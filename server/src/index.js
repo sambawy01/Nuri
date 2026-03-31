@@ -35,23 +35,6 @@ app.use(express.json());
 // Health check
 const { getProvider } = require('./services/ai-provider');
 
-// Debug: test Claude API directly
-app.get('/api/debug-claude', async (req, res) => {
-  try {
-    const Anthropic = require('@anthropic-ai/sdk');
-    const keyPreview = (process.env.ANTHROPIC_API_KEY || '').substring(0, 20) + '...';
-    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-    const response = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 10,
-      messages: [{ role: 'user', content: 'say hi' }],
-    });
-    res.json({ success: true, data: { keyPreview, response: response.content[0].text } });
-  } catch (err) {
-    res.json({ success: false, error: err.message, type: err.constructor.name, keySet: !!process.env.ANTHROPIC_API_KEY });
-  }
-});
-
 app.get('/api/health', async (req, res) => {
   const health = { status: 'ok', timestamp: new Date().toISOString(), aiProvider: getProvider() };
 

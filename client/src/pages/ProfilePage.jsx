@@ -5,7 +5,7 @@ import { ArrowLeft, LogOut, Users, Trophy, Zap, Flame, HelpCircle, Star, Award }
 import { useProfile } from '../context/ProfileContext';
 import { subjects, subjectKeys } from '../lib/subjects';
 import { api } from '../lib/api';
-import NuriAvatar from '../components/NuriAvatar';
+import { getStageImage } from '../components/NuriOwl';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function ProfilePage() {
@@ -80,7 +80,12 @@ export default function ProfilePage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <NuriAvatar size={120} />
+        <img
+          src={getStageImage(level)}
+          alt="Nuri Evolution"
+          className="w-28 h-28 object-contain mx-auto"
+          draggable={false}
+        />
         <div
           className="w-20 h-20 rounded-full mx-auto -mt-4 flex items-center justify-center text-white font-bold text-3xl shadow-lg border-4 border-white relative z-10"
           style={{ backgroundColor: currentProfile.avatarColor || '#A855F7' }}
@@ -207,6 +212,15 @@ export default function ProfilePage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
       >
+        <motion.button
+          onClick={() => navigate('/stickers')}
+          className="w-full bg-yellow-50 border-2 border-yellow-200 text-yellow-700 font-bold py-3 rounded-2xl flex items-center justify-center gap-2"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <Star size={18} />
+          Sticker Book
+        </motion.button>
         <motion.button
           onClick={() => navigate('/badges')}
           className="w-full bg-purple-50 border-2 border-purple-200 text-purple-700 font-bold py-3 rounded-2xl flex items-center justify-center gap-2"

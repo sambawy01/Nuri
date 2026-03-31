@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { User, Trophy, Zap, Target, Award, BookOpen, RotateCcw } from 'lucide-react';
+import { User, Trophy, Zap, Target, Award, BookOpen, RotateCcw, Mail, Star } from 'lucide-react';
 import { useProfile } from '../context/ProfileContext';
 import { subjectKeys } from '../lib/subjects';
 import { api } from '../lib/api';
@@ -9,7 +9,8 @@ import SubjectCard from '../components/SubjectCard';
 import XPBar from '../components/XPBar';
 import StreakBadge from '../components/StreakBadge';
 import LoadingSpinner from '../components/LoadingSpinner';
-import NuriOwl from '../components/NuriOwl';
+import NuriOwl, { getStageImage } from '../components/NuriOwl';
+import MysteryChallenge from '../components/MysteryChallenge';
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ export default function HomePage() {
   const [loadingStats, setLoadingStats] = useState(true);
   const [mistakeCount, setMistakeCount] = useState(0);
   const [reviewCount, setReviewCount] = useState(0);
+  const [showChallenge, setShowChallenge] = useState(false);
 
   useEffect(() => {
     if (!profileLoading && !currentProfile) {
@@ -186,6 +188,23 @@ export default function HomePage() {
         </h2>
         <div className="space-y-3">
           <motion.button
+            onClick={() => setShowChallenge(true)}
+            className="w-full bg-gradient-to-r from-purple-500 to-orange-400 rounded-2xl p-4 shadow-lg text-left flex items-center gap-4 cursor-pointer text-white"
+            whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(0,0,0,0.15)' }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          >
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-white/20 shrink-0">
+              <Mail size={24} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold">Daily Mystery Challenge</p>
+              <p className="text-sm opacity-80 font-semibold">Open today's mystery question!</p>
+            </div>
+            <span className="bg-white/20 text-xs font-bold px-2.5 py-1 rounded-full">+50 XP</span>
+          </motion.button>
+
+          <motion.button
             onClick={() => navigate('/mistakes')}
             className="w-full bg-white rounded-2xl p-4 shadow-lg border-l-4 text-left flex items-center gap-4 cursor-pointer"
             style={{ borderLeftColor: '#F59E0B' }}
@@ -228,18 +247,42 @@ export default function HomePage() {
               </span>
             )}
           </motion.button>
+
+          <motion.button
+            onClick={() => navigate('/stickers')}
+            className="w-full bg-white rounded-2xl p-4 shadow-lg border-l-4 text-left flex items-center gap-4 cursor-pointer"
+            style={{ borderLeftColor: '#F59E0B' }}
+            whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(0,0,0,0.12)' }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          >
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white text-lg shrink-0 bg-yellow-500">
+              <Star size={24} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-gray-800">Sticker Book {'\u2B50'}</p>
+              <p className="text-sm text-gray-500 font-semibold">Collect them all!</p>
+            </div>
+          </motion.button>
         </div>
       </motion.div>
 
-      {/* Floating Nuri */}
+      {/* Floating Nuri — Evolution Stage */}
       <motion.div
         className="fixed bottom-6 right-6 cursor-pointer z-40"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => navigate('/profile')}
       >
-        <NuriOwl size="sm" state="idle" level={level} />
+        <img
+          src={getStageImage(level)}
+          alt="Nuri"
+          className="w-16 h-16 object-contain drop-shadow-lg"
+          draggable={false}
+        />
       </motion.div>
+
+      <MysteryChallenge visible={showChallenge} onClose={() => setShowChallenge(false)} />
     </div>
   );
 }

@@ -11,6 +11,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import NuriOwl from '../components/NuriOwl';
 import DifficultySelector from '../components/DifficultySelector';
 import ConfidenceMeter from '../components/ConfidenceMeter';
+import LevelUpModal from '../components/LevelUpModal';
 
 const TOTAL_QUESTIONS = 10;
 const DIFFICULTY_XP = { easy: 5, medium: 10, hard: 15, challenge: 20 };
@@ -19,7 +20,7 @@ export default function QuizPage() {
   const { subject } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { currentProfile, updateXP } = useProfile();
+  const { currentProfile, updateXP, levelUpData, clearLevelUp } = useProfile();
   const meta = subjects[subject];
   const topic = location.state?.topic;
 
@@ -266,6 +267,7 @@ export default function QuizPage() {
           </motion.div>
         </motion.div>
         <CelebrationEffect trigger={score >= 7 ? 1 : 0} />
+        <LevelUpModal level={levelUpData?.level} visible={!!levelUpData} onClose={clearLevelUp} />
       </div>
     );
   }
@@ -395,6 +397,8 @@ export default function QuizPage() {
           )}
         </motion.button>
       )}
+
+      <LevelUpModal level={levelUpData?.level} visible={!!levelUpData} onClose={clearLevelUp} />
     </div>
   );
 }

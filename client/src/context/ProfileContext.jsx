@@ -6,6 +6,7 @@ const ProfileContext = createContext(null);
 export function ProfileProvider({ children }) {
   const [currentProfile, setCurrentProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [levelUpData, setLevelUpData] = useState(null);
 
   useEffect(() => {
     const savedId = localStorage.getItem('nuri_profile_id');
@@ -36,14 +37,22 @@ export function ProfileProvider({ children }) {
   const updateXP = useCallback((amount) => {
     setCurrentProfile((prev) => {
       if (!prev) return prev;
-      const newXP = (prev.xp || 0) + amount;
+      const newXP = (prev.xp || prev.total_xp || 0) + amount;
       const newLevel = Math.floor(newXP / 100) + 1;
-      return { ...prev, xp: newXP, level: newLevel };
+      const oldLevel = prev.level || prev.current_level || 1;
+      if (newLevel > oldLevel) {
+        setLevelUpData({ level: newLevel, previousLevel: oldLevel });
+      }
+      return { ...prev, xp: newXP, total_xp: newXP, level: newLevel, current_level: newLevel };
     });
   }, []);
 
+  const clearLevelUp = useCallback(() => {
+    setLevelUpData(null);
+  }, []);
+
   return (
-    <ProfileContext.Provider value={{ currentProfile, loading, login, logout, updateXP }}>
+    <ProfileContext.Provider value={{ currentProfile, loading, login, logout, updateXP, levelUpData, clearLevelUp }}>
       {children}
     </ProfileContext.Provider>
   );

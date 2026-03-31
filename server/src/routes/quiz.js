@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db/connection');
 const { generateQuizQuestion } = require('../services/ai-provider');
-const { awardXP } = require('../services/xp');
+const { awardXP, awardQuizXP } = require('../services/xp');
 const { getTopics } = require('../services/curriculum');
 
 // POST /api/quiz/question — generate quiz question
@@ -17,7 +17,7 @@ router.post('/question', async (req, res, next) => {
       });
     }
 
-    const validDifficulties = ['easy', 'medium', 'hard'];
+    const validDifficulties = ['easy', 'medium', 'hard', 'challenge'];
     const questionDifficulty = validDifficulties.includes(difficulty) ? difficulty : 'medium';
 
     // Get the profile to determine year group
@@ -107,9 +107,10 @@ router.post('/answer', async (req, res, next) => {
     }
 
     // Award XP
-    const xpResult = await awardXP(
+    const xpResult = await awardQuizXP(
       profileId,
       eventType,
+      question.difficulty || 'medium',
       subject || question.subject,
       topic || question.topic
     );

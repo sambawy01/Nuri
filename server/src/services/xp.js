@@ -7,6 +7,21 @@ const XP_VALUES = {
   learn_session: 20,
   streak_bonus: 25,
   daily_login: 5,
+  confidence_used: 2,
+};
+
+const DIFFICULTY_XP = {
+  easy:      { correct_first_try: 5,  correct_with_hint: 3,  wrong_but_tried: 2 },
+  medium:    { correct_first_try: 10, correct_with_hint: 7,  wrong_but_tried: 5 },
+  hard:      { correct_first_try: 15, correct_with_hint: 10, wrong_but_tried: 5 },
+  challenge: { correct_first_try: 20, correct_with_hint: 14, wrong_but_tried: 7 },
+};
+
+const DIFFICULTY_STREAK_BONUS = {
+  easy: 10,
+  medium: 25,
+  hard: 40,
+  challenge: 60,
 };
 
 const LEVEL_THRESHOLDS = [
@@ -71,6 +86,42 @@ async function awardXP(profileId, eventType, subject, topic) {
 
     await client.query('COMMIT');
 
+    return { xpAwarded: xpAmount, totalXP: newTotalXP, level: newLevel };
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
+async function awardQuizXP(profileId, eventType, difficulty, subject, topic) {
+  const diffXP = DIFFICULTY_XP[difficulty] || DIFFICULTY_XP.medium;
+  const xpAmount = diffXP[eventType] || 5;
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    await client.query(
+      'INSERT INTO xp_events (profile_id, xp_amount, event_type, subject, topic) VALUES ($1, $2, $3, $4, $5)',
+      [profileId, xpAmount, `${eventType}_${difficulty}`, subject, topic]
+    );
+
+    const result = await client.query(
+      'UPDATE profiles SET total_xp = total_xp + $1, updated_at = NOW() WHERE id = $2 RETURNING total_xp',
+      [xpAmount, profileId]
+    );
+
+    const newTotalXP = result.rows[0].total_xp;
+    const newLevel = getLevel(newTotalXP);
+
+    await client.query(
+      'UPDATE profiles SET current_level = $1 WHERE id = $2 AND current_level < $1',
+      [newLevel, profileId]
+    );
+
+    await client.query('COMMIT');
     return { xpAwarded: xpAmount, totalXP: newTotalXP, level: newLevel };
   } catch (err) {
     await client.query('ROLLBACK');
@@ -155,8 +206,11 @@ async function updateStreak(profileId) {
 
 module.exports = {
   XP_VALUES,
+  DIFFICULTY_XP,
+  DIFFICULTY_STREAK_BONUS,
   LEVEL_THRESHOLDS,
   getLevel,
   awardXP,
+  awardQuizXP,
   updateStreak,
 };

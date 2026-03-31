@@ -82,15 +82,30 @@ async function chat(messages, systemPrompt) {
 }
 
 async function generateQuizQuestion(subject, topic, yearGroup, difficulty) {
-  const systemPrompt = `You are a quiz question generator for Year ${yearGroup} students studying ${subject}.
+  // Year-shift for difficulty
+  let effectiveYear = yearGroup;
+  let difficultyNote = '';
+  if (difficulty === 'easy') {
+    effectiveYear = Math.max(1, yearGroup - 1);
+    difficultyNote = 'Make this an easy, confidence-building question.';
+  } else if (difficulty === 'hard') {
+    effectiveYear = Math.min(6, yearGroup + 1);
+    difficultyNote = 'Make this a challenging stretch question.';
+  } else if (difficulty === 'challenge') {
+    effectiveYear = Math.min(6, yearGroup + 1);
+    difficultyNote = 'Make this the HARDEST possible question. Include multi-step reasoning. This is a Challenge Me question for ambitious students.';
+  }
+
+  const systemPrompt = `You are a quiz question generator for Year ${effectiveYear} students studying ${subject}.
 Generate exactly ONE multiple-choice question about "${topic}".
 Difficulty: ${difficulty}
+${difficultyNote}
 
 You MUST respond with ONLY valid JSON in this exact format:
 {"question": "...", "options": ["A) ...", "B) ...", "C) ...", "D) ..."], "correctAnswer": "A", "explanation": "..."}
 
 The correctAnswer must be just the letter (A, B, C, or D).
-Make the question age-appropriate for ${getAgeRange(yearGroup)} year old students.`;
+Make the question age-appropriate for ${getAgeRange(effectiveYear)} year old students.`;
 
   const response = await client.messages.create({
     model: 'claude-sonnet-4-20250514',

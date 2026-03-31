@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Lightbulb, Puzzle, Calculator, FlaskConical, BookOpen, Clock, Heart, Languages, Globe, Star, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Lightbulb, Puzzle, GraduationCap, Calculator, FlaskConical, BookOpen, Clock, Heart, Languages, Globe, Star, ChevronRight } from 'lucide-react';
 import { subjects } from '../lib/subjects';
 import { useProfile } from '../context/ProfileContext';
 import { api } from '../lib/api';
@@ -89,7 +89,7 @@ export default function SubjectPage() {
       </motion.div>
 
       {/* Mode Buttons */}
-      <div className="grid grid-cols-2 gap-3 mb-8">
+      <div className="grid grid-cols-3 gap-3 mb-8">
         <motion.button
           onClick={() => navigate(`/learn/${subject}`, { state: { topic: selectedTopic } })}
           className="bg-white rounded-2xl p-4 shadow-lg text-center hover:shadow-xl transition-shadow group"
@@ -126,6 +126,25 @@ export default function SubjectPage() {
           </div>
           <h3 className="text-sm font-extrabold text-gray-800">Quiz 🧩</h3>
           <p className="text-gray-400 text-xs font-semibold mt-0.5">Test yourself</p>
+        </motion.button>
+
+        <motion.button
+          onClick={() => navigate(`/explain/${subject}`, { state: { topic: selectedTopic } })}
+          className="bg-white rounded-2xl p-4 shadow-lg text-center hover:shadow-xl transition-shadow group"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          whileHover={{ y: -3 }}
+          whileTap={{ scale: 0.97 }}
+        >
+          <div
+            className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2"
+            style={{ backgroundColor: `${meta.color}15` }}
+          >
+            <GraduationCap size={24} style={{ color: meta.color }} />
+          </div>
+          <h3 className="text-sm font-extrabold text-gray-800">Teach 🎓</h3>
+          <p className="text-gray-400 text-xs font-semibold mt-0.5">Explain to Nuri</p>
         </motion.button>
       </div>
 
@@ -220,6 +239,13 @@ export default function SubjectPage() {
               style={{ borderColor: meta.color, color: meta.color }}
             >
               Quiz: {selectedTopic}
+            </button>
+            <button
+              onClick={() => navigate(`/explain/${subject}`, { state: { topic: selectedTopic } })}
+              className="flex-1 py-3 rounded-xl font-bold text-sm shadow-lg border-2"
+              style={{ borderColor: meta.color, color: meta.color }}
+            >
+              Teach: {selectedTopic}
             </button>
           </motion.div>
         )}

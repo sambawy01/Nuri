@@ -136,7 +136,9 @@ export default function QuizPage() {
     setAnswered(true);
     setSelectedAnswer(index);
 
-    const correct = question.correctAnswer ?? 0;
+    // correctAnswer from server is a letter (A/B/C/D) — convert to index
+    const correctLetter = question.correctAnswer || 'A';
+    const correct = correctLetter.charCodeAt(0) - 65;
     setCorrectAnswer(correct);
     setExplanation(question.explanation || '');
 
@@ -158,12 +160,13 @@ export default function QuizPage() {
     setShowConfidence(true);
 
     // Store pending answer to submit with optional confidence
+    // Server expects letter (A/B/C/D), not index
+    const answerLetter = String.fromCharCode(65 + index);
     pendingAnswerRef.current = {
       profileId: currentProfile._id || currentProfile.id,
       subject,
       questionId: question.questionId,
-      answer: index,
-      correct: isCorrect,
+      answer: answerLetter,
     };
   }
 

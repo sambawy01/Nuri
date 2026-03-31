@@ -13,7 +13,7 @@ const OLLAMA_BASE = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3.2';
 
 // Reuse system prompt builder from claude.js
-function buildSystemPrompt(profile, subject, mode) {
+function buildSystemPrompt(profile, subject, mode, learningStyle) {
   const yearGroup = profile.year_group;
   const ageRange = getAgeRange(yearGroup);
   const curriculumType = getCurriculumType(subject);
@@ -68,7 +68,39 @@ QUIZ MODE — Return ONLY valid JSON, no other text:
 correctAnswer must be just the letter A, B, C, or D.`;
   }
 
+  if (learningStyle && learningStyle.total_interactions >= 20) {
+    const styles = [
+      { name: 'visual descriptions', score: learningStyle.visual },
+      { name: 'real-world analogies', score: learningStyle.analogy },
+      { name: 'examples before theory', score: learningStyle.example_first },
+      { name: 'spoken explanations', score: learningStyle.auditory },
+      { name: 'trying questions first', score: learningStyle.try_first },
+    ].filter(s => s.score > 0.5).sort((a, b) => b.score - a.score).slice(0, 2);
+
+    if (styles.length > 0) {
+      prompt += `\n\nLEARNING STYLE: This child learns best with ${styles.map(s => s.name).join(' and ')}.`;
+    }
+  }
+
   return prompt;
+}
+
+function buildExplainBackPrompt(profile, subject, topic) {
+  return `You are Nuri, a friendly owl who PRETENDS not to understand the topic.
+The child (${profile.name}, Year ${profile.year_group}) will teach YOU about "${topic}" in ${subject}.
+
+YOUR ROLE:
+- Act confused and curious — "Hmm, what do you mean by X?"
+- Ask follow-up questions that probe their understanding
+- If they explain something WRONG, ask a question that reveals the gap
+- If they explain correctly, show genuine surprise and excitement
+- After 4-6 exchanges, give an understanding score (1-5)
+
+RESPOND IN JSON:
+{"reply": "your message", "done": false}
+
+When ready to score:
+{"reply": "encouraging message", "done": true, "score": 4, "summary": "what they understood well and what needs work"}`;
 }
 
 /**
@@ -121,15 +153,32 @@ async function chat(messages, systemPrompt) {
  * Generate a quiz question using Ollama
  */
 async function generateQuizQuestion(subject, topic, yearGroup, difficulty) {
-  const systemPrompt = `You are a quiz question generator for Year ${yearGroup} students studying ${subject}.
+  // Year-shift for difficulty
+  let effectiveYear = yearGroup;
+  let difficultyNote = '';
+  if (difficulty === 'easy') {
+    effectiveYear = Math.max(1, yearGroup - 1);
+    difficultyNote = 'Make this an easy, confidence-building question.';
+  } else if (difficulty === 'hard') {
+    effectiveYear = Math.min(6, yearGroup + 1);
+    difficultyNote = 'Make this a challenging stretch question.';
+  } else if (difficulty === 'challenge') {
+    effectiveYear = Math.min(6, yearGroup + 1);
+    difficultyNote = 'Make this the HARDEST possible question. Include multi-step reasoning.';
+  }
+
+  const systemPrompt = `You are a quiz question generator for Year ${effectiveYear} students studying ${subject}.
 Generate exactly ONE multiple-choice question about "${topic}".
 Difficulty: ${difficulty}
+${difficultyNote}
+
+CRITICAL: Before finalizing, SOLVE the question yourself step-by-step to verify the correct answer is actually correct. For maths, do the arithmetic carefully. The correctAnswer MUST be right.
 
 You MUST respond with ONLY valid JSON in this exact format:
-{"question": "...", "options": ["A) ...", "B) ...", "C) ...", "D) ..."], "correctAnswer": "A", "explanation": "..."}
+{"question": "...", "options": ["A) ...", "B) ...", "C) ...", "D) ..."], "correctAnswer": "A", "explanation": "...", "verification": "step-by-step solution"}
 
 The correctAnswer must be just the letter (A, B, C, or D).
-Make the question age-appropriate for ${getAgeRange(yearGroup)} year old students.`;
+Make the question age-appropriate for ${getAgeRange(effectiveYear)} year old students.`;
 
   const response = await ollamaRequest('/api/chat', {
     model: OLLAMA_MODEL,
@@ -140,12 +189,12 @@ Make the question age-appropriate for ${getAgeRange(yearGroup)} year old student
       },
       {
         role: 'user',
-        content: `Generate a ${difficulty} difficulty question about "${topic}" for Year ${yearGroup} ${subject}.`,
+        content: `Generate a ${difficulty} difficulty question about "${topic}" for Year ${yearGroup} ${subject}. IMPORTANT: Double-check your arithmetic — make sure the correct answer is actually correct.`,
       },
     ],
     stream: false,
     options: {
-      temperature: 0.5, // Lower temperature for more consistent quiz questions
+      temperature: 0.3, // Lower temperature for more accurate quiz questions
     },
   });
 
@@ -234,6 +283,7 @@ async function chatStream(messages, systemPrompt, onChunk) {
 
 module.exports = {
   buildSystemPrompt,
+  buildExplainBackPrompt,
   chat,
   chatStream,
   generateQuizQuestion,

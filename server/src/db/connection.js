@@ -1,7 +1,10 @@
 const { Pool } = require('pg');
 
+const isProduction = process.env.VERCEL || process.env.NODE_ENV === 'production';
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
+  ...(isProduction && { ssl: { rejectUnauthorized: false } }),
 });
 
 pool.on('error', (err) => {

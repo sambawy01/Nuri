@@ -22,14 +22,24 @@ export default function QuizPage() {
   const location = useLocation();
   const { currentProfile, updateXP, levelUpData, clearLevelUp } = useProfile();
   const meta = subjects[subject];
-  const topic = location.state?.topic;
+  // Restore session from sessionStorage if navigated back
+  const sessionKey = `nuri_quiz_${subject}`;
+  const saved = useRef(null);
+  if (!saved.current) {
+    try {
+      const raw = sessionStorage.getItem(sessionKey);
+      if (raw) saved.current = JSON.parse(raw);
+    } catch { saved.current = null; }
+  }
+  const restored = saved.current;
 
-  const [difficulty, setDifficulty] = useState('medium');
+  const [activeTopic, setActiveTopic] = useState(location.state?.topic || restored?.topic || null);
+  const [difficulty, setDifficulty] = useState(restored?.difficulty || 'medium');
   const [question, setQuestion] = useState(null);
-  const [questionNum, setQuestionNum] = useState(1);
-  const [score, setScore] = useState(0);
-  const [sessionXP, setSessionXP] = useState(0);
-  const [quizStreak, setQuizStreak] = useState(0);
+  const [questionNum, setQuestionNum] = useState(restored?.questionNum || 1);
+  const [score, setScore] = useState(restored?.score || 0);
+  const [sessionXP, setSessionXP] = useState(restored?.sessionXP || 0);
+  const [quizStreak, setQuizStreak] = useState(restored?.quizStreak || 0);
   const [answered, setAnswered] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [correctAnswer, setCorrectAnswer] = useState(null);
@@ -43,13 +53,49 @@ export default function QuizPage() {
   const [confidenceGiven, setConfidenceGiven] = useState(false);
   const pendingAnswerRef = useRef(null);
 
+  // Persist quiz session progress
+  useEffect(() => {
+    if (showSummary) {
+      sessionStorage.removeItem(sessionKey);
+    } else if (questionNum > 0) {
+      sessionStorage.setItem(sessionKey, JSON.stringify({
+        topic: activeTopic, difficulty, questionNum, score, sessionXP, quizStreak,
+      }));
+    }
+  }, [questionNum, score, sessionXP, quizStreak, difficulty, activeTopic, showSummary, sessionKey]);
+
+  // Track if initial load is done
+  const initialLoadDone = useRef(false);
+
   useEffect(() => {
     if (!currentProfile) {
       navigate('/');
       return;
     }
-    fetchQuestion();
+    if (initialLoadDone.current) return;
+    initialLoadDone.current = true;
+
+    if (!activeTopic) {
+      // Fetch a topic first, then trigger question load via activeTopic change
+      api(`/curriculum/${subject}/${currentProfile.year_group}`)
+        .then(topics => {
+          if (topics?.length > 0) {
+            const randomTopic = topics[Math.floor(Math.random() * topics.length)].name;
+            setActiveTopic(randomTopic);
+          }
+        })
+        .catch(() => {});
+    } else {
+      fetchQuestion();
+    }
   }, []);
+
+  // Fetch question when activeTopic is set (handles the async topic fetch case)
+  useEffect(() => {
+    if (activeTopic && initialLoadDone.current) {
+      fetchQuestion();
+    }
+  }, [activeTopic]);
 
   const fetchQuestion = useCallback(async () => {
     setLoading(true);
@@ -68,7 +114,7 @@ export default function QuizPage() {
           profileId: currentProfile._id || currentProfile.id,
           subject,
           difficulty,
-          ...(topic && { topic }),
+          ...(activeTopic && { topic: activeTopic }),
         },
       });
       setQuestion(data);
@@ -83,7 +129,7 @@ export default function QuizPage() {
     } finally {
       setLoading(false);
     }
-  }, [currentProfile, subject, difficulty, meta, topic]);
+  }, [currentProfile, subject, difficulty, meta, activeTopic]);
 
   async function handleAnswer(index) {
     if (answered) return;
@@ -159,6 +205,7 @@ export default function QuizPage() {
   }
 
   function restartQuiz() {
+    sessionStorage.removeItem(sessionKey);
     setShowSummary(false);
     setQuestionNum(1);
     setScore(0);

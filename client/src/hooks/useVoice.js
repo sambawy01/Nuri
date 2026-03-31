@@ -15,24 +15,60 @@ export function useVoice() {
     'speechSynthesis' in window &&
     ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
 
+  // Ensure voices are loaded (Chrome loads them async)
+  const voicesReady = useRef(false);
+  useEffect(() => {
+    if (!window.speechSynthesis) return;
+    const loadVoices = () => { voicesReady.current = window.speechSynthesis.getVoices().length > 0; };
+    loadVoices();
+    window.speechSynthesis.addEventListener('voiceschanged', loadVoices);
+    return () => window.speechSynthesis.removeEventListener('voiceschanged', loadVoices);
+  }, []);
+
   const speak = useCallback((text, options = {}) => {
     if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    const isArabic = options.lang === 'ar-SA' || isArabicText(text);
+    // Only cancel if explicitly requested (not for queued sentences)
+    if (options.interrupt !== false) {
+      window.speechSynthesis.cancel();
+    }
+
+    // Strip markdown for cleaner speech but keep normal punctuation
+    const cleanText = text
+      .replace(/[#*_~`]/g, '')
+      .replace(/\[.*?\]\(.*?\)/g, '')
+      .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{27BF}\u{1F900}-\u{1F9FF}]/gu, '')
+      .substring(0, 1000);
+
+    if (!cleanText.trim()) return;
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    const isArabic = options.lang === 'ar-SA' || isArabicText(cleanText);
     utterance.lang = isArabic ? 'ar-SA' : 'en-US';
     utterance.rate = options.rate || (isArabic ? 0.85 : 0.95);
     utterance.pitch = options.pitch || 1.1;
+
+    // Try to pick a good voice
+    const voices = window.speechSynthesis.getVoices();
+    const langPrefix = isArabic ? 'ar' : 'en';
+    const preferredVoice = voices.find(v => v.lang.startsWith(langPrefix) && v.localService) ||
+      voices.find(v => v.lang.startsWith(langPrefix));
+    if (preferredVoice) utterance.voice = preferredVoice;
 
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => {
       setIsSpeaking(false);
       options.onEnd?.();
     };
-    utterance.onerror = () => setIsSpeaking(false);
+    utterance.onerror = (e) => {
+      console.warn('Speech error:', e.error);
+      setIsSpeaking(false);
+    };
 
     utteranceRef.current = utterance;
+
+    // Chrome workaround: resume if paused
+    window.speechSynthesis.resume();
     window.speechSynthesis.speak(utterance);
   }, []);
 

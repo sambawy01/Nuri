@@ -25,7 +25,9 @@ const PORT = process.env.PORT || 3001;
 app.use(helmet());
 app.use(morgan('dev'));
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176'],
+  origin: process.env.VERCEL
+    ? true  // Allow all origins on Vercel (same-origin anyway)
+    : ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176'],
   credentials: true,
 }));
 app.use(express.json());
@@ -71,8 +73,11 @@ app.use((req, res) => {
 // Error handler
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`Nuri server running on port ${PORT}`);
-});
+// Only listen when running directly (not as Vercel serverless)
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Nuri server running on port ${PORT}`);
+  });
+}
 
 module.exports = app;

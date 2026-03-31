@@ -20,7 +20,7 @@ export default function QuestionCard({
       return 'bg-green-100 border-2 border-green-500 text-green-800';
     }
     if (index === selectedAnswer && index !== correctAnswer) {
-      return 'bg-amber-100 border-2 border-amber-500 text-amber-800';
+      return 'bg-gray-100 border-2 border-gray-300 text-gray-500';
     }
     return 'bg-gray-50 border-2 border-gray-200 text-gray-400';
   }

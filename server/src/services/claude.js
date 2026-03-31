@@ -118,8 +118,10 @@ Generate exactly ONE multiple-choice question about "${topic}".
 Difficulty: ${difficulty}
 ${difficultyNote}
 
+CRITICAL: Before finalizing, SOLVE the question yourself step-by-step to verify the correct answer. For maths questions, show your working mentally and double-check the arithmetic. The correctAnswer MUST actually be correct.
+
 You MUST respond with ONLY valid JSON in this exact format:
-{"question": "...", "options": ["A) ...", "B) ...", "C) ...", "D) ..."], "correctAnswer": "A", "explanation": "..."}
+{"question": "...", "options": ["A) ...", "B) ...", "C) ...", "D) ..."], "correctAnswer": "A", "explanation": "...", "verification": "brief step-by-step solution confirming the answer"}
 
 The correctAnswer must be just the letter (A, B, C, or D).
 Make the question age-appropriate for ${getAgeRange(effectiveYear)} year old students.`;

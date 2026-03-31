@@ -19,15 +19,27 @@ export default function LearnPage() {
   const { currentProfile } = useProfile();
   const meta = subjects[subject];
   const selectedTopic = location.state?.topic;
-  const [messages, setMessages] = useState([]);
+
+  // Restore learn session if navigated back
+  const learnSessionKey = `nuri_learn_${subject}`;
+  const savedLearn = useRef(null);
+  if (!savedLearn.current) {
+    try {
+      const raw = sessionStorage.getItem(learnSessionKey);
+      if (raw) savedLearn.current = JSON.parse(raw);
+    } catch { savedLearn.current = null; }
+  }
+  const restoredLearn = savedLearn.current;
+
+  const [messages, setMessages] = useState(restoredLearn?.messages || []);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [owlState, setOwlState] = useState('idle');
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
-  const sessionIdRef = useRef(null);
-  const autoSpokeRef = useRef(false);
+  const sessionIdRef = useRef(restoredLearn?.sessionId || null);
+  const autoSpokeRef = useRef(!!restoredLearn);
   const lastExplainTypeRef = useRef(null);
 
   const EXPLAIN_TYPE_MAP = {
@@ -37,12 +49,24 @@ export default function LearnPage() {
   };
   const { speak } = useVoice();
 
+  // Persist learn session for back-button recovery
+  useEffect(() => {
+    if (messages.length > 0) {
+      sessionStorage.setItem(learnSessionKey, JSON.stringify({
+        messages, sessionId: sessionIdRef.current,
+      }));
+    }
+  }, [messages, learnSessionKey]);
+
   useEffect(() => {
     if (!currentProfile) {
       navigate('/');
       return;
     }
-    sendInitialGreeting();
+    // Skip greeting if restoring a session
+    if (!restoredLearn) {
+      sendInitialGreeting();
+    }
   }, []);
 
   useEffect(() => {
@@ -78,12 +102,13 @@ export default function LearnPage() {
         } else {
           setMessages(prev => [...prev, { text, isNuri: true }]);
         }
+        // Speak the full response
+        if (text) speak(text, { lang: subject === 'arabic' ? 'ar-SA' : 'en-US' });
         return;
       }
 
       // SSE streaming
       setIsLoading(false); // hide typing indicator, show live text
-      const nuriMsgIndex = isInitial ? 0 : -1; // track which message to update
 
       if (isInitial) {
         setMessages([{ text: '', isNuri: true }]);
@@ -94,6 +119,8 @@ export default function LearnPage() {
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
+      let fullText = '';
+      let spokenUpTo = 0;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -110,15 +137,40 @@ export default function LearnPage() {
             if (event.type === 'session') {
               sessionIdRef.current = event.sessionId;
             } else if (event.type === 'chunk') {
+              fullText += event.content;
               setMessages(prev => {
                 const updated = [...prev];
                 const lastNuri = updated.length - 1;
-                updated[lastNuri] = { ...updated[lastNuri], text: updated[lastNuri].text + event.content };
+                updated[lastNuri] = { ...updated[lastNuri], text: fullText };
                 return updated;
               });
+
+              // Speak complete sentences as they stream in
+              const unspoken = fullText.substring(spokenUpTo);
+              const match = unspoken.match(/^(.*?[.!?،؟])\s/);
+              if (match) {
+                const sentence = match[1].trim();
+                if (sentence.length > 2) {
+                  speak(sentence, { lang: subject === 'arabic' ? 'ar-SA' : 'en-US', interrupt: false });
+                }
+                spokenUpTo += match[0].length;
+              }
             }
           } catch {}
         }
+      }
+
+      // Speak any remaining text after stream ends
+      const remaining = fullText.substring(spokenUpTo).trim();
+      if (remaining.length > 2) {
+        const waitForSpeech = () => {
+          if (window.speechSynthesis?.speaking) {
+            setTimeout(waitForSpeech, 200);
+          } else {
+            speak(remaining, { lang: subject === 'arabic' ? 'ar-SA' : 'en-US', interrupt: false });
+          }
+        };
+        waitForSpeech();
       }
       return;
     } catch (err) {
@@ -152,13 +204,17 @@ export default function LearnPage() {
     }
   }
 
-  // Auto-speak Nuri's first message
+  // For non-streaming responses (fallback), speak when message appears
+  const lastSpokenNonStream = useRef(-1);
   useEffect(() => {
-    if (!autoSpokeRef.current && messages.length === 1 && messages[0].isNuri && messages[0].text) {
-      autoSpokeRef.current = true;
-      speak(messages[0].text, { lang: subject === 'arabic' ? 'ar-SA' : 'en-US' });
+    if (messages.length === 0) return;
+    const lastIdx = messages.length - 1;
+    const lastMsg = messages[lastIdx];
+    // Only speak non-streaming responses (streaming is handled inline in streamChat)
+    if (lastMsg.isNuri && lastMsg.text && lastIdx > lastSpokenNonStream.current && !isLoading) {
+      lastSpokenNonStream.current = lastIdx;
     }
-  }, [messages, speak, subject]);
+  }, [messages, isLoading]);
 
   async function sendMessage(text) {
     if (!text.trim() || isLoading) return;

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Flame, Trophy, RotateCcw, Home } from 'lucide-react';
@@ -10,6 +10,7 @@ import CelebrationEffect from '../components/CelebrationEffect';
 import LoadingSpinner from '../components/LoadingSpinner';
 import NuriOwl from '../components/NuriOwl';
 import DifficultySelector from '../components/DifficultySelector';
+import ConfidenceMeter from '../components/ConfidenceMeter';
 
 const TOTAL_QUESTIONS = 10;
 const DIFFICULTY_XP = { easy: 5, medium: 10, hard: 15, challenge: 20 };
@@ -37,6 +38,9 @@ export default function QuizPage() {
   const [celebrate, setCelebrate] = useState(0);
   const [showSummary, setShowSummary] = useState(false);
   const [xpFloat, setXpFloat] = useState(false);
+  const [showConfidence, setShowConfidence] = useState(false);
+  const [confidenceGiven, setConfidenceGiven] = useState(false);
+  const pendingAnswerRef = useRef(null);
 
   useEffect(() => {
     if (!currentProfile) {
@@ -53,6 +57,8 @@ export default function QuizPage() {
     setCorrectAnswer(null);
     setExplanation('');
     setError(null);
+    setShowConfidence(false);
+    setConfidenceGiven(false);
 
     try {
       const data = await api('/quiz/question', {
@@ -88,7 +94,6 @@ export default function QuizPage() {
     setExplanation(question.explanation || '');
 
     const isCorrect = index === correct;
-
     const xpGain = DIFFICULTY_XP[difficulty] || 10;
 
     if (isCorrect) {
@@ -103,24 +108,47 @@ export default function QuizPage() {
       setQuizStreak(0);
     }
 
-    // Submit answer to API
+    setShowConfidence(true);
+
+    // Store pending answer to submit with optional confidence
+    pendingAnswerRef.current = {
+      profileId: currentProfile._id || currentProfile.id,
+      subject,
+      questionId: question.questionId,
+      answer: index,
+      correct: isCorrect,
+    };
+  }
+
+  async function submitAnswer(confidence) {
+    if (!pendingAnswerRef.current) return;
+    const body = { ...pendingAnswerRef.current };
+    if (confidence) body.confidence = confidence;
+    pendingAnswerRef.current = null;
+
     try {
       await api('/quiz/answer', {
         method: 'POST',
-        body: {
-          profileId: currentProfile._id || currentProfile.id,
-          subject,
-          questionId: question._id || question.id,
-          answer: index,
-          correct: isCorrect,
-        },
+        body,
       });
     } catch {
-      // Non-critical, continue quiz
+      // Non-critical
     }
   }
 
+  function handleConfidence(level) {
+    setShowConfidence(false);
+    setConfidenceGiven(true);
+    setSessionXP((xp) => xp + 2);
+    updateXP(2);
+    submitAnswer(level);
+  }
+
   function nextQuestion() {
+    // Submit without confidence if not already submitted
+    if (pendingAnswerRef.current) {
+      submitAnswer(null);
+    }
     if (questionNum >= TOTAL_QUESTIONS) {
       setShowSummary(true);
       return;
@@ -135,6 +163,8 @@ export default function QuizPage() {
     setScore(0);
     setSessionXP(0);
     setQuizStreak(0);
+    setShowConfidence(false);
+    setConfidenceGiven(false);
     fetchQuestion();
   }
 
@@ -333,6 +363,14 @@ export default function QuizPage() {
           subjectColor={meta.color}
         />
       ) : null}
+
+      {/* Confidence Meter */}
+      {answered && (
+        <ConfidenceMeter
+          visible={showConfidence && !confidenceGiven}
+          onSelect={handleConfidence}
+        />
+      )}
 
       {/* Next button */}
       {answered && (

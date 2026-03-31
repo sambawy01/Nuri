@@ -4,6 +4,7 @@ const pool = require('../db/connection');
 const { generateQuizQuestion } = require('../services/ai-provider');
 const { awardXP, awardQuizXP } = require('../services/xp');
 const { getTopics } = require('../services/curriculum');
+const { evaluateBadges } = require('../services/badges');
 
 // POST /api/quiz/question — generate quiz question
 router.post('/question', async (req, res, next) => {
@@ -189,6 +190,9 @@ router.post('/answer', async (req, res, next) => {
       );
     }
 
+    // Evaluate badges
+    const newBadges = await evaluateBadges(profileId);
+
     res.json({
       success: true,
       data: {
@@ -197,6 +201,7 @@ router.post('/answer', async (req, res, next) => {
         xpEarned: xpResult.xpAwarded,
         totalXP: xpResult.totalXP,
         level: xpResult.level,
+        newBadges,
       },
     });
   } catch (err) {

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db/connection');
 const { getLevel } = require('../services/xp');
+const { getEarnedBadges } = require('../services/badges');
 
 // GET /api/stats/:profileId — full stats
 router.get('/:profileId', async (req, res, next) => {
@@ -54,6 +55,9 @@ router.get('/:profileId', async (req, res, next) => {
       [profileId]
     );
 
+    // Get earned badges
+    const earnedBadges = await getEarnedBadges(profileId);
+
     const quizStats = quizCountResult.rows[0];
     const accuracy = quizStats.total > 0
       ? Math.round((quizStats.correct / quizStats.total) * 100)
@@ -75,6 +79,7 @@ router.get('/:profileId', async (req, res, next) => {
         recentActivity: recentActivityResult.rows,
         unresolvedMistakes: parseInt(mistakesResult.rows[0].unresolved, 10),
         sessions: sessionsResult.rows,
+        badges: earnedBadges,
       },
     });
   } catch (err) {

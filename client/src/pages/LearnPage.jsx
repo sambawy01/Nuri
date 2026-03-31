@@ -28,6 +28,13 @@ export default function LearnPage() {
   const inputRef = useRef(null);
   const sessionIdRef = useRef(null);
   const autoSpokeRef = useRef(false);
+  const lastExplainTypeRef = useRef(null);
+
+  const EXPLAIN_TYPE_MAP = {
+    'Explain Simpler ✨': 'visual',
+    'Give Example 💡': 'example_first',
+    'Quiz Me 🧩': 'try_first',
+  };
   const { speak } = useVoice();
 
   useEffect(() => {
@@ -164,6 +171,17 @@ export default function LearnPage() {
     try {
       await streamChat(text.trim());
       setOwlState('idle');
+      if (lastExplainTypeRef.current) {
+        api('/learning-style/track', {
+          method: 'POST',
+          body: {
+            profileId: currentProfile._id || currentProfile.id,
+            explanationType: lastExplainTypeRef.current,
+            wasCorrect: true,
+          },
+        }).catch(() => {});
+        lastExplainTypeRef.current = null;
+      }
     } catch (err) {
       setError('Oops! Nuri got a bit confused. Try again?');
       setOwlState('idle');
@@ -174,6 +192,12 @@ export default function LearnPage() {
   }
 
   function handleQuickButton(text) {
+    if (text === 'I Can Teach This! 🎓') {
+      const topic = selectedTopic || meta?.name;
+      navigate(`/explain/${subject}`, { state: { topic } });
+      return;
+    }
+    lastExplainTypeRef.current = EXPLAIN_TYPE_MAP[text] || null;
     sendMessage(text);
   }
 
@@ -233,9 +257,10 @@ export default function LearnPage() {
       {/* Quick Buttons */}
       <div className="px-4 pb-2 flex gap-2 overflow-x-auto hide-scrollbar shrink-0">
         {[
-          { label: 'Explain Simpler ✨', icon: Sparkles },
-          { label: 'Give Example 💡', icon: Lightbulb },
-          { label: 'Quiz Me 🧩', icon: Puzzle },
+          { label: 'Explain Simpler ✨' },
+          { label: 'Give Example 💡' },
+          { label: 'Quiz Me 🧩' },
+          { label: 'I Can Teach This! 🎓' },
         ].map(({ label }) => (
           <motion.button
             key={label}

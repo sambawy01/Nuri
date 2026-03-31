@@ -7,6 +7,9 @@ import SubjectPage from './pages/SubjectPage';
 import LearnPage from './pages/LearnPage';
 import QuizPage from './pages/QuizPage';
 import ProfilePage from './pages/ProfilePage';
+import BadgesPage from './pages/BadgesPage';
+import MistakesPage from './pages/MistakesPage';
+import ReviewPage from './pages/ReviewPage';
 
 function App() {
   return (
@@ -20,6 +23,9 @@ function App() {
           <Route path="/learn/:subject" element={<LearnPage />} />
           <Route path="/quiz/:subject" element={<QuizPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/badges" element={<BadgesPage />} />
+          <Route path="/mistakes" element={<MistakesPage />} />
+          <Route path="/review" element={<ReviewPage />} />
         </Routes>
       </div>
     </ProfileProvider>

@@ -7,6 +7,10 @@ import { useProfile } from '../context/ProfileContext';
 import { subjects } from '../lib/subjects';
 import ChatBubble from '../components/ChatBubble';
 import TypingIndicator from '../components/TypingIndicator';
+import NuriOwl from '../components/NuriOwl';
+import { useVoice } from '../hooks/useVoice';
+import MicButton from '../components/MicButton';
+import SpeakerButton from '../components/SpeakerButton';
 
 export default function LearnPage() {
   const { subject } = useParams();
@@ -19,9 +23,12 @@ export default function LearnPage() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [owlState, setOwlState] = useState('idle');
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const sessionIdRef = useRef(null);
+  const autoSpokeRef = useRef(false);
+  const { speak } = useVoice();
 
   useEffect(() => {
     if (!currentProfile) {
@@ -114,6 +121,7 @@ export default function LearnPage() {
 
   async function sendInitialGreeting() {
     setIsLoading(true);
+    setOwlState('talking');
     try {
       let topic = selectedTopic;
       if (!topic) {
@@ -129,14 +137,21 @@ export default function LearnPage() {
 
       await streamChat(message, true);
     } catch (err) {
-      setMessages([{
-        text: `Hi ${currentProfile.name}! I'm Nuri, your study buddy! 🦉 Let's learn ${meta?.name || subject} together! What topic would you like to start with?`,
-        isNuri: true,
-      }]);
+      const fallback = `Hi ${currentProfile.name}! I'm Nuri, your study buddy! Let's learn ${meta?.name || subject} together! What topic would you like to start with?`;
+      setMessages([{ text: fallback, isNuri: true }]);
     } finally {
       setIsLoading(false);
+      setOwlState('idle');
     }
   }
+
+  // Auto-speak Nuri's first message
+  useEffect(() => {
+    if (!autoSpokeRef.current && messages.length === 1 && messages[0].isNuri && messages[0].text) {
+      autoSpokeRef.current = true;
+      speak(messages[0].text, { lang: subject === 'arabic' ? 'ar-SA' : 'en-US' });
+    }
+  }, [messages, speak, subject]);
 
   async function sendMessage(text) {
     if (!text.trim() || isLoading) return;
@@ -144,11 +159,14 @@ export default function LearnPage() {
     setInput('');
     setIsLoading(true);
     setError(null);
+    setOwlState('talking');
 
     try {
       await streamChat(text.trim());
+      setOwlState('idle');
     } catch (err) {
       setError('Oops! Nuri got a bit confused. Try again?');
+      setOwlState('idle');
     } finally {
       setIsLoading(false);
       inputRef.current?.focus();
@@ -178,17 +196,12 @@ export default function LearnPage() {
         >
           <ArrowLeft size={22} />
         </button>
-        <div
-          className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm"
-          style={{ backgroundColor: meta.color }}
-        >
-          {meta.emoji}
-        </div>
+        <NuriOwl size="sm" state={owlState} level={currentProfile?.level || 1} />
         <div>
           <p className={`font-bold text-gray-800 text-sm ${subject === 'arabic' ? 'font-arabic' : ''}`}>
             Learn {meta.name}
           </p>
-          <p className="text-xs text-gray-500 font-semibold">with Nuri 🦉</p>
+          <p className="text-xs text-gray-500 font-semibold">with Nuri</p>
         </div>
       </motion.div>
 
@@ -200,6 +213,8 @@ export default function LearnPage() {
             message={msg.text}
             isNuri={msg.isNuri}
             subjectColor={meta.color}
+            owlState={msg.isNuri ? owlState : undefined}
+            owlLevel={currentProfile?.level || 1}
           />
         ))}
         {isLoading && <TypingIndicator />}
@@ -237,7 +252,13 @@ export default function LearnPage() {
 
       {/* Input */}
       <div className="px-4 pb-4 pt-2 shrink-0">
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <MicButton
+            onResult={(text) => sendMessage(text)}
+            lang={subject === 'arabic' ? 'ar-SA' : 'en-US'}
+            disabled={isLoading}
+            size={44}
+          />
           <input
             ref={inputRef}
             type="text"

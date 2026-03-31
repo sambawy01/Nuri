@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Flame, Trophy, RotateCcw, Home } from 'lucide-react';
 import { api } from '../lib/api';
@@ -8,7 +8,7 @@ import { subjects } from '../lib/subjects';
 import QuestionCard from '../components/QuestionCard';
 import CelebrationEffect from '../components/CelebrationEffect';
 import LoadingSpinner from '../components/LoadingSpinner';
-import NuriAvatar from '../components/NuriAvatar';
+import NuriOwl from '../components/NuriOwl';
 
 const TOTAL_QUESTIONS = 10;
 const XP_PER_CORRECT = 15;
@@ -17,8 +17,10 @@ const DIFFICULTIES = ['easy', 'medium', 'hard'];
 export default function QuizPage() {
   const { subject } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { currentProfile, updateXP } = useProfile();
   const meta = subjects[subject];
+  const topic = location.state?.topic;
 
   const [difficulty, setDifficulty] = useState('medium');
   const [question, setQuestion] = useState(null);
@@ -59,6 +61,7 @@ export default function QuizPage() {
           profileId: currentProfile._id || currentProfile.id,
           subject,
           difficulty,
+          ...(topic && { topic }),
         },
       });
       setQuestion(data);
@@ -73,7 +76,7 @@ export default function QuizPage() {
     } finally {
       setLoading(false);
     }
-  }, [currentProfile, subject, difficulty, meta]);
+  }, [currentProfile, subject, difficulty, meta, topic]);
 
   async function handleAnswer(index) {
     if (answered) return;
@@ -138,6 +141,10 @@ export default function QuizPage() {
     return null;
   }
 
+  const owlState = answered
+    ? (selectedAnswer === correctAnswer ? 'celebrating' : 'encouraging')
+    : 'excited';
+
   // Summary screen
   if (showSummary) {
     const percentage = Math.round((score / TOTAL_QUESTIONS) * 100);
@@ -154,7 +161,9 @@ export default function QuizPage() {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
         >
-          <NuriAvatar size={120} />
+          <div className="flex justify-center">
+            <NuriOwl size="md" state={score >= 7 ? 'celebrating' : 'encouraging'} level={currentProfile.level || 1} />
+          </div>
 
           <motion.div
             className="bg-white rounded-3xl shadow-xl p-6 mt-6 text-center"
@@ -289,6 +298,11 @@ export default function QuizPage() {
             {d}
           </motion.button>
         ))}
+      </div>
+
+      {/* Nuri Owl */}
+      <div className="flex justify-center mb-4">
+        <NuriOwl size="md" state={loading ? 'thinking' : owlState} level={currentProfile.level || 1} />
       </div>
 
       {/* Question */}

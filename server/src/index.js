@@ -11,6 +11,8 @@ const chatRouter = require('./routes/chat');
 const quizRouter = require('./routes/quiz');
 const statsRouter = require('./routes/stats');
 const curriculumRouter = require('./routes/curriculum');
+const mistakesRouter = require('./routes/mistakes');
+const reviewRouter = require('./routes/review');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -50,6 +52,8 @@ app.use('/api/chat', chatRouter);
 app.use('/api/quiz', quizRouter);
 app.use('/api/stats', statsRouter);
 app.use('/api/curriculum', curriculumRouter);
+app.use('/api/mistakes', mistakesRouter);
+app.use('/api/review', reviewRouter);
 
 // 404 handler
 app.use((req, res) => {

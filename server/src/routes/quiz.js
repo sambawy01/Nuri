@@ -140,12 +140,19 @@ router.post('/answer', async (req, res, next) => {
       );
     }
 
-    // If wrong, record as a mistake
+    // If wrong, record as a mistake and add to spaced repetition queue
     if (!isCorrect) {
       await pool.query(
         `INSERT INTO mistakes (profile_id, subject, topic, question_text, child_answer, correct_answer)
          VALUES ($1, $2, $3, $4, $5, $6)`,
         [profileId, masterySubject, masteryTopic, question.question_text, answer, question.correct_answer]
+      );
+
+      // Auto-add to spaced repetition review queue
+      await pool.query(
+        `INSERT INTO review_items (profile_id, subject, topic, question_text, correct_answer)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [profileId, masterySubject, masteryTopic, question.question_text, question.correct_answer]
       );
     }
 

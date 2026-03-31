@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, LogOut, Users, Trophy, Zap, Flame, HelpCircle, Star } from 'lucide-react';
+import { ArrowLeft, LogOut, Users, Trophy, Zap, Flame, HelpCircle, Star, Award } from 'lucide-react';
 import { useProfile } from '../context/ProfileContext';
 import { subjects, subjectKeys } from '../lib/subjects';
 import { api } from '../lib/api';
@@ -161,6 +161,15 @@ export default function ProfilePage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
       >
+        <motion.button
+          onClick={() => navigate('/badges')}
+          className="w-full bg-purple-50 border-2 border-purple-200 text-purple-700 font-bold py-3 rounded-2xl flex items-center justify-center gap-2"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <Award size={18} />
+          View Badges
+        </motion.button>
         <motion.button
           onClick={handleSwitch}
           className="w-full bg-white border-2 border-gray-200 text-gray-700 font-bold py-3 rounded-2xl flex items-center justify-center gap-2"

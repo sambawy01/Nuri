@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { User, Trophy, Zap, Target } from 'lucide-react';
+import { User, Trophy, Zap, Target, Award, BookOpen, RotateCcw } from 'lucide-react';
 import { useProfile } from '../context/ProfileContext';
 import { subjectKeys } from '../lib/subjects';
 import { api } from '../lib/api';
@@ -9,12 +9,15 @@ import SubjectCard from '../components/SubjectCard';
 import XPBar from '../components/XPBar';
 import StreakBadge from '../components/StreakBadge';
 import LoadingSpinner from '../components/LoadingSpinner';
+import NuriOwl from '../components/NuriOwl';
 
 export default function HomePage() {
   const navigate = useNavigate();
   const { currentProfile, loading: profileLoading } = useProfile();
   const [stats, setStats] = useState(null);
   const [loadingStats, setLoadingStats] = useState(true);
+  const [mistakeCount, setMistakeCount] = useState(0);
+  const [reviewCount, setReviewCount] = useState(0);
 
   useEffect(() => {
     if (!profileLoading && !currentProfile) {
@@ -23,6 +26,7 @@ export default function HomePage() {
     }
     if (currentProfile) {
       fetchStats();
+      fetchToolCounts();
     }
   }, [currentProfile, profileLoading, navigate]);
 
@@ -35,6 +39,22 @@ export default function HomePage() {
       setStats(null);
     } finally {
       setLoadingStats(false);
+    }
+  }
+
+  async function fetchToolCounts() {
+    const pid = currentProfile._id || currentProfile.id;
+    try {
+      const mStats = await api(`/mistakes/${pid}/stats`);
+      setMistakeCount(mStats.unresolved ?? 0);
+    } catch {
+      setMistakeCount(0);
+    }
+    try {
+      const rStats = await api(`/review/${pid}/stats`);
+      setReviewCount(rStats.due ?? 0);
+    } catch {
+      setReviewCount(0);
     }
   }
 
@@ -54,13 +74,16 @@ export default function HomePage() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <div>
-          <h1 className="text-2xl font-extrabold text-gray-800">
-            Hello, {currentProfile.name}! 👋
-          </h1>
-          <p className="text-gray-500 font-semibold text-sm">
-            Ready to learn something awesome?
-          </p>
+        <div className="flex items-center gap-3">
+          <NuriOwl size="sm" state="idle" level={level} />
+          <div>
+            <h1 className="text-2xl font-extrabold text-gray-800">
+              Hello, {currentProfile.name}!
+            </h1>
+            <p className="text-gray-500 font-semibold text-sm">
+              Ready to learn something awesome?
+            </p>
+          </div>
         </div>
         <motion.button
           onClick={() => navigate('/profile')}
@@ -117,7 +140,7 @@ export default function HomePage() {
 
       {/* Stats Row */}
       <motion.div
-        className="grid grid-cols-3 gap-3 mt-6"
+        className="grid grid-cols-4 gap-3 mt-6"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6 }}
@@ -137,18 +160,85 @@ export default function HomePage() {
           <p className="text-xl font-extrabold text-gray-800">{streak}</p>
           <p className="text-xs text-gray-500 font-semibold">Day Streak</p>
         </div>
+        <motion.div
+          className="bg-purple-50 rounded-2xl shadow-md p-3 text-center cursor-pointer border-2 border-purple-100"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => navigate('/badges')}
+        >
+          <Award size={20} className="mx-auto text-purple-500 mb-1" />
+          <p className="text-xl font-extrabold text-purple-600">
+            <Trophy size={16} className="inline" />
+          </p>
+          <p className="text-xs text-purple-500 font-semibold">Badges</p>
+        </motion.div>
+      </motion.div>
+
+      {/* Tools Section */}
+      <motion.div
+        className="mt-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.7 }}
+      >
+        <h2 className="text-lg font-extrabold text-gray-800 mb-3">
+          Tools
+        </h2>
+        <div className="space-y-3">
+          <motion.button
+            onClick={() => navigate('/mistakes')}
+            className="w-full bg-white rounded-2xl p-4 shadow-lg border-l-4 text-left flex items-center gap-4 cursor-pointer"
+            style={{ borderLeftColor: '#F59E0B' }}
+            whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(0,0,0,0.12)' }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          >
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white text-lg shrink-0 bg-amber-500">
+              <BookOpen size={24} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-gray-800">Mistake Journal {'\u{1F4D3}'}</p>
+              <p className="text-sm text-gray-500 font-semibold">Learn from your mistakes</p>
+            </div>
+            {mistakeCount > 0 && (
+              <span className="bg-amber-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                {mistakeCount}
+              </span>
+            )}
+          </motion.button>
+
+          <motion.button
+            onClick={() => navigate('/review')}
+            className="w-full bg-white rounded-2xl p-4 shadow-lg border-l-4 text-left flex items-center gap-4 cursor-pointer"
+            style={{ borderLeftColor: '#8B5CF6' }}
+            whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(0,0,0,0.12)' }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          >
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white text-lg shrink-0 bg-purple-500">
+              <RotateCcw size={24} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-gray-800">Daily Review {'\u{1F504}'}</p>
+              <p className="text-sm text-gray-500 font-semibold">Practice spaced repetition</p>
+            </div>
+            {reviewCount > 0 && (
+              <span className="bg-purple-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                {reviewCount}
+              </span>
+            )}
+          </motion.button>
+        </div>
       </motion.div>
 
       {/* Floating Nuri */}
       <motion.div
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-full gradient-bg shadow-xl flex items-center justify-center text-2xl cursor-pointer z-40"
-        animate={{ y: [0, -5, 0] }}
-        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+        className="fixed bottom-6 right-6 cursor-pointer z-40"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => navigate('/profile')}
       >
-        🦉
+        <NuriOwl size="sm" state="idle" level={level} />
       </motion.div>
     </div>
   );

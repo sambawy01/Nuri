@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, X, Eye, EyeOff } from 'lucide-react';
 import { api } from '../lib/api';
 import { useProfile } from '../context/ProfileContext';
-import NuriAvatar from '../components/NuriAvatar';
+import NuriOwl from '../components/NuriOwl';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const AVATAR_COLORS = ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#F43F5E', '#14B8A6'];
@@ -75,7 +75,9 @@ export default function WelcomePage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <NuriAvatar size={160} />
+        <div className="flex justify-center">
+          <NuriOwl size="lg" state="idle" />
+        </div>
 
         <motion.h1
           className="text-4xl md:text-5xl font-extrabold text-center mt-6 gradient-text"

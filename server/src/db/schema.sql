@@ -94,3 +94,19 @@ CREATE INDEX IF NOT EXISTS idx_chat_sessions_profile ON chat_sessions(profile_id
 CREATE INDEX IF NOT EXISTS idx_streak_history_profile ON streak_history(profile_id, streak_date);
 CREATE INDEX IF NOT EXISTS idx_mistakes_profile ON mistakes(profile_id);
 CREATE INDEX IF NOT EXISTS idx_mistakes_unresolved ON mistakes(profile_id, resolved) WHERE resolved = FALSE;
+
+CREATE TABLE IF NOT EXISTS review_items (
+  id SERIAL PRIMARY KEY,
+  profile_id INT REFERENCES profiles(id) ON DELETE CASCADE,
+  subject VARCHAR(50) NOT NULL,
+  topic VARCHAR(100),
+  question_text TEXT NOT NULL,
+  correct_answer TEXT NOT NULL,
+  memory_score INT DEFAULT 0,
+  next_review_date DATE DEFAULT CURRENT_DATE,
+  times_reviewed INT DEFAULT 0,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_review_items_profile ON review_items(profile_id);
+CREATE INDEX IF NOT EXISTS idx_review_items_due ON review_items(profile_id, next_review_date) WHERE memory_score < 5;

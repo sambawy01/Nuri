@@ -9,10 +9,10 @@ import QuestionCard from '../components/QuestionCard';
 import CelebrationEffect from '../components/CelebrationEffect';
 import LoadingSpinner from '../components/LoadingSpinner';
 import NuriOwl from '../components/NuriOwl';
+import DifficultySelector from '../components/DifficultySelector';
 
 const TOTAL_QUESTIONS = 10;
-const XP_PER_CORRECT = 15;
-const DIFFICULTIES = ['easy', 'medium', 'hard'];
+const DIFFICULTY_XP = { easy: 5, medium: 10, hard: 15, challenge: 20 };
 
 export default function QuizPage() {
   const { subject } = useParams();
@@ -89,13 +89,15 @@ export default function QuizPage() {
 
     const isCorrect = index === correct;
 
+    const xpGain = DIFFICULTY_XP[difficulty] || 10;
+
     if (isCorrect) {
       setScore((s) => s + 1);
-      setSessionXP((xp) => xp + XP_PER_CORRECT);
+      setSessionXP((xp) => xp + xpGain);
       setQuizStreak((s) => s + 1);
       setCelebrate((c) => c + 1);
       setXpFloat(true);
-      updateXP(XP_PER_CORRECT);
+      updateXP(xpGain);
       setTimeout(() => setXpFloat(false), 1500);
     } else {
       setQuizStreak(0);
@@ -154,6 +156,15 @@ export default function QuizPage() {
     else if (percentage >= 50) nuriMessage = "Good effort! Keep practising and you'll be amazing! 🦉";
     else nuriMessage = "Don't worry! Every mistake helps you learn. Let's try again! 💕";
 
+    let suggestion = null;
+    if (difficulty === 'easy' && percentage >= 90) {
+      suggestion = "That was too easy for you! Want to try Medium? I think you're ready! 💪";
+    } else if (difficulty === 'hard' && percentage < 40) {
+      suggestion = "No shame! Let's go back to Medium and build up. You'll get there! 🌟";
+    } else if (difficulty === 'medium' && percentage >= 90) {
+      suggestion = "You're crushing it! Ready to try Hard mode? 🔥";
+    }
+
     return (
       <div className="min-h-screen flex items-center justify-center px-4 py-8">
         <motion.div
@@ -196,6 +207,12 @@ export default function QuizPage() {
               <p className="text-sm text-blue-800 font-semibold">{nuriMessage}</p>
             </div>
 
+            {suggestion && (
+              <div className="bg-purple-50 rounded-2xl p-4 mb-4">
+                <p className="text-sm text-purple-800 font-semibold">{suggestion}</p>
+              </div>
+            )}
+
             <div className="flex gap-3">
               <motion.button
                 onClick={restartQuiz}
@@ -237,7 +254,7 @@ export default function QuizPage() {
             exit={{ opacity: 0 }}
             transition={{ duration: 1.2 }}
           >
-            +{XP_PER_CORRECT} XP
+            +{DIFFICULTY_XP[difficulty] || 10} XP
           </motion.div>
         )}
       </AnimatePresence>
@@ -281,23 +298,12 @@ export default function QuizPage() {
       </div>
 
       {/* Difficulty */}
-      <div className="flex justify-center gap-2 mb-6">
-        {DIFFICULTIES.map((d) => (
-          <motion.button
-            key={d}
-            onClick={() => !answered && setDifficulty(d)}
-            className={`px-4 py-1.5 rounded-full text-xs font-bold capitalize transition-all ${
-              difficulty === d
-                ? 'text-white shadow-md'
-                : 'bg-white text-gray-500 border border-gray-200'
-            }`}
-            style={difficulty === d ? { backgroundColor: meta.color } : undefined}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            {d}
-          </motion.button>
-        ))}
+      <div className="mb-6">
+        <DifficultySelector
+          selected={difficulty}
+          onSelect={setDifficulty}
+          disabled={answered}
+        />
       </div>
 
       {/* Nuri Owl */}

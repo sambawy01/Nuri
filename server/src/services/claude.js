@@ -92,7 +92,7 @@ QUIZ MODE:
 
 async function chat(messages, systemPrompt) {
   const response = await getClient().messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-haiku-4-5-20251001',
     max_tokens: 1024,
     system: systemPrompt,
     messages: messages.map((msg) => ({
@@ -133,7 +133,7 @@ The correctAnswer must be just the letter (A, B, C, or D).
 Make the question age-appropriate for ${getAgeRange(effectiveYear)} year old students.`;
 
   const response = await getClient().messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-haiku-4-5-20251001',
     max_tokens: 512,
     system: systemPrompt,
     messages: [

@@ -13,6 +13,7 @@ export default function ProfilePage() {
   const { currentProfile, logout, loading: profileLoading } = useProfile();
   const [stats, setStats] = useState(null);
   const [loadingStats, setLoadingStats] = useState(true);
+  const [learningStyle, setLearningStyle] = useState(null);
 
   useEffect(() => {
     if (!profileLoading && !currentProfile) {
@@ -26,8 +27,13 @@ export default function ProfilePage() {
 
   async function fetchStats() {
     try {
-      const data = await api(`/stats/${currentProfile._id || currentProfile.id}`);
-      setStats(data);
+      const pid = currentProfile._id || currentProfile.id;
+      const [statsData, styleData] = await Promise.all([
+        api(`/stats/${pid}`).catch(() => null),
+        api(`/learning-style/${pid}`).catch(() => null),
+      ]);
+      setStats(statsData);
+      if (styleData) setLearningStyle(styleData);
     } catch {
       setStats(null);
     } finally {
@@ -153,6 +159,46 @@ export default function ProfilePage() {
           })}
         </div>
       </motion.div>
+
+      {/* Learning Style */}
+      {learningStyle && learningStyle.total_interactions >= 20 && (
+        <motion.div
+          className="bg-white rounded-2xl shadow-lg p-4 mb-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45 }}
+        >
+          <h3 className="font-extrabold text-gray-800 mb-4">How You Learn Best</h3>
+          <p className="text-xs text-gray-500 font-semibold mb-3">Based on {learningStyle.total_interactions} interactions</p>
+          <div className="space-y-3">
+            {[
+              { label: 'Visual', key: 'visual', emoji: '\ud83d\uddbc\ufe0f' },
+              { label: 'Analogies', key: 'analogy', emoji: '\ud83d\udd17' },
+              { label: 'Examples First', key: 'example_first', emoji: '\ud83d\udca1' },
+              { label: 'Listening', key: 'auditory', emoji: '\ud83d\udd0a' },
+              { label: 'Try First', key: 'try_first', emoji: '\ud83e\uddea' },
+            ].map(({ label, key, emoji }) => {
+              const score = Math.round((learningStyle[key] || 0) * 100);
+              return (
+                <div key={key}>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="font-semibold text-gray-700">{emoji} {label}</span>
+                    <span className="font-bold text-purple-600">{score}%</span>
+                  </div>
+                  <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full rounded-full bg-gradient-to-r from-orange-400 to-purple-500"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${score}%` }}
+                      transition={{ duration: 0.8, delay: 0.1 }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </motion.div>
+      )}
 
       {/* Actions */}
       <motion.div

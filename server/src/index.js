@@ -13,6 +13,7 @@ const statsRouter = require('./routes/stats');
 const curriculumRouter = require('./routes/curriculum');
 const mistakesRouter = require('./routes/mistakes');
 const reviewRouter = require('./routes/review');
+const explainRouter = require('./routes/explain');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -54,6 +55,7 @@ app.use('/api/stats', statsRouter);
 app.use('/api/curriculum', curriculumRouter);
 app.use('/api/mistakes', mistakesRouter);
 app.use('/api/review', reviewRouter);
+app.use('/api/explain', explainRouter);
 
 // 404 handler
 app.use((req, res) => {

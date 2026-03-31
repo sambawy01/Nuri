@@ -23,11 +23,16 @@ if (AI_PROVIDER === 'ollama') {
   console.log('[AI] Using Claude API');
 }
 
+function buildExplainBackPrompt(profile, subject, topic) {
+  return provider.buildExplainBackPrompt(profile, subject, topic);
+}
+
 module.exports = {
   buildSystemPrompt: provider.buildSystemPrompt,
   chat: provider.chat,
   chatStream: provider.chatStream || null,
   generateQuizQuestion: provider.generateQuizQuestion,
+  buildExplainBackPrompt,
 
   /** Returns which provider is active */
   getProvider: () => AI_PROVIDER,

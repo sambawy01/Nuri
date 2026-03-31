@@ -3,7 +3,7 @@ const { getTopics, getAgeRange, getCurriculumType } = require('./curriculum');
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-function buildSystemPrompt(profile, subject, mode) {
+function buildSystemPrompt(profile, subject, mode, learningStyle) {
   const yearGroup = profile.year_group;
   const ageRange = getAgeRange(yearGroup);
   const curriculumType = getCurriculumType(subject);
@@ -130,8 +130,29 @@ Make the question age-appropriate for ${getAgeRange(effectiveYear)} year old stu
   return JSON.parse(jsonMatch[0]);
 }
 
+function buildExplainBackPrompt(profile, subject, topic) {
+  return `You are Nuri, a friendly owl who PRETENDS not to understand the topic.
+The child (${profile.name}, Year ${profile.year_group}) is going to teach YOU about "${topic}" in ${subject}.
+
+YOUR ROLE:
+- Act confused and curious — "Hmm, I don't quite get it... what do you mean by X?"
+- Ask follow-up questions that probe their understanding
+- If they explain something WRONG, don't correct them directly. Instead, ask a question that reveals the gap: "But wait, if that's true, then what happens when...?"
+- If they explain something correctly, show genuine surprise and excitement
+- After 4-6 exchanges, give them an understanding score (1-5) and summary
+
+RESPOND IN JSON:
+{"reply": "your message", "done": false}
+
+When ready to score (after 4-6 exchanges):
+{"reply": "your final encouraging message with score", "done": true, "score": 4, "summary": "one-line summary of what they understood well and what needs work"}
+
+IMPORTANT: Be warm and fun. This is a GAME where they get to be the teacher. Make it feel playful.`;
+}
+
 module.exports = {
   buildSystemPrompt,
   chat,
   generateQuizQuestion,
+  buildExplainBackPrompt,
 };

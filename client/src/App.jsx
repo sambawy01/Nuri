@@ -11,6 +11,7 @@ import BadgesPage from './pages/BadgesPage';
 import MistakesPage from './pages/MistakesPage';
 import ReviewPage from './pages/ReviewPage';
 import ExplainBackPage from './pages/ExplainBackPage';
+import StickerBookPage from './pages/StickerBookPage';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
           <Route path="/mistakes" element={<MistakesPage />} />
           <Route path="/review" element={<ReviewPage />} />
           <Route path="/explain/:subject" element={<ExplainBackPage />} />
+          <Route path="/stickers" element={<StickerBookPage />} />
         </Routes>
       </div>
     </ProfileProvider>

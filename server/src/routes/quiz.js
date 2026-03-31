@@ -74,7 +74,7 @@ router.post('/question', async (req, res, next) => {
 // POST /api/quiz/answer — submit answer
 router.post('/answer', async (req, res, next) => {
   try {
-    const { profileId, questionId, answer, subject, topic } = req.body;
+    const { profileId, questionId, answer, subject, topic, confidence } = req.body;
 
     if (!profileId || !questionId || !answer) {
       return res.status(400).json({
@@ -122,6 +122,38 @@ router.post('/answer', async (req, res, next) => {
        WHERE id = $4`,
       [answer, isCorrect, xpResult.xpAwarded, questionId]
     );
+
+    // Record confidence response if provided
+    const validConfidence = ['guessed', 'unsure', 'pretty_sure', 'knew_it'];
+    if (confidence && validConfidence.includes(confidence)) {
+      await pool.query(
+        `INSERT INTO confidence_responses (profile_id, quiz_history_id, confidence_level, was_correct, subject, topic)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [profileId, questionId, confidence, isCorrect, subject || question.subject, topic || question.topic]
+      );
+
+      // +2 XP for using confidence meter
+      await awardXP(profileId, 'confidence_used', subject || question.subject, topic || question.topic);
+
+      // Blind spots (confident + wrong) get highest priority in spaced repetition
+      if ((confidence === 'knew_it' || confidence === 'pretty_sure') && !isCorrect) {
+        await pool.query(
+          `UPDATE review_items SET memory_score = 0, next_review_date = CURRENT_DATE
+           WHERE profile_id = $1 AND question_text = $2`,
+          [profileId, question.question_text]
+        );
+      }
+
+      // Lucky guesses (unsure + right) stay in review
+      if ((confidence === 'guessed' || confidence === 'unsure') && isCorrect) {
+        await pool.query(
+          `INSERT INTO review_items (profile_id, subject, topic, question_text, correct_answer, memory_score)
+           VALUES ($1, $2, $3, $4, $5, 1)
+           ON CONFLICT DO NOTHING`,
+          [profileId, subject || question.subject, topic || question.topic, question.question_text, question.correct_answer]
+        );
+      }
+    }
 
     // Update topic mastery
     const masterySubject = subject || question.subject;

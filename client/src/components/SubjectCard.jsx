@@ -1,22 +1,13 @@
 import { motion } from 'framer-motion';
-import { Calculator, FlaskConical, BookOpen, Clock, Heart, Languages, Globe, Star } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { subjects } from '../lib/subjects';
-
-const iconMap = {
-  Calculator,
-  FlaskConical,
-  BookOpen,
-  Clock,
-  Heart,
-  Languages,
-  Globe,
-};
+import { subjectMap } from './NuriOwl';
 
 export default function SubjectCard({ subject, mastery = 0, onClick }) {
   const meta = subjects[subject];
   if (!meta) return null;
 
-  const Icon = iconMap[meta.icon];
+  const nuriImage = subjectMap[subject];
 
   return (
     <motion.button
@@ -27,11 +18,17 @@ export default function SubjectCard({ subject, mastery = 0, onClick }) {
       whileTap={{ scale: 0.97 }}
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
     >
-      <div
-        className="w-12 h-12 rounded-xl flex items-center justify-center text-white text-lg shrink-0"
-        style={{ backgroundColor: meta.color }}
-      >
-        {Icon ? <Icon size={24} /> : <span className="text-2xl">{meta.emoji}</span>}
+      <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 overflow-hidden">
+        {nuriImage ? (
+          <img
+            src={nuriImage}
+            alt={`Nuri ${meta.name}`}
+            className="w-full h-full object-contain"
+            draggable={false}
+          />
+        ) : (
+          <span className="text-2xl">{meta.emoji}</span>
+        )}
       </div>
       <div className="flex-1 min-w-0">
         <p className={`font-bold text-gray-800 ${subject === 'arabic' ? 'font-arabic' : ''}`}>

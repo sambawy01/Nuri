@@ -1,7 +1,13 @@
 const Anthropic = require('@anthropic-ai/sdk');
 const { getTopics, getAgeRange, getCurriculumType } = require('./curriculum');
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+let _client = null;
+function getClient() {
+  if (!_client) {
+    _client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  }
+  return _client;
+}
 
 function buildSystemPrompt(profile, subject, mode, learningStyle) {
   const yearGroup = profile.year_group;
@@ -85,7 +91,7 @@ QUIZ MODE:
 }
 
 async function chat(messages, systemPrompt) {
-  const response = await client.messages.create({
+  const response = await getClient().messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 1024,
     system: systemPrompt,
@@ -126,7 +132,7 @@ You MUST respond with ONLY valid JSON in this exact format:
 The correctAnswer must be just the letter (A, B, C, or D).
 Make the question age-appropriate for ${getAgeRange(effectiveYear)} year old students.`;
 
-  const response = await client.messages.create({
+  const response = await getClient().messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 512,
     system: systemPrompt,

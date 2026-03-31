@@ -57,6 +57,11 @@ async function migrateV4() {
       CREATE INDEX IF NOT EXISTS idx_daily_attempts_profile ON daily_challenge_attempts(profile_id);
     `);
 
+    // Seed badge definitions
+    const { seedBadges } = require('../services/badges');
+    await seedBadges();
+    console.log('Badge definitions seeded.');
+
     console.log('v4 migration completed successfully.');
   } catch (err) {
     console.error('v4 migration failed:', err.message);

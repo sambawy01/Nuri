@@ -1,0 +1,232 @@
+// curriculum-history.js
+// Source: English National Curriculum — History Programmes of Study (KS1/KS2)
+// https://www.gov.uk/government/publications/national-curriculum-in-england-history-programmes-of-study
+const history = {
+  1: [
+    {
+      id: 'history-1-living-memory',
+      name: 'Changes Within Living Memory',
+      strand: 'Chronological Understanding',
+      codes: [],
+      objectives: [
+        'Compare aspects of life in different periods',
+        'Describe changes within living memory, focusing on aspects of national life',
+        'Explore how everyday life has changed over time (e.g. toys, transport, seaside holidays)',
+        'Use common words and phrases about the passing of time (old, new, a long time ago, before I was born)',
+        'Place events and objects in chronological order',
+      ],
+    },
+    {
+      id: 'history-1-significant-individuals',
+      name: 'Significant Individuals',
+      strand: 'Historical Knowledge',
+      codes: [],
+      objectives: [
+        'Learn about the lives of significant individuals who have contributed to national and international achievements',
+        'Compare aspects of life in different periods using the lives of significant individuals (e.g. Florence Nightingale, Mary Seacole)',
+        'Know about the achievements of Neil Armstrong and Rosa Parks',
+        'Identify similarities and differences between ways of life in different periods',
+        'Understand some of the ways in which we find out about the past',
+      ],
+    },
+    {
+      id: 'history-1-beyond-living-memory',
+      name: 'Events Beyond Living Memory',
+      strand: 'Historical Knowledge',
+      codes: [],
+      objectives: [
+        'Learn about events beyond living memory that are significant nationally or globally',
+        'Know about the Great Fire of London and why it was significant',
+        'Use a wide vocabulary of everyday historical terms',
+        'Ask and answer questions, choosing and using parts of stories and other sources to show understanding',
+        'Identify different ways in which the past is represented',
+      ],
+    },
+  ],
+  2: [
+    {
+      id: 'history-2-beyond-living-memory',
+      name: 'Events Beyond Living Memory',
+      strand: 'Historical Knowledge',
+      codes: [],
+      objectives: [
+        'Learn about events beyond living memory that are significant nationally or globally (e.g. the Gunpowder Plot, the sinking of the Titanic)',
+        'Place events and objects in chronological order',
+        'Use common words and phrases about the passing of time',
+        'Ask and answer questions about the past using parts of stories and other sources',
+        'Identify different ways in which the past is represented',
+      ],
+    },
+    {
+      id: 'history-2-significant-people',
+      name: 'Significant People',
+      strand: 'Historical Knowledge',
+      codes: [],
+      objectives: [
+        'Learn about the lives of significant individuals who have contributed to national and international achievements (e.g. Christopher Columbus, Ibn Battuta, Amelia Earhart)',
+        'Compare aspects of life in different periods using the lives of significant individuals',
+        'Identify similarities and differences between ways of life in different periods',
+        'Understand some of the ways in which we find out about the past',
+      ],
+    },
+    {
+      id: 'history-2-local-history',
+      name: 'Local History',
+      strand: 'Historical Enquiry',
+      codes: [],
+      objectives: [
+        'Explore significant historical events, people and places in their own locality',
+        'Connect local history to broader historical themes',
+        'Use a wide vocabulary of everyday historical terms',
+        'Ask and answer questions, choosing and using parts of stories and other sources to show understanding',
+      ],
+    },
+  ],
+  3: [
+    {
+      id: 'history-3-stone-age-iron-age',
+      name: 'Stone Age to Iron Age',
+      strand: 'British History',
+      codes: [],
+      objectives: [
+        'Know about late Neolithic hunter-gatherers and early farmers (e.g. Skara Brae)',
+        'Know about Bronze Age religion, technology, and travel (e.g. Stonehenge)',
+        'Know about Iron Age hill forts, tribal kingdoms, farming, art and culture',
+        'Establish clear narratives within and across periods studied',
+        'Note connections, contrasts, and trends over time',
+        'Develop appropriate use of historical terms',
+        'Address and devise historically valid questions about change, cause, similarity, difference, and significance',
+      ],
+    },
+    {
+      id: 'history-3-ancient-egypt',
+      name: 'Ancient Egypt',
+      strand: 'World History',
+      codes: [],
+      objectives: [
+        'Know about the achievements of the earliest civilisations and where and when they appeared',
+        'Carry out a depth study of Ancient Egypt as one of the first civilisations',
+        'Construct informed responses involving thoughtful selection and organisation of relevant historical information',
+        'Understand how knowledge of the past is constructed from a range of sources',
+        'Gain and deploy a historically grounded understanding of abstract terms such as "civilisation"',
+      ],
+    },
+  ],
+  4: [
+    {
+      id: 'history-4-roman-empire',
+      name: 'Roman Empire and Britain',
+      strand: 'British History',
+      codes: [],
+      objectives: [
+        'Know about Julius Caesar\'s attempted invasion in 55-54 BC',
+        'Know about the Roman Empire by AD 42 and the power of its army',
+        'Know about the successful invasion by Claudius and conquest, including Hadrian\'s Wall',
+        'Know about British resistance, e.g. Boudica',
+        'Know about the Romanisation of Britain: sites such as Caerwent and the impact of technology, culture, and beliefs, including early Christianity',
+        'Establish clear narratives within and across periods studied',
+        'Gain and deploy a historically grounded understanding of abstract terms such as "empire"',
+      ],
+    },
+    {
+      id: 'history-4-anglo-saxons-scots',
+      name: 'Anglo-Saxons and Scots',
+      strand: 'British History',
+      codes: [],
+      objectives: [
+        'Know about the Roman withdrawal from Britain in c. AD 410 and the fall of the western Roman Empire',
+        'Know about Scots invasions from Ireland to north Britain (now Scotland)',
+        'Know about Anglo-Saxon invasions, settlements, and kingdoms: place names and village life',
+        'Know about Anglo-Saxon art and culture',
+        'Know about Christian conversion: Canterbury, Iona, and Lindisfarne',
+        'Note connections, contrasts, and trends over time',
+      ],
+    },
+    {
+      id: 'history-4-vikings',
+      name: 'Vikings and Anglo-Saxon Struggle',
+      strand: 'British History',
+      codes: [],
+      objectives: [
+        'Know about Viking raids and invasion',
+        'Know about resistance by Alfred the Great and Athelstan, first king of England',
+        'Know about further Viking invasions and Danegeld',
+        'Know about Anglo-Saxon laws and justice',
+        'Know about Edward the Confessor and his death in 1066',
+        'Address and devise historically valid questions about change, cause, similarity, difference, and significance',
+      ],
+    },
+  ],
+  5: [
+    {
+      id: 'history-5-ancient-greece',
+      name: 'Ancient Greece',
+      strand: 'World History',
+      codes: [],
+      objectives: [
+        'Carry out a study of Greek life and achievements and their influence on the western world',
+        'Construct informed responses involving thoughtful selection and organisation of relevant historical information',
+        'Understand how knowledge of the past is constructed from a range of sources',
+        'Develop increasingly sophisticated understanding of chronology',
+        'Gain and deploy a historically grounded understanding of abstract terms such as "civilisation" and "parliament"',
+      ],
+    },
+    {
+      id: 'history-5-non-european',
+      name: 'Non-European Society: Early Islamic Civilisation',
+      strand: 'World History',
+      codes: [],
+      objectives: [
+        'Study a non-European society that provides contrasts with British history (e.g. early Islamic civilisation, Baghdad c. AD 900)',
+        'Note connections, contrasts, and trends over time',
+        'Develop appropriate use of historical terms',
+        'Construct informed responses involving thoughtful selection and organisation of relevant historical information',
+        'Understand how knowledge of the past is constructed from a range of sources',
+      ],
+    },
+  ],
+  6: [
+    {
+      id: 'history-6-local-history',
+      name: 'Local History Study',
+      strand: 'Historical Enquiry',
+      codes: [],
+      objectives: [
+        'Carry out a depth study linked to one of the British areas of study',
+        'Trace how several aspects of national history are reflected in the locality over time',
+        'Study an aspect of history or site dating from a period beyond 1066 that is significant in the locality',
+        'Understand how knowledge of the past is constructed from a range of sources',
+        'Develop increasingly sophisticated understanding of chronology',
+      ],
+    },
+    {
+      id: 'history-6-british-theme',
+      name: 'British History Theme Beyond 1066',
+      strand: 'British History',
+      codes: [],
+      objectives: [
+        'Study an aspect or theme in British history that extends chronological knowledge beyond 1066',
+        'Explore themes such as the changing power of monarchs (e.g. John, Anne, Victoria), changes in social history (e.g. crime and punishment, leisure), or a significant turning point (e.g. first railways, Battle of Britain)',
+        'Establish clear narratives within and across periods studied',
+        'Address and devise historically valid questions about change, cause, similarity, difference, and significance',
+        'Construct informed responses involving thoughtful selection and organisation of relevant historical information',
+      ],
+    },
+    {
+      id: 'history-6-world-war',
+      name: 'World War Overview',
+      strand: 'British History',
+      codes: [],
+      objectives: [
+        'Gain an overview of the World Wars as significant turning points in British history',
+        'Understand the impact of the World Wars on national life',
+        'Gain and deploy a historically grounded understanding of abstract terms such as "parliament" and "peasantry"',
+        'Develop increasingly sophisticated understanding of chronology',
+        'Note connections, contrasts, and trends over time',
+        'Construct informed responses involving thoughtful selection and organisation of relevant historical information',
+      ],
+    },
+  ],
+};
+
+module.exports = history;

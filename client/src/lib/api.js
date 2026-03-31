@@ -1,0 +1,12 @@
+const API_BASE = '/api';
+
+export async function api(endpoint, options = {}) {
+  const res = await fetch(`${API_BASE}${endpoint}`, {
+    headers: { 'Content-Type': 'application/json' },
+    ...options,
+    body: options.body ? JSON.stringify(options.body) : undefined,
+  });
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error || 'Something went wrong');
+  return data.data;
+}

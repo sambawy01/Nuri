@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-orange: #F97316;
+  --color-primary-purple: #A855F7;
+  --color-maths: #3B82F6;
+  --color-science: #10B981;
+  --color-english: #8B5CF6;
+  --color-history: #F59E0B;
+  --color-religion: #F43F5E;
+  --color-arabic: #14B8A6;
+  --font-family-sans: 'Nunito', sans-serif;
+  --font-family-arabic: 'Noto Naskh Arabic', serif;
+}
+
+body {
+  font-family: var(--font-family-sans);
+  background: linear-gradient(135deg, #FFF7ED 0%, #FEF3C7 30%, #EFF6FF 100%);
+  min-height: 100vh;
+  margin: 0;
+}
+
+.font-arabic {
+  font-family: var(--font-family-arabic);
+  direction: rtl;
+}
+
+.gradient-text {
+  background: linear-gradient(to right, #F97316, #A855F7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-border {
+  background: linear-gradient(135deg, #F97316, #A855F7);
+}
+
+.gradient-bg {
+  background: linear-gradient(135deg, #F97316, #A855F7);
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

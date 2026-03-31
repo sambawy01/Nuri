@@ -69,7 +69,17 @@ router.post('/', async (req, res, next) => {
     // Add the user's message
     messages.push({ role: 'user', content: message });
 
-    const systemPrompt = buildSystemPrompt(profile, subject, mode);
+    // Fetch learning style
+    let learningStyle = null;
+    const styleResult = await pool.query(
+      'SELECT * FROM learning_style_profiles WHERE profile_id = $1',
+      [profileId]
+    );
+    if (styleResult.rows.length > 0) {
+      learningStyle = styleResult.rows[0];
+    }
+
+    const systemPrompt = buildSystemPrompt(profile, subject, mode, learningStyle);
     const wantsStream = req.query.stream === 'true' && supportsStreaming() && chatStream;
 
     if (wantsStream) {

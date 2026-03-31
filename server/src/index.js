@@ -14,6 +14,7 @@ const curriculumRouter = require('./routes/curriculum');
 const mistakesRouter = require('./routes/mistakes');
 const reviewRouter = require('./routes/review');
 const explainRouter = require('./routes/explain');
+const learningStyleRouter = require('./routes/learning-style');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -56,6 +57,7 @@ app.use('/api/curriculum', curriculumRouter);
 app.use('/api/mistakes', mistakesRouter);
 app.use('/api/review', reviewRouter);
 app.use('/api/explain', explainRouter);
+app.use('/api/learning-style', learningStyleRouter);
 
 // 404 handler
 app.use((req, res) => {

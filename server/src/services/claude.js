@@ -64,6 +64,23 @@ QUIZ MODE:
 - Vary question types: factual recall, application, reasoning`;
   }
 
+  if (learningStyle && learningStyle.total_interactions >= 20) {
+    const styles = [
+      { name: 'visual descriptions and imagery', score: learningStyle.visual },
+      { name: 'real-world analogies', score: learningStyle.analogy },
+      { name: 'concrete examples before theory', score: learningStyle.example_first },
+      { name: 'spoken/audio explanations', score: learningStyle.auditory },
+      { name: 'attempting questions before being taught', score: learningStyle.try_first },
+    ]
+      .filter((s) => s.score > 0.5)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 2);
+
+    if (styles.length > 0) {
+      prompt += `\n\nLEARNING STYLE: This child learns best with ${styles.map((s) => s.name).join(' and ')}. Prioritize these in your explanations.`;
+    }
+  }
+
   return prompt;
 }
 

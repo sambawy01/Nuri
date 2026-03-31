@@ -48,16 +48,21 @@ router.get('/:profileId', async (req, res, next) => {
 
     const result = await pool.query(query, params);
 
-    // Group by subject
-    const grouped = {};
-    for (const row of result.rows) {
-      if (!grouped[row.subject]) {
-        grouped[row.subject] = [];
-      }
-      grouped[row.subject].push(row);
-    }
+    // Return flat array with client-friendly field names
+    const mistakes = result.rows.map(row => ({
+      id: row.id,
+      subject: row.subject,
+      topic: row.topic,
+      question: row.question_text,
+      wrongAnswer: row.child_answer,
+      correctAnswer: row.correct_answer,
+      errorType: row.error_type,
+      explanation: row.explanation,
+      resolved: row.resolved,
+      createdAt: row.created_at,
+    }));
 
-    res.json({ success: true, data: grouped });
+    res.json({ success: true, data: mistakes });
   } catch (err) {
     next(err);
   }

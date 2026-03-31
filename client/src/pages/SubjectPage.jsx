@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Lightbulb, Puzzle, GraduationCap, Calculator, FlaskConical, BookOpen, Clock, Heart, Languages, Globe, Star, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Lightbulb, Puzzle, GraduationCap, Calculator, FlaskConical, BookOpen, Clock, Heart, Languages, Globe, Star, ChevronRight, ChevronDown, CheckCircle2 } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
 import { subjects } from '../lib/subjects';
 import { useProfile } from '../context/ProfileContext';
 import { api } from '../lib/api';
@@ -170,54 +171,151 @@ export default function SubjectPage() {
           <div className="bg-white rounded-xl p-6 shadow text-center text-gray-400 font-semibold">
             No topics found for this subject
           </div>
-        ) : (
-          <div className="space-y-2">
-            {topics.map((topic, index) => (
-              <motion.button
-                key={topic.name}
-                onClick={() => setSelectedTopic(selectedTopic === topic.name ? null : topic.name)}
-                className={`w-full bg-white rounded-xl p-4 shadow text-left transition-all ${
-                  selectedTopic === topic.name
-                    ? 'ring-2 shadow-lg'
-                    : 'hover:shadow-md'
-                }`}
-                style={{
-                  borderColor: selectedTopic === topic.name ? meta.color : 'transparent',
-                  ringColor: selectedTopic === topic.name ? meta.color : undefined,
-                }}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 + index * 0.05 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-extrabold text-white"
-                      style={{ backgroundColor: meta.color }}
-                    >
-                      {index + 1}
-                    </div>
-                    <div>
-                      <p className={`font-bold text-gray-800 text-sm ${subject === 'arabic' ? 'font-arabic' : ''}`}>
-                        {topic.name}
-                      </p>
-                      {topic.attempts > 0 && (
-                        <p className="text-xs text-gray-400 font-semibold mt-0.5">
-                          {topic.correctCount}/{topic.attempts} correct
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {renderStars(topic.stars)}
-                    <ChevronRight size={16} className="text-gray-300" />
+        ) : (() => {
+          // Group topics by strand
+          const strands = [];
+          const strandMap = {};
+          topics.forEach((topic, index) => {
+            const strand = topic.strand || 'General';
+            if (!strandMap[strand]) {
+              strandMap[strand] = [];
+              strands.push(strand);
+            }
+            strandMap[strand].push({ ...topic, _index: index });
+          });
+
+          return (
+            <div className="space-y-4">
+              {strands.map(strand => (
+                <div key={strand}>
+                  {strands.length > 1 && (
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 px-1">{strand}</p>
+                  )}
+                  <div className="space-y-2">
+                    {strandMap[strand].map((topic) => {
+                      const isExpanded = selectedTopic === topic.name;
+                      const objectiveCount = topic.objectives?.length || 0;
+                      const progressPct = topic.attempts > 0 ? Math.round((topic.correctCount / topic.attempts) * 100) : 0;
+
+                      return (
+                        <motion.div
+                          key={topic.name}
+                          className={`bg-white rounded-xl shadow text-left transition-all overflow-hidden ${
+                            isExpanded ? 'ring-2 shadow-lg' : 'hover:shadow-md'
+                          }`}
+                          style={{ ringColor: isExpanded ? meta.color : undefined }}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.3 + topic._index * 0.04 }}
+                        >
+                          <button
+                            onClick={() => setSelectedTopic(isExpanded ? null : topic.name)}
+                            className="w-full p-4 text-left"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3 flex-1 min-w-0">
+                                <div
+                                  className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-extrabold text-white shrink-0"
+                                  style={{ backgroundColor: meta.color }}
+                                >
+                                  {topic._index + 1}
+                                </div>
+                                <div className="min-w-0">
+                                  <p className={`font-bold text-gray-800 text-sm ${subject === 'arabic' ? 'font-arabic' : ''}`}>
+                                    {topic.name}
+                                  </p>
+                                  <div className="flex items-center gap-2 mt-0.5">
+                                    {topic.attempts > 0 && (
+                                      <span className="text-xs text-gray-400 font-semibold">
+                                        {progressPct}% correct
+                                      </span>
+                                    )}
+                                    {objectiveCount > 0 && (
+                                      <span className="text-xs text-gray-300 font-semibold">
+                                        {objectiveCount} objectives
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0">
+                                {renderStars(topic.stars)}
+                                {isExpanded
+                                  ? <ChevronDown size={16} className="text-gray-400" />
+                                  : <ChevronRight size={16} className="text-gray-300" />
+                                }
+                              </div>
+                            </div>
+
+                            {/* Progress bar */}
+                            {topic.attempts > 0 && (
+                              <div className="mt-2 w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                <div
+                                  className="h-full rounded-full transition-all"
+                                  style={{ width: `${progressPct}%`, backgroundColor: meta.color }}
+                                />
+                              </div>
+                            )}
+                          </button>
+
+                          {/* Expanded: objectives + codes */}
+                          <AnimatePresence>
+                            {isExpanded && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="overflow-hidden"
+                              >
+                                <div className="px-4 pb-4 border-t border-gray-100 pt-3">
+                                  {topic.codes?.length > 0 && (
+                                    <div className="flex flex-wrap gap-1 mb-2">
+                                      {topic.codes.slice(0, 6).map(code => (
+                                        <span key={code} className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-gray-100 text-gray-500">
+                                          {code}
+                                        </span>
+                                      ))}
+                                      {topic.codes.length > 6 && (
+                                        <span className="text-[10px] px-1.5 py-0.5 text-gray-400">
+                                          +{topic.codes.length - 6} more
+                                        </span>
+                                      )}
+                                    </div>
+                                  )}
+
+                                  {topic.objectives?.length > 0 && (
+                                    <div className="space-y-1.5">
+                                      <p className="text-xs font-bold text-gray-500">What you'll learn:</p>
+                                      {topic.objectives.map((obj, i) => (
+                                        <div key={i} className="flex items-start gap-2">
+                                          <CheckCircle2
+                                            size={14}
+                                            className="shrink-0 mt-0.5"
+                                            style={{ color: topic.stars >= 3 ? meta.color : '#D1D5DB' }}
+                                          />
+                                          <p className={`text-xs leading-relaxed ${subject === 'arabic' ? 'font-arabic' : ''} ${
+                                            topic.stars >= 3 ? 'text-gray-700' : 'text-gray-500'
+                                          }`}>
+                                            {obj}
+                                          </p>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </motion.div>
+                      );
+                    })}
                   </div>
                 </div>
-              </motion.button>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          );
+        })()}
 
         {/* Selected topic action */}
         {selectedTopic && (

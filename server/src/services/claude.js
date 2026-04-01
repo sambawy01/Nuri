@@ -127,91 +127,79 @@ async function generateQuizQuestion(subject, topic, yearGroup, difficulty) {
   let difficultyNote = '';
   if (difficulty === 'easy') {
     effectiveYear = Math.max(1, yearGroup - 1);
-    difficultyNote = 'Make this an easy, confidence-building question.';
+    difficultyNote = 'Easy: confidence-building, straightforward recall.';
   } else if (difficulty === 'hard') {
     effectiveYear = Math.min(6, yearGroup + 1);
-    difficultyNote = 'Make this a challenging stretch question.';
+    difficultyNote = 'Hard: requires thinking, not just recall.';
   } else if (difficulty === 'challenge') {
     effectiveYear = Math.min(6, yearGroup + 1);
-    difficultyNote = 'Make this the HARDEST possible question. Include multi-step reasoning. This is a Challenge Me question for ambitious students.';
+    difficultyNote = 'Challenge: multi-step reasoning, the hardest possible.';
+  } else {
+    difficultyNote = 'Medium: at their level, tests understanding.';
   }
 
   const ageRange = getAgeRange(effectiveYear);
-  const systemPrompt = `You are a quiz question generator for Year ${effectiveYear} students (age ${ageRange}) studying ${subject}.
-Generate exactly ONE multiple-choice question about "${topic}".
-Difficulty: ${difficulty}
-${difficultyNote}
 
-AGE-APPROPRIATE LANGUAGE — THIS IS CRITICAL:
-- The child is ${ageRange} years old. Use ONLY words and concepts a ${ageRange} year old would understand.
-- Year 1-2 (age 5-7): Very simple words. Short sentences. "The plant needs water to grow."
-- Year 3-4 (age 7-9): Simple vocabulary. No scientific jargon. "Plants use sunlight to make food."
-- Year 5-6 (age 9-11): Can handle basic scientific terms. "Plants absorb water through their roots."
-- NEVER use university-level words like "stomata", "transpiration", "turgor pressure", "abscisic acid", "flaccid" etc. for ANY primary school year.
-- Explanations must be equally simple. If a 7 year old can't understand it, rewrite it.
-- Options should be SHORT — max 15 words each.
+  // Pick a random position for the correct answer
+  const correctPosition = ['A', 'B', 'C', 'D'][Math.floor(Math.random() * 4)];
 
-VERIFY: Before finalizing, check that the correct answer is actually correct. For maths, solve step by step.
+  const systemPrompt = `You generate quiz questions for children age ${ageRange} (Year ${effectiveYear}, ${subject}).
 
-Respond with ONLY valid JSON:
-{"question": "...", "options": ["A) ...", "B) ...", "C) ...", "D) ..."], "correctAnswer": "A", "explanation": "..."}
+TASK: One multiple-choice question about "${topic}". ${difficultyNote}
 
-The correctAnswer must be just the letter (A, B, C, or D).`;
+ABSOLUTE RULES FOR OPTIONS — READ CAREFULLY:
+
+1. ALL 4 OPTIONS MUST BE THE SAME LENGTH (within 3 words of each other).
+   BAD:  A) "6"  B) "The answer is 8 because you multiply 2 by 4"  C) "10"  D) "4"
+   GOOD: A) "6"  B) "8"  C) "10"  D) "4"
+   BAD:  A) "It rains"  B) "Water evaporates from oceans, forms clouds, and falls as rain"  C) "Snow falls"  D) "Wind blows"
+   GOOD: A) "It makes rain fall"  B) "It moves the clouds"  C) "It heats the oceans"  D) "It freezes the water"
+
+2. The correct answer is position ${correctPosition}. Build the question so ${correctPosition} is correct.
+
+3. Wrong options must be PLAUSIBLE — not silly or obviously wrong.
+   BAD wrong option: "Pizza" (for a maths question)
+   GOOD wrong option: "12" when the answer is "8" (common mistake: adding instead of subtracting)
+
+4. Make wrong options reflect COMMON MISTAKES children actually make:
+   - Maths: wrong operation, off-by-one, forgetting to carry
+   - Science: common misconceptions ("the sun moves around the earth")
+   - English: common grammar mistakes
+   - History: mixing up dates or people from the same era
+
+5. Options are SHORT: 2-10 words each. Never a full sentence as an option.
+
+6. The question itself should be clear, specific, and test ONE thing.
+
+LANGUAGE FOR AGE ${ageRange}:
+- Use words a ${ageRange} year old uses daily
+- No jargon, no technical terms, no Latin/Greek roots
+- If you wouldn't hear it on a children's TV show, don't use it
+
+VERIFICATION: For maths, solve it yourself. The answer MUST be correct.
+
+RESPOND WITH ONLY THIS JSON:
+{"question": "...", "options": ["A) ...", "B) ...", "C) ...", "D) ..."], "correctAnswer": "${correctPosition}", "explanation": "one simple sentence explaining why"}`;
 
   const response = await getClient().messages.create({
     model: 'claude-haiku-4-5-20251001',
-    max_tokens: 512,
+    max_tokens: 400,
     system: systemPrompt,
     messages: [
       {
         role: 'user',
-        content: `Generate a ${difficulty} difficulty question about "${topic}" for Year ${yearGroup} ${subject}.`,
+        content: `Generate a ${difficulty} ${subject} question about "${topic}" for a ${ageRange} year old. Remember: all 4 options must be similar length, correct answer is ${correctPosition}.`,
       },
     ],
   });
 
   const text = response.content[0].text;
-
-  // Extract JSON from the response
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {
     throw new Error('Failed to parse quiz question from Claude response');
   }
 
-  const parsed = JSON.parse(jsonMatch[0]);
-  return shuffleOptions(parsed);
-}
-
-/**
- * Shuffle quiz options so the correct answer isn't always A
- */
-function shuffleOptions(question) {
-  const labels = ['A', 'B', 'C', 'D'];
-  const correctIdx = labels.indexOf(question.correctAnswer.toUpperCase());
-  if (correctIdx === -1) return question;
-
-  // Strip existing labels from options
-  const cleanOptions = question.options.map(opt =>
-    opt.replace(/^[A-D]\)\s*/, '')
-  );
-
-  // Fisher-Yates shuffle with index tracking
-  const indices = [0, 1, 2, 3];
-  for (let i = indices.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [indices[i], indices[j]] = [indices[j], indices[i]];
-  }
-
-  const newCorrectIdx = indices.indexOf(correctIdx);
-  const shuffledOptions = indices.map((origIdx, newIdx) =>
-    `${labels[newIdx]}) ${cleanOptions[origIdx]}`
-  );
-
-  return {
-    ...question,
-    options: shuffledOptions,
-    correctAnswer: labels[newCorrectIdx],
-  };
+  return JSON.parse(jsonMatch[0]);
 }
 
 function buildExplainBackPrompt(profile, subject, topic) {

@@ -1,11 +1,12 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Lightbulb, Puzzle, GraduationCap, Camera, Calculator, FlaskConical, BookOpen, Clock, Heart, Languages, Globe, Star, ChevronRight, ChevronDown, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Lightbulb, Puzzle, GraduationCap, Camera, Calculator, FlaskConical, BookOpen, Clock, Heart, Languages, Globe, Star, ChevronRight, ChevronDown, CheckCircle2, CalendarDays } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import { subjects } from '../lib/subjects';
 import { useProfile } from '../context/ProfileContext';
 import { api } from '../lib/api';
 import { useState, useEffect } from 'react';
+import TestPlanModal from '../components/TestPlanModal';
 
 const iconMap = { Calculator, FlaskConical, BookOpen, Clock, Heart, Languages, Globe };
 
@@ -17,6 +18,7 @@ export default function SubjectPage() {
   const [topics, setTopics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedTopic, setSelectedTopic] = useState(null);
+  const [showTestModal, setShowTestModal] = useState(false);
 
   useEffect(() => {
     if (!currentProfile || !meta) return;
@@ -164,6 +166,21 @@ export default function SubjectPage() {
           <p className="text-gray-400 text-xs font-semibold mt-0.5">Homework</p>
         </motion.button>
       </div>
+
+      {/* I Have a Test button */}
+      <motion.button
+        onClick={() => setShowTestModal(true)}
+        className="w-full mb-6 py-3 rounded-2xl font-extrabold text-sm shadow-md flex items-center justify-center gap-2 border-2 transition-colors"
+        style={{ borderColor: meta.color, color: meta.color, backgroundColor: `${meta.color}10` }}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.35 }}
+        whileHover={{ y: -2 }}
+        whileTap={{ scale: 0.97 }}
+      >
+        <CalendarDays size={16} />
+        I have a test! Create study plan
+      </motion.button>
 
       {/* Topic List */}
       <motion.div
@@ -397,6 +414,16 @@ export default function SubjectPage() {
           </motion.div>
         )}
       </motion.div>
+
+      {/* Test Plan Modal */}
+      {showTestModal && (
+        <TestPlanModal
+          subject={subject}
+          profileId={currentProfile?.id || currentProfile?._id}
+          onClose={() => setShowTestModal(false)}
+          onCreated={() => navigate('/home')}
+        />
+      )}
     </div>
   );
 }

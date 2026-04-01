@@ -12,6 +12,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import NuriOwl, { getStageImage } from '../components/NuriOwl';
 import MysteryChallenge from '../components/MysteryChallenge';
 import TestPredictionCard from '../components/TestPredictionCard';
+import TestPlanCard from '../components/TestPlanCard';
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -184,6 +185,7 @@ export default function HomePage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.7 }}
       >
+        <TestPlanCard profileId={currentProfile._id || currentProfile.id} />
         <TestPredictionCard profileId={currentProfile._id || currentProfile.id} />
         <h2 className="text-lg font-extrabold text-gray-800 mb-3">
           Tools
@@ -281,6 +283,23 @@ export default function HomePage() {
               <p className="font-bold text-gray-800">Sticker Book {'\u2B50'}</p>
               <p className="text-sm text-gray-500 font-semibold">Collect them all!</p>
             </div>
+          </motion.button>
+
+          <motion.button
+            onClick={() => navigate('/treehouse')}
+            className="w-full bg-gradient-to-r from-green-500 to-teal-400 rounded-2xl p-4 shadow-lg text-left flex items-center gap-4 cursor-pointer text-white"
+            whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(0,0,0,0.15)' }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          >
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-white/20 shrink-0 text-2xl">
+              {'\u{1F333}'}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold">Nuri's World</p>
+              <p className="text-sm opacity-80 font-semibold">Decorate your virtual treehouse!</p>
+            </div>
+            <span className="bg-white/20 text-xs font-bold px-2.5 py-1 rounded-full">NEW</span>
           </motion.button>
         </div>
       </motion.div>

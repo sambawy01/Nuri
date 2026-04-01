@@ -23,6 +23,7 @@ const parentRouter = require('./routes/parent');
 const testPlanRouter = require('./routes/test-plan');
 const duelsRouter = require('./routes/duels');
 const treehouseRouter = require('./routes/treehouse');
+const storyRouter = require('./routes/story');
 
 const app = express();
 const PORT = process.env.PORT || 3001;

@@ -303,6 +303,31 @@ export default function SubjectPage() {
                                       ))}
                                     </div>
                                   )}
+
+                                  {/* Action buttons */}
+                                  <div className="flex gap-2 mt-3">
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); navigate(`/learn/${subject}`, { state: { topic: topic.name } }); }}
+                                      className="flex-1 py-2.5 rounded-xl text-white font-bold text-sm shadow-md flex items-center justify-center gap-1.5"
+                                      style={{ backgroundColor: meta.color }}
+                                    >
+                                      <Lightbulb size={14} /> Learn
+                                    </button>
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); navigate(`/quiz/${subject}`, { state: { topic: topic.name } }); }}
+                                      className="flex-1 py-2.5 rounded-xl font-bold text-sm shadow-md border-2 flex items-center justify-center gap-1.5"
+                                      style={{ borderColor: meta.color, color: meta.color }}
+                                    >
+                                      <Puzzle size={14} /> Quiz
+                                    </button>
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); navigate(`/explain/${subject}`, { state: { topic: topic.name } }); }}
+                                      className="flex-1 py-2.5 rounded-xl font-bold text-sm shadow-md border-2 flex items-center justify-center gap-1.5"
+                                      style={{ borderColor: meta.color, color: meta.color }}
+                                    >
+                                      <GraduationCap size={14} /> Teach
+                                    </button>
+                                  </div>
                                 </div>
                               </motion.div>
                             )}

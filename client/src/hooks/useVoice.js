@@ -45,8 +45,8 @@ export function useVoice() {
     const utterance = new SpeechSynthesisUtterance(cleanText);
     const isArabic = options.lang === 'ar-SA' || isArabicText(cleanText);
     utterance.lang = isArabic ? 'ar-SA' : 'en-US';
-    utterance.rate = options.rate || (isArabic ? 0.85 : 0.95);
-    utterance.pitch = options.pitch || 1.1;
+    utterance.rate = options.rate || (isArabic ? 0.75 : 0.82);
+    utterance.pitch = options.pitch || 1.15;
 
     // Try to pick a good voice
     const voices = window.speechSynthesis.getVoices();

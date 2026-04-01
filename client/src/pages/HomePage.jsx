@@ -71,7 +71,7 @@ export default function HomePage() {
   const masteries = stats?.subjectMastery || {};
 
   return (
-    <div className="min-h-screen px-4 py-6 pb-24 max-w-lg mx-auto">
+    <div className="min-h-screen px-4 py-6 max-w-lg mx-auto">
       {/* Header */}
       <motion.div
         className="flex items-center justify-between mb-6"
@@ -338,20 +338,7 @@ export default function HomePage() {
         </div>
       </motion.div>
 
-      {/* Floating Nuri — Evolution Stage */}
-      <motion.div
-        className="fixed bottom-6 right-6 cursor-pointer z-40"
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        onClick={() => navigate('/profile')}
-      >
-        <img
-          src={getStageImage(level)}
-          alt="Nuri"
-          className="w-16 h-16 object-contain drop-shadow-lg"
-          draggable={false}
-        />
-      </motion.div>
+      {/* Bottom nav spacing */}
 
       <MysteryChallenge visible={showChallenge} onClose={() => setShowChallenge(false)} />
     </div>

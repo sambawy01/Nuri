@@ -20,11 +20,12 @@ import StoryChapterPage from './pages/StoryChapterPage';
 import DuelsPage from './pages/DuelsPage';
 import DuelPlayPage from './pages/DuelPlayPage';
 import DuelResultsPage from './pages/DuelResultsPage';
+import BottomNav from './components/BottomNav';
 
 function App() {
   return (
     <ProfileProvider>
-      <div className="min-h-screen">
+      <div className="min-h-screen pb-20">
         <Routes>
           <Route path="/" element={<WelcomePage />} />
           <Route path="/create-profile" element={<CreateProfilePage />} />
@@ -47,6 +48,7 @@ function App() {
           <Route path="/story" element={<StoryMapPage />} />
           <Route path="/story/:chapter/:stage" element={<StoryChapterPage />} />
         </Routes>
+        <BottomNav />
       </div>
     </ProfileProvider>
   );

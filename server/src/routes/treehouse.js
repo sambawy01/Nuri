@@ -8,7 +8,7 @@ const { checkUnlocks, seedItems, isUnlocked, getProfileStats, TREEHOUSE_ITEMS } 
 async function ensureTables() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS treehouse_items (
-      id           TEXT PRIMARY KEY,
+      id           SERIAL PRIMARY KEY,
       name         TEXT NOT NULL,
       category     TEXT NOT NULL,
       icon         TEXT NOT NULL,
@@ -18,12 +18,12 @@ async function ensureTables() {
     )
   `);
   await pool.query(`
-    CREATE TABLE IF NOT EXISTS treehouse_owned_items (
+    CREATE TABLE IF NOT EXISTS owned_items (
       id          SERIAL PRIMARY KEY,
-      profile_id  UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-      item_id     TEXT NOT NULL REFERENCES treehouse_items(id) ON DELETE CASCADE,
+      profile_id  INT REFERENCES profiles(id) ON DELETE CASCADE,
+      item_id     INT REFERENCES treehouse_items(id) ON DELETE CASCADE,
       equipped    BOOLEAN NOT NULL DEFAULT FALSE,
-      acquired_at TIMESTAMPTZ DEFAULT NOW(),
+      earned_at   TIMESTAMPTZ DEFAULT NOW(),
       UNIQUE (profile_id, item_id)
     )
   `);
@@ -83,7 +83,7 @@ router.post('/equip', async (req, res, next) => {
 
     // Upsert owned item record
     await pool.query(
-      `INSERT INTO treehouse_owned_items (profile_id, item_id, equipped)
+      `INSERT INTO owned_items (profile_id, item_id, equipped)
        VALUES ($1, $2, $3)
        ON CONFLICT (profile_id, item_id) DO UPDATE SET equipped = EXCLUDED.equipped`,
       [profileId, itemId, equipped]

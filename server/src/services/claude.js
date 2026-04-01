@@ -211,12 +211,35 @@ RESPOND WITH ONLY THIS JSON:
   });
 
   const text = response.content[0].text;
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) {
-    throw new Error('Failed to parse quiz question from Claude response');
+
+  // Robust JSON extraction — try multiple approaches
+  let parsed;
+  try {
+    // Try direct parse first (if response is clean JSON)
+    parsed = JSON.parse(text.trim());
+  } catch {
+    // Extract JSON object — find matching braces
+    const start = text.indexOf('{');
+    if (start === -1) throw new Error('No JSON found in quiz response');
+
+    let depth = 0;
+    let end = -1;
+    for (let i = start; i < text.length; i++) {
+      if (text[i] === '{') depth++;
+      if (text[i] === '}') depth--;
+      if (depth === 0) { end = i; break; }
+    }
+
+    if (end === -1) throw new Error('Malformed JSON in quiz response');
+
+    try {
+      parsed = JSON.parse(text.substring(start, end + 1));
+    } catch (e) {
+      throw new Error(`Failed to parse quiz JSON: ${e.message}`);
+    }
   }
 
-  return JSON.parse(jsonMatch[0]);
+  return parsed;
 }
 
 function buildExplainBackPrompt(profile, subject, topic) {

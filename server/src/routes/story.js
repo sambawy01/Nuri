@@ -6,17 +6,10 @@ const { evaluateBadges } = require('../services/badges');
 
 // Ensure story_progress table exists (idempotent migration helper)
 async function ensureTable() {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS story_progress (
-      id          SERIAL PRIMARY KEY,
-      profile_id  UUID NOT NULL,
-      chapter     INTEGER NOT NULL,
-      stage       INTEGER NOT NULL,
-      score       INTEGER NOT NULL DEFAULT 0,
-      completed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      UNIQUE (profile_id, chapter, stage)
-    )
-  `);
+  // Table already created by migration — just ensure completed_at column exists
+  try {
+    await pool.query(`ALTER TABLE story_progress ADD COLUMN IF NOT EXISTS completed_at TIMESTAMPTZ DEFAULT NOW()`);
+  } catch {}
 }
 
 // GET /api/story/progress/:profileId

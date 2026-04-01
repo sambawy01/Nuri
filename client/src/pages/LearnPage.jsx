@@ -20,14 +20,22 @@ export default function LearnPage() {
   const meta = subjects[subject];
   const selectedTopic = location.state?.topic;
 
-  // Restore learn session if navigated back
-  const learnSessionKey = `nuri_learn_${subject}`;
+  // Restore learn session if navigated back — only if same topic
+  const topicKey = selectedTopic ? selectedTopic.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 30) : 'auto';
+  const learnSessionKey = `nuri_learn_${subject}_${topicKey}`;
   const savedLearn = useRef(null);
   if (!savedLearn.current) {
     try {
       const raw = sessionStorage.getItem(learnSessionKey);
       if (raw) savedLearn.current = JSON.parse(raw);
     } catch { savedLearn.current = null; }
+    // Clear any other learn sessions for this subject (old topic sessions)
+    for (let i = sessionStorage.length - 1; i >= 0; i--) {
+      const key = sessionStorage.key(i);
+      if (key?.startsWith(`nuri_learn_${subject}_`) && key !== learnSessionKey) {
+        sessionStorage.removeItem(key);
+      }
+    }
   }
   const restoredLearn = savedLearn.current;
 

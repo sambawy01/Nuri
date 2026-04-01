@@ -21,11 +21,12 @@ export default function BottomNav() {
   // Hide on welcome/create pages and during fullscreen experiences
   if (HIDDEN_ON.includes(currentPath)) return null;
 
-  // Hide during active learn/quiz/homework chat (fullscreen)
-  if (currentPath.startsWith('/learn/') || currentPath.startsWith('/explain/') ||
-      currentPath.startsWith('/duel/') || currentPath.startsWith('/story/')) {
-    // Only hide on deep paths (chapter/stage), not the map
-    if (currentPath !== '/story') return null;
+  // Hide during fullscreen experiences
+  if (currentPath.startsWith('/learn/') || currentPath.startsWith('/quiz/') ||
+      currentPath.startsWith('/explain/') || currentPath.startsWith('/duel/') ||
+      currentPath.startsWith('/homework') || currentPath.startsWith('/story/')) {
+    // Only hide on deep paths, not list pages
+    if (currentPath !== '/story' && currentPath !== '/duels') return null;
   }
 
   return (

@@ -40,6 +40,7 @@ export default function HomeworkPage() {
   const [questionComplete, setQuestionComplete] = useState(false);
   const [correctAnswer, setCorrectAnswer] = useState(null);
   const [verifyResult, setVerifyResult] = useState(null);
+  const [analyzeError, setAnalyzeError] = useState(null);
   const [summaryData, setSummaryData] = useState(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -157,8 +158,6 @@ export default function HomeworkPage() {
       setPhase('input');
     }
   }
-
-  const [analyzeError, setAnalyzeError] = useState(null);
 
   async function analyzeInput(base64, mediaType, sourceType) {
     setPhase('analyzing');

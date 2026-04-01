@@ -51,9 +51,14 @@ export default function HomeworkPage() {
   async function handleFileUpload(e) {
     const file = e.target.files?.[0];
     if (!file) return;
+    setAnalyzeError(null);
 
-    // For PDFs, read directly and send as PDF
+    // For PDFs — check size (Vercel has 4.5MB body limit, base64 adds 33%)
     if (file.type === 'application/pdf') {
+      if (file.size > 3 * 1024 * 1024) {
+        setAnalyzeError("This PDF is too large. Please take a photo of the homework page instead, or type the questions.");
+        return;
+      }
       setPhase('analyzing');
       const reader = new FileReader();
       reader.onload = async () => {
@@ -68,7 +73,7 @@ export default function HomeworkPage() {
       return;
     }
 
-    // For images, compress to max 1MB to stay within Vercel limits
+    // For images, compress to stay within limits
     try {
       const compressed = await compressImage(file, 1200, 0.7);
       await analyzeInput(compressed, 'image/jpeg', 'upload_image');

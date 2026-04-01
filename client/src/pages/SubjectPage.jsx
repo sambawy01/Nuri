@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Lightbulb, Puzzle, GraduationCap, Calculator, FlaskConical, BookOpen, Clock, Heart, Languages, Globe, Star, ChevronRight, ChevronDown, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Lightbulb, Puzzle, GraduationCap, Camera, Calculator, FlaskConical, BookOpen, Clock, Heart, Languages, Globe, Star, ChevronRight, ChevronDown, CheckCircle2 } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import { subjects } from '../lib/subjects';
 import { useProfile } from '../context/ProfileContext';
@@ -90,7 +90,7 @@ export default function SubjectPage() {
       </motion.div>
 
       {/* Mode Buttons */}
-      <div className="grid grid-cols-3 gap-3 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         <motion.button
           onClick={() => navigate(`/learn/${subject}`, { state: { topic: selectedTopic } })}
           className="bg-white rounded-2xl p-4 shadow-lg text-center hover:shadow-xl transition-shadow group"
@@ -146,6 +146,22 @@ export default function SubjectPage() {
           </div>
           <h3 className="text-sm font-extrabold text-gray-800">Teach 🎓</h3>
           <p className="text-gray-400 text-xs font-semibold mt-0.5">Explain to Nuri</p>
+        </motion.button>
+
+        <motion.button
+          onClick={() => navigate('/homework')}
+          className="bg-white rounded-2xl p-4 shadow-lg text-center hover:shadow-xl transition-shadow group"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          whileHover={{ y: -3 }}
+          whileTap={{ scale: 0.97 }}
+        >
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2" style={{ backgroundColor: `${meta.color}15` }}>
+            <Camera size={24} style={{ color: meta.color }} />
+          </div>
+          <h3 className="text-sm font-extrabold text-gray-800">Help</h3>
+          <p className="text-gray-400 text-xs font-semibold mt-0.5">Homework</p>
         </motion.button>
       </div>
 

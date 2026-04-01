@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { User, Trophy, Zap, Target, Award, BookOpen, RotateCcw, Mail, Star } from 'lucide-react';
+import { User, Trophy, Zap, Target, Award, BookOpen, RotateCcw, Mail, Star, Camera } from 'lucide-react';
 import { useProfile } from '../context/ProfileContext';
 import { subjectKeys } from '../lib/subjects';
 import { api } from '../lib/api';
@@ -11,6 +11,7 @@ import StreakBadge from '../components/StreakBadge';
 import LoadingSpinner from '../components/LoadingSpinner';
 import NuriOwl, { getStageImage } from '../components/NuriOwl';
 import MysteryChallenge from '../components/MysteryChallenge';
+import TestPredictionCard from '../components/TestPredictionCard';
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -183,10 +184,27 @@ export default function HomePage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.7 }}
       >
+        <TestPredictionCard profileId={currentProfile._id || currentProfile.id} />
         <h2 className="text-lg font-extrabold text-gray-800 mb-3">
           Tools
         </h2>
         <div className="space-y-3">
+          <motion.button
+            onClick={() => navigate('/homework')}
+            className="w-full bg-gradient-to-r from-blue-500 to-teal-400 rounded-2xl p-4 shadow-lg text-left flex items-center gap-4 cursor-pointer text-white"
+            whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(0,0,0,0.15)' }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          >
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-white/20 shrink-0">
+              <Camera size={24} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold">Homework Helper</p>
+              <p className="text-sm opacity-80 font-semibold">Snap, upload, or type — Nuri helps you solve it!</p>
+            </div>
+          </motion.button>
+
           <motion.button
             onClick={() => setShowChallenge(true)}
             className="w-full bg-gradient-to-r from-purple-500 to-orange-400 rounded-2xl p-4 shadow-lg text-left flex items-center gap-4 cursor-pointer text-white"

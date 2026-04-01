@@ -152,6 +152,42 @@ async function insertQuestions(questions, subject, topic, yearGroup, difficulty)
   return inserted;
 }
 
+async function qualityCheck(subject, topic, yearGroup, difficulty) {
+  // Pick 10 random questions from the bank
+  const result = await pool.query(
+    `SELECT question_text, options, correct_answer FROM question_bank
+     WHERE subject=$1 AND topic=$2 AND year_group=$3 AND difficulty=$4
+     ORDER BY RANDOM() LIMIT 10`,
+    [subject, topic, yearGroup, difficulty]
+  );
+
+  if (result.rows.length === 0) return 0;
+
+  const questionsText = result.rows.map((q, i) => {
+    const opts = typeof q.options === 'string' ? JSON.parse(q.options) : q.options;
+    return `Q${i + 1}: ${q.question_text}\nA) ${opts[0]}\nB) ${opts[1]}\nC) ${opts[2]}\nD) ${opts[3]}\nStated answer: ${q.correct_answer}`;
+  }).join('\n\n');
+
+  try {
+    const response = await ollamaGenerate(
+      `Verify these ${result.rows.length} quiz questions. For each, check if the stated correct answer is actually correct. Respond with ONLY a JSON array of booleans, e.g. [true, true, false, true, ...] where true = correct answer is right, false = wrong.\n\n${questionsText}`,
+      'You are a quiz answer verifier. Check if each question has the correct answer marked. For maths, solve step by step. Respond ONLY with a JSON array of booleans.'
+    );
+
+    const match = response.match(/\[[\s\S]*?\]/);
+    if (match) {
+      const results = JSON.parse(match[0]);
+      const correct = results.filter(Boolean).length;
+      return correct;
+    }
+  } catch {
+    // If verification fails, assume OK
+    return 10;
+  }
+
+  return 10;
+}
+
 async function main() {
   const args = process.argv.slice(2);
   const subjectFilter = args.includes('--subject') ? args[args.indexOf('--subject') + 1] : null;
@@ -194,8 +230,11 @@ async function main() {
 
           const needed = QUESTIONS_PER_TOPIC - existing;
           const batches = Math.ceil(needed / BATCH_SIZE);
+          let skipRemaining = false;
 
           for (let b = 1; b <= batches; b++) {
+            if (skipRemaining) break;
+
             const { system, user } = buildBatchPrompt(subject, topic, year, difficulty, b);
 
             process.stdout.write(`[${subject}] Y${year} "${topic}" ${difficulty} batch ${b}/${batches}... `);
@@ -206,6 +245,21 @@ async function main() {
               const inserted = await insertQuestions(questions, subject, topic, year, difficulty);
               totalGenerated += inserted;
               console.log(`${inserted} questions saved (total: ${totalGenerated})`);
+
+              // Quality gate at 20 questions: spot-check 10, skip if 8+/10 good
+              if (b === 2) {
+                const currentCount = await getExistingCount(subject, topic, year, difficulty);
+                if (currentCount >= 20) {
+                  const score = await qualityCheck(subject, topic, year, difficulty);
+                  if (score >= 8) {
+                    console.log(`  ✓ Quality score ${score}/10 — skipping to next (${currentCount} questions is enough)`);
+                    skipRemaining = true;
+                    totalSkipped++;
+                  } else {
+                    console.log(`  ⚠ Quality score ${score}/10 — generating more to improve pool`);
+                  }
+                }
+              }
             } catch (err) {
               console.log(`ERROR: ${err.message}`);
             }

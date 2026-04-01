@@ -126,18 +126,27 @@ async function generateQuizQuestion(subject, topic, yearGroup, difficulty) {
     difficultyNote = 'Make this the HARDEST possible question. Include multi-step reasoning. This is a Challenge Me question for ambitious students.';
   }
 
-  const systemPrompt = `You are a quiz question generator for Year ${effectiveYear} students studying ${subject}.
+  const ageRange = getAgeRange(effectiveYear);
+  const systemPrompt = `You are a quiz question generator for Year ${effectiveYear} students (age ${ageRange}) studying ${subject}.
 Generate exactly ONE multiple-choice question about "${topic}".
 Difficulty: ${difficulty}
 ${difficultyNote}
 
-CRITICAL: Before finalizing, SOLVE the question yourself step-by-step to verify the correct answer. For maths questions, show your working mentally and double-check the arithmetic. The correctAnswer MUST actually be correct.
+AGE-APPROPRIATE LANGUAGE — THIS IS CRITICAL:
+- The child is ${ageRange} years old. Use ONLY words and concepts a ${ageRange} year old would understand.
+- Year 1-2 (age 5-7): Very simple words. Short sentences. "The plant needs water to grow."
+- Year 3-4 (age 7-9): Simple vocabulary. No scientific jargon. "Plants use sunlight to make food."
+- Year 5-6 (age 9-11): Can handle basic scientific terms. "Plants absorb water through their roots."
+- NEVER use university-level words like "stomata", "transpiration", "turgor pressure", "abscisic acid", "flaccid" etc. for ANY primary school year.
+- Explanations must be equally simple. If a 7 year old can't understand it, rewrite it.
+- Options should be SHORT — max 15 words each.
 
-You MUST respond with ONLY valid JSON in this exact format:
-{"question": "...", "options": ["A) ...", "B) ...", "C) ...", "D) ..."], "correctAnswer": "A", "explanation": "...", "verification": "brief step-by-step solution confirming the answer"}
+VERIFY: Before finalizing, check that the correct answer is actually correct. For maths, solve step by step.
 
-The correctAnswer must be just the letter (A, B, C, or D).
-Make the question age-appropriate for ${getAgeRange(effectiveYear)} year old students.`;
+Respond with ONLY valid JSON:
+{"question": "...", "options": ["A) ...", "B) ...", "C) ...", "D) ..."], "correctAnswer": "A", "explanation": "..."}
+
+The correctAnswer must be just the letter (A, B, C, or D).`;
 
   const response = await getClient().messages.create({
     model: 'claude-haiku-4-5-20251001',

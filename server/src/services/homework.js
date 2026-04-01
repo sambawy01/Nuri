@@ -47,25 +47,46 @@ async function analyzeHomework(base64Data, mediaType) {
           fileBlock,
           {
             type: 'text',
-            text: `Analyze this homework ${isPDF ? 'document' : 'image'}. Extract each individual question.
+            text: `You are analyzing a child's homework ${isPDF ? 'document' : 'photo'}. Extract ONLY the actual homework questions the child needs to solve.
+
+EXTRACT ONLY actual questions. These ARE questions:
+- "What is 5 + 3?"
+- "Fill in the blank: The cat sat on the ___"
+- "Circle the correct answer"
+- "Write a sentence using the word 'because'"
+- "How many sides does a triangle have?"
+- "Put these numbers in order"
+- "Match the words to their meanings"
+- "Read the passage and answer questions 1-5"
+- Any numbered exercise or problem to solve
+
+IGNORE everything that is NOT a question:
+- Student name, date, class fields ("Name: ___", "Date: ___")
+- Parent/teacher signature lines ("Parent signature: ___")
+- Instructions to parents ("Dear parents, please...")
+- Page numbers, headers, footers, school logos
+- "Hand in by...", "Due date:", deadlines
+- Teacher notes, marking schemes, grades
+- "Homework Sheet", "Worksheet", titles
+- "Remember to show your working" (this is an instruction, not a question)
 
 Respond with ONLY valid JSON:
 {
-  "subject": "maths",
-  "topic": "best guess topic name",
+  "subject": "maths or science or english or history or arabic or religion",
+  "topic": "specific topic name",
   "questions": [
-    {"number": 1, "text": "full question text", "type": "multiple_choice|short_answer|word_problem|fill_blank"},
+    {"number": 1, "text": "the exact question text", "type": "short_answer"},
     ...
   ]
 }
 
 Rules:
-- Extract EVERY question you can see
+- ONLY include things the child needs to ANSWER or SOLVE
 - For maths: include all numbers, operators, and units exactly as shown
-- For English: include the full sentence or passage reference
-- If you can't read something clearly, note it as [illegible]
-- Detect subject automatically from content
-- Number questions sequentially even if the original doesn't number them`,
+- For English: include the full sentence or passage
+- If you can't read something clearly, skip it
+- If there are NO questions found, return an empty questions array
+- Detect subject from the actual content`,
           },
         ],
       },

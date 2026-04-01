@@ -15,15 +15,26 @@ export default function HomeworkPage() {
   const navigate = useNavigate();
   const { currentProfile, updateXP } = useProfile();
 
+  // Restore homework session from sessionStorage
+  const hwSessionKey = 'nuri_homework_session';
+  const savedHW = useRef(null);
+  if (!savedHW.current) {
+    try {
+      const raw = sessionStorage.getItem(hwSessionKey);
+      if (raw) savedHW.current = JSON.parse(raw);
+    } catch { savedHW.current = null; }
+  }
+  const restored = savedHW.current;
+
   // Phase: input | analyzing | questions | chat | verify | summary
-  const [phase, setPhase] = useState('input');
-  const [inputTab, setInputTab] = useState('upload'); // camera | upload | type
+  const [phase, setPhase] = useState(restored?.phase || 'input');
+  const [inputTab, setInputTab] = useState('upload');
   const [typedText, setTypedText] = useState('');
-  const [sessionId, setSessionId] = useState(null);
-  const [questions, setQuestions] = useState([]);
-  const [currentQ, setCurrentQ] = useState(0);
-  const [subject, setSubject] = useState('');
-  const [messages, setMessages] = useState([]);
+  const [sessionId, setSessionId] = useState(restored?.sessionId || null);
+  const [questions, setQuestions] = useState(restored?.questions || []);
+  const [currentQ, setCurrentQ] = useState(restored?.currentQ || 0);
+  const [subject, setSubject] = useState(restored?.subject || '');
+  const [messages, setMessages] = useState(restored?.messages || []);
   const [chatInput, setChatInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [questionComplete, setQuestionComplete] = useState(false);
@@ -37,6 +48,17 @@ export default function HomeworkPage() {
   useEffect(() => {
     if (!currentProfile) navigate('/');
   }, [currentProfile]);
+
+  // Persist homework session for back-button recovery
+  useEffect(() => {
+    if (phase === 'summary' || phase === 'input') {
+      sessionStorage.removeItem(hwSessionKey);
+    } else if (sessionId) {
+      sessionStorage.setItem(hwSessionKey, JSON.stringify({
+        phase, sessionId, questions, currentQ, subject, messages,
+      }));
+    }
+  }, [phase, sessionId, questions, currentQ, subject, messages]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

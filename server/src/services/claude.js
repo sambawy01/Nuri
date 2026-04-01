@@ -74,6 +74,13 @@ INTERACTIVE TEACHING MODE:
 - If stuck after 2 attempts: gently give the answer with clear explanation, encourage, move on
 - Start each topic with a fun HOOK question
 - Use the child's name frequently`;
+
+    // Cross-subject connections
+    const { getConnections } = require('./cross-subject');
+    const crossConnections = getConnections(subject, topics?.[0]?.name || '');
+    if (crossConnections.length > 0) {
+      prompt += `\n\nCROSS-SUBJECT FUN FACTS — mention ONE of these naturally during the conversation (not all at once):\n${crossConnections.map(c => `- ${c}`).join('\n')}`;
+    }
   }
 
   if (mode === 'quiz') {

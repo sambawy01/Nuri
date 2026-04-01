@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, Flame, Zap, Trophy, BookOpen, TrendingUp, AlertTriangle,
   Award, BarChart2, ClipboardList, Target, CheckCircle2, XCircle, Lightbulb,
+  MessageSquare, X, Plus,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { subjects } from '../lib/subjects';
@@ -317,6 +318,155 @@ function RecentBadges({ badges }) {
   );
 }
 
+// ─── NotesForNuri ────────────────────────────────────────────────────────────
+
+function NotesForNuri({ profileId }) {
+  const [notes, setNotes] = useState([]);
+  const [noteText, setNoteText] = useState('');
+  const [priority, setPriority] = useState('normal');
+  const [saving, setSaving] = useState(false);
+  const [loadError, setLoadError] = useState('');
+
+  useEffect(() => {
+    fetchNotes();
+  }, [profileId]);
+
+  async function fetchNotes() {
+    try {
+      const res = await api(`/parent/notes/${profileId}`);
+      setNotes(res.data || []);
+    } catch {
+      setLoadError('Could not load notes.');
+    }
+  }
+
+  async function handleAdd() {
+    if (!noteText.trim()) return;
+    setSaving(true);
+    try {
+      const res = await api('/parent/notes', {
+        method: 'POST',
+        body: { profileId, note: noteText.trim(), priority },
+      });
+      setNotes(prev => [res.data, ...prev]);
+      setNoteText('');
+      setPriority('normal');
+    } catch {
+      // silently fail — user can retry
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete(noteId) {
+    try {
+      await api(`/parent/notes/${noteId}`, { method: 'DELETE' });
+      setNotes(prev => prev.filter(n => n.id !== noteId));
+    } catch {
+      // silently fail
+    }
+  }
+
+  const priorityConfig = {
+    normal:  { label: 'Normal',    bg: 'bg-gray-100',    text: 'text-gray-600',   active: 'bg-gray-500 text-white' },
+    high:    { label: 'Important', bg: 'bg-orange-50',   text: 'text-orange-600', active: 'bg-orange-500 text-white' },
+    urgent:  { label: 'Urgent',    bg: 'bg-red-50',      text: 'text-red-600',    active: 'bg-red-500 text-white' },
+  };
+
+  function priorityBadge(p) {
+    const cfg = priorityConfig[p] || priorityConfig.normal;
+    return (
+      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${cfg.bg} ${cfg.text}`}>
+        {cfg.label}
+      </span>
+    );
+  }
+
+  return (
+    <Card delay={0.68}>
+      <SectionTitle icon={MessageSquare} title="Notes for Nuri" color="text-teal-500" />
+
+      {/* Input area */}
+      <div className="space-y-3 mb-4">
+        <textarea
+          className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-teal-300 focus:border-transparent"
+          rows={2}
+          placeholder="Tell Nuri what to focus on... e.g. 'Focus on fractions this week, he has a test'"
+          value={noteText}
+          onChange={e => setNoteText(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleAdd(); }}
+        />
+
+        {/* Priority selector */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold text-gray-500 shrink-0">Priority:</span>
+          {Object.entries(priorityConfig).map(([key, cfg]) => (
+            <button
+              key={key}
+              onClick={() => setPriority(key)}
+              className={`text-xs font-bold px-3 py-1 rounded-full transition-colors ${
+                priority === key ? cfg.active : `${cfg.bg} ${cfg.text}`
+              }`}
+            >
+              {cfg.label}
+            </button>
+          ))}
+          <button
+            onClick={handleAdd}
+            disabled={saving || !noteText.trim()}
+            className="ml-auto flex items-center gap-1.5 bg-teal-500 hover:bg-teal-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold px-4 py-1.5 rounded-full transition-colors"
+          >
+            <Plus size={13} />
+            Add Note
+          </button>
+        </div>
+      </div>
+
+      {/* Notes list */}
+      {loadError && (
+        <p className="text-xs text-red-400 text-center py-2">{loadError}</p>
+      )}
+      {notes.length === 0 && !loadError && (
+        <p className="text-sm text-gray-400 text-center py-3">
+          No notes yet — tell Nuri what this child needs!
+        </p>
+      )}
+      <AnimatePresence>
+        {notes.map((note, i) => {
+          const date = note.created_at
+            ? new Date(note.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+            : '';
+          return (
+            <motion.div
+              key={note.id}
+              className="flex items-start gap-3 py-2.5 border-b border-gray-50 last:border-0"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 10 }}
+              transition={{ delay: i * 0.04 }}
+            >
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-gray-700 font-medium leading-snug">{note.note}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  {priorityBadge(note.priority)}
+                  {date && <span className="text-xs text-gray-400">{date}</span>}
+                </div>
+              </div>
+              <button
+                onClick={() => handleDelete(note.id)}
+                className="shrink-0 w-6 h-6 rounded-full bg-gray-100 hover:bg-red-100 text-gray-400 hover:text-red-500 flex items-center justify-center transition-colors mt-0.5"
+                aria-label="Remove note"
+              >
+                <X size={12} />
+              </button>
+            </motion.div>
+          );
+        })}
+      </AnimatePresence>
+    </Card>
+  );
+}
+
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
 export default function ParentDashboardPage() {
@@ -529,6 +679,7 @@ export default function ParentDashboardPage() {
         <SessionReports reports={reports} />
         <TestPredictions predictions={predictions} />
         <MistakePatterns mistakePatterns={mistakePatterns} />
+        <NotesForNuri profileId={profileId} />
         <RecentBadges badges={badges} />
       </div>
     </div>

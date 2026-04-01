@@ -67,4 +67,38 @@ router.get('/dashboard/:profileId', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// POST /api/parent/notes — add a parent note
+router.post('/notes', async (req, res, next) => {
+  try {
+    const { profileId, note, priority } = req.body;
+    if (!profileId || !note) {
+      return res.status(400).json({ success: false, error: 'profileId and note required' });
+    }
+    const result = await pool.query(
+      'INSERT INTO parent_notes (profile_id, note, priority) VALUES ($1, $2, $3) RETURNING *',
+      [profileId, note, priority || 'normal']
+    );
+    res.json({ success: true, data: result.rows[0] });
+  } catch (err) { next(err); }
+});
+
+// GET /api/parent/notes/:profileId — get active parent notes
+router.get('/notes/:profileId', async (req, res, next) => {
+  try {
+    const result = await pool.query(
+      'SELECT * FROM parent_notes WHERE profile_id = $1 AND active = TRUE ORDER BY priority DESC, created_at DESC',
+      [req.params.profileId]
+    );
+    res.json({ success: true, data: result.rows });
+  } catch (err) { next(err); }
+});
+
+// DELETE /api/parent/notes/:noteId — deactivate a note
+router.delete('/notes/:noteId', async (req, res, next) => {
+  try {
+    await pool.query('UPDATE parent_notes SET active = FALSE WHERE id = $1', [req.params.noteId]);
+    res.json({ success: true });
+  } catch (err) { next(err); }
+});
+
 module.exports = router;

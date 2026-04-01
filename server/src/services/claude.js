@@ -152,7 +152,40 @@ Make the question age-appropriate for ${getAgeRange(effectiveYear)} year old stu
     throw new Error('Failed to parse quiz question from Claude response');
   }
 
-  return JSON.parse(jsonMatch[0]);
+  const parsed = JSON.parse(jsonMatch[0]);
+  return shuffleOptions(parsed);
+}
+
+/**
+ * Shuffle quiz options so the correct answer isn't always A
+ */
+function shuffleOptions(question) {
+  const labels = ['A', 'B', 'C', 'D'];
+  const correctIdx = labels.indexOf(question.correctAnswer.toUpperCase());
+  if (correctIdx === -1) return question;
+
+  // Strip existing labels from options
+  const cleanOptions = question.options.map(opt =>
+    opt.replace(/^[A-D]\)\s*/, '')
+  );
+
+  // Fisher-Yates shuffle with index tracking
+  const indices = [0, 1, 2, 3];
+  for (let i = indices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indices[i], indices[j]] = [indices[j], indices[i]];
+  }
+
+  const newCorrectIdx = indices.indexOf(correctIdx);
+  const shuffledOptions = indices.map((origIdx, newIdx) =>
+    `${labels[newIdx]}) ${cleanOptions[origIdx]}`
+  );
+
+  return {
+    ...question,
+    options: shuffledOptions,
+    correctAnswer: labels[newCorrectIdx],
+  };
 }
 
 function buildExplainBackPrompt(profile, subject, topic) {

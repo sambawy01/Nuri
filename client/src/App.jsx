@@ -13,6 +13,7 @@ import ReviewPage from './pages/ReviewPage';
 import ExplainBackPage from './pages/ExplainBackPage';
 import StickerBookPage from './pages/StickerBookPage';
 import HomeworkPage from './pages/HomeworkPage';
+import ParentDashboardPage from './pages/ParentDashboardPage';
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
           <Route path="/explain/:subject" element={<ExplainBackPage />} />
           <Route path="/stickers" element={<StickerBookPage />} />
           <Route path="/homework" element={<HomeworkPage />} />
+          <Route path="/parent/:profileId" element={<ParentDashboardPage />} />
         </Routes>
       </div>
     </ProfileProvider>

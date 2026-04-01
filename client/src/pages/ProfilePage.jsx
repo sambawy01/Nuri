@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, LogOut, Users, Trophy, Zap, Flame, HelpCircle, Star, Award } from 'lucide-react';
+import { ArrowLeft, LogOut, Users, Trophy, Zap, Flame, HelpCircle, Star, Award, ShieldCheck } from 'lucide-react';
 import { useProfile } from '../context/ProfileContext';
 import { subjects, subjectKeys } from '../lib/subjects';
 import { api } from '../lib/api';
@@ -212,6 +212,15 @@ export default function ProfilePage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
       >
+        <motion.button
+          onClick={() => navigate(`/parent/${currentProfile._id || currentProfile.id}`)}
+          className="w-full bg-gradient-to-r from-orange-400 to-purple-500 text-white font-bold py-3 rounded-2xl flex items-center justify-center gap-2 shadow-md"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <ShieldCheck size={18} />
+          Parent Dashboard
+        </motion.button>
         <motion.button
           onClick={() => navigate('/stickers')}
           className="w-full bg-yellow-50 border-2 border-yellow-200 text-yellow-700 font-bold py-3 rounded-2xl flex items-center justify-center gap-2"

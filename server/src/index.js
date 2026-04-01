@@ -19,6 +19,10 @@ const badgesRouter = require('./routes/badges');
 const challengeRouter = require('./routes/challenge');
 const homeworkRouter = require('./routes/homework');
 const reportsRouter = require('./routes/reports');
+const parentRouter = require('./routes/parent');
+const testPlanRouter = require('./routes/test-plan');
+const duelsRouter = require('./routes/duels');
+const treehouseRouter = require('./routes/treehouse');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -68,6 +72,10 @@ app.use('/api/badges', badgesRouter);
 app.use('/api/challenge', challengeRouter);
 app.use('/api/homework', homeworkRouter);
 app.use('/api/reports', reportsRouter);
+app.use('/api/parent', parentRouter);
+app.use("/api/test-plan", testPlanRouter);
+app.use("/api/duels", duelsRouter);
+app.use('/api/treehouse', treehouseRouter);
 
 // 404 handler
 app.use((req, res) => {

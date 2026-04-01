@@ -14,6 +14,8 @@
  */
 
 const pool = require('../db/connection');
+const { getObjectiveSummary } = require('./objective-mastery');
+const { checkPrerequisites } = require('./prerequisites');
 
 // Cache profiles for 5 minutes to avoid hammering the DB on every message
 const cache = new Map();
@@ -39,6 +41,7 @@ async function buildProfile(profileId) {
     confidencePattern,
     mistakePatterns,
     subjectActivity,
+    practicedSubjects,
   ] = await Promise.all([
     // Last 5 session reports
     pool.query(
@@ -98,6 +101,12 @@ async function buildProfile(profileId) {
        GROUP BY subject`,
       [profileId]
     ).then(r => r.rows).catch(() => []),
+
+    // Objective mastery summary (add for each recent subject)
+    pool.query(
+      `SELECT DISTINCT subject FROM objective_mastery WHERE profile_id = $1 ORDER BY subject`,
+      [profileId]
+    ).then(r => r.rows.map(row => row.subject)).catch(() => []),
   ]);
 
   // Build the context string
@@ -182,6 +191,16 @@ async function buildProfile(profileId) {
       .map(s => s.subject);
     if (neglected.length > 0) {
       context += `\nNEGLECTED SUBJECTS: ${neglected.join(', ')} haven't been practiced in over a week. Gently suggest these when appropriate.`;
+    }
+  }
+
+  // Objective-level mastery
+  if (practicedSubjects && practicedSubjects.length > 0) {
+    for (const subj of practicedSubjects.slice(0, 3)) {
+      const objSummary = await getObjectiveSummary(profileId, subj);
+      if (objSummary.weakObjectives.length > 0) {
+        context += `\nWEAK OBJECTIVES in ${subj}: ${objSummary.weakObjectives.slice(0, 3).join('; ')}. Focus on these.`;
+      }
     }
   }
 

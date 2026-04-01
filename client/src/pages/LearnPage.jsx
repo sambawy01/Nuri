@@ -183,16 +183,30 @@ export default function LearnPage() {
     setOwlState('talking');
     try {
       let topic = selectedTopic;
-      if (!topic) {
-        try {
-          const topics = await api(`/curriculum/${subject}/${currentProfile.year_group}`);
-          if (topics && topics.length > 0) topic = topics[0].name;
-        } catch {}
-      }
+      let objectiveHint = '';
+
+      // Fetch curriculum topics with mastery data to find what to teach next
+      const pid = currentProfile._id || currentProfile.id;
+      try {
+        const topics = await api(`/curriculum/${subject}/${currentProfile.year_group}?profileId=${pid}`);
+        if (topics && topics.length > 0) {
+          if (!topic) {
+            // Find the first topic that isn't fully mastered (stars < 5)
+            const nextTopic = topics.find(t => t.stars < 5) || topics[0];
+            topic = nextTopic.name;
+          }
+
+          // Find the current topic's objectives to guide what to teach
+          const currentTopic = topics.find(t => t.name === topic);
+          if (currentTopic?.objectives?.length > 0) {
+            objectiveHint = `\n\nThis topic has these objectives: ${currentTopic.objectives.join('; ')}. Teach the NEXT one the child hasn't mastered yet — don't restart from the beginning.`;
+          }
+        }
+      } catch {}
 
       const message = topic
-        ? `Teach me about "${topic}" in ${meta?.name || subject}. Start teaching right away with a fun hook question — do NOT ask me what I want to learn.`
-        : `Start teaching me ${meta?.name || subject}. Pick the first topic and begin teaching right away with a fun hook question — do NOT ask me what I want to learn.`;
+        ? `Teach me about "${topic}" in ${meta?.name || subject}. Start teaching right away with a fun hook question — do NOT ask me what I want to learn.${objectiveHint}`
+        : `Start teaching me ${meta?.name || subject}. Pick a topic I haven't mastered yet and begin teaching right away with a fun hook question — do NOT ask me what I want to learn.`;
 
       await streamChat(message, true);
     } catch (err) {

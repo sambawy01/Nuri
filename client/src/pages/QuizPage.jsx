@@ -76,12 +76,16 @@ export default function QuizPage() {
     initialLoadDone.current = true;
 
     if (!activeTopic) {
-      // Fetch a topic first, then trigger question load via activeTopic change
-      api(`/curriculum/${subject}/${currentProfile.year_group}`)
+      // Fetch topics with mastery data, pick the weakest unmastered one
+      const pid = currentProfile._id || currentProfile.id;
+      api(`/curriculum/${subject}/${currentProfile.year_group}?profileId=${pid}`)
         .then(topics => {
           if (topics?.length > 0) {
-            const randomTopic = topics[Math.floor(Math.random() * topics.length)].name;
-            setActiveTopic(randomTopic);
+            // Pick weakest topic (lowest stars, has been attempted) or first unattempted
+            const unattempted = topics.find(t => t.attempts === 0);
+            const weakest = topics.filter(t => t.stars < 5 && t.attempts > 0).sort((a, b) => a.stars - b.stars)[0];
+            const nextTopic = weakest || unattempted || topics[Math.floor(Math.random() * topics.length)];
+            setActiveTopic(nextTopic.name);
           }
         })
         .catch(() => {});

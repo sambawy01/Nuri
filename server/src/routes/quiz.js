@@ -56,9 +56,12 @@ router.post('/question', async (req, res, next) => {
 
     if (bankResult.rows.length > 0) {
       const q = bankResult.rows[0];
+      // Options in bank are stored without A)/B) prefixes — add them
+      const labels = ['A', 'B', 'C', 'D'];
+      const opts = typeof q.options === 'string' ? JSON.parse(q.options) : q.options;
       question = {
         question: q.question_text,
-        options: q.options,
+        options: opts.map((opt, i) => `${labels[i]}) ${opt}`),
         correctAnswer: q.correct_answer,
         explanation: q.explanation,
       };
@@ -88,6 +91,7 @@ router.post('/question', async (req, res, next) => {
         questionId: historyResult.rows[0].id,
         question: question.question,
         options: question.options,
+        correctAnswer: question.correctAnswer,
         explanation: question.explanation,
         difficulty: questionDifficulty,
       },

@@ -42,7 +42,14 @@ RULES:
 - Keep responses concise (max 3-4 short paragraphs)
 - Use real-world examples kids relate to
 - For Arabic content, show terms as: Arabic — transliteration — English meaning
-- For Religion content, reference the Coptic Orthodox tradition`;
+- For Religion content, reference the Coptic Orthodox tradition
+
+CRITICAL — NEVER STOP ENCOURAGING:
+- NEVER say "that's enough for today", "take a break", "you've done great, time to rest" or anything that suggests stopping
+- When a child completes an objective, ALWAYS suggest the next objective: "Amazing work on [topic]! Ready to tackle [next topic]?"
+- If the child seems tired or bored, suggest switching subjects: "Want to try something different? How about [other subject]?"
+- Always end responses with forward momentum — a question, a challenge, or a next step
+- The goal is to keep the child learning as long as they want to`;
 
   if (mode === 'learn') {
     prompt += `

@@ -257,3 +257,23 @@ CREATE TABLE IF NOT EXISTS homework_topics_tracker (
 );
 CREATE INDEX IF NOT EXISTS idx_homework_tracker_profile ON homework_topics_tracker(profile_id, subject);
 CREATE INDEX IF NOT EXISTS idx_homework_tracker_recent ON homework_topics_tracker(profile_id, homework_date);
+
+CREATE TABLE IF NOT EXISTS session_reports (
+  id SERIAL PRIMARY KEY,
+  profile_id INT REFERENCES profiles(id) ON DELETE CASCADE,
+  session_type VARCHAR(20) NOT NULL CHECK (session_type IN ('learn', 'quiz', 'homework', 'explain', 'review')),
+  session_id INT,
+  subject VARCHAR(50),
+  topic VARCHAR(100),
+  duration_seconds INT,
+  questions_attempted INT DEFAULT 0,
+  questions_correct INT DEFAULT 0,
+  xp_earned INT DEFAULT 0,
+  strengths TEXT,
+  struggles TEXT,
+  recommendations TEXT,
+  error_patterns JSONB DEFAULT '[]',
+  created_at TIMESTAMP DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_session_reports_profile ON session_reports(profile_id);
+CREATE INDEX IF NOT EXISTS idx_session_reports_recent ON session_reports(profile_id, created_at DESC);

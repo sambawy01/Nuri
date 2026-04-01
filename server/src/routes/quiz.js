@@ -5,6 +5,7 @@ const { generateQuizQuestion } = require('../services/ai-provider');
 const { awardXP, awardQuizXP } = require('../services/xp');
 const { getTopics } = require('../services/curriculum');
 const { evaluateBadges } = require('../services/badges');
+const { generateSessionReport } = require('../services/session-reports');
 
 // POST /api/quiz/question — generate quiz question
 router.post('/question', async (req, res, next) => {
@@ -226,6 +227,38 @@ router.post('/answer', async (req, res, next) => {
         totalXP: xpResult.totalXP,
         level: xpResult.level,
         newBadges,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/quiz/complete — finalize quiz session and generate report
+router.post('/complete', async (req, res, next) => {
+  try {
+    const { profileId, subject, topic, score, total, sessionXP, difficulty } = req.body;
+
+    if (!profileId || !subject) {
+      return res.status(400).json({ success: false, error: 'profileId and subject required' });
+    }
+
+    // Generate session report
+    const report = await generateSessionReport({
+      profileId,
+      sessionType: 'quiz',
+      subject,
+      topic: topic || subject,
+      questionsAttempted: total || 10,
+      questionsCorrect: score || 0,
+      xpEarned: sessionXP || 0,
+    });
+
+    res.json({
+      success: true,
+      data: {
+        report,
+        nextSuggestion: report.recommendations,
       },
     });
   } catch (err) {

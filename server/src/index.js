@@ -18,6 +18,7 @@ const learningStyleRouter = require('./routes/learning-style');
 const badgesRouter = require('./routes/badges');
 const challengeRouter = require('./routes/challenge');
 const homeworkRouter = require('./routes/homework');
+const reportsRouter = require('./routes/reports');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -66,6 +67,7 @@ app.use('/api/learning-style', learningStyleRouter);
 app.use('/api/badges', badgesRouter);
 app.use('/api/challenge', challengeRouter);
 app.use('/api/homework', homeworkRouter);
+app.use('/api/reports', reportsRouter);
 
 // 404 handler
 app.use((req, res) => {

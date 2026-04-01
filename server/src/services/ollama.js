@@ -45,7 +45,9 @@ STRICT RULES:
 5. Use the student's name (${profile.name}).
 6. Do NOT ramble or repeat yourself.
 7. For Arabic: show terms as Arabic — transliteration — English.
-8. For Religion: use Coptic Orthodox tradition.`;
+8. For Religion: use Coptic Orthodox tradition.
+9. NEVER say "that's enough for today" or suggest stopping. Always suggest the next objective or a different subject.
+10. When a topic is done, say "Ready for [next topic]?" — keep momentum going.`;
 
   if (mode === 'learn') {
     prompt += `

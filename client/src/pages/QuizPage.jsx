@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Flame, Trophy, RotateCcw, Home } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Flame, Trophy, RotateCcw, Home, Lightbulb } from 'lucide-react';
 import { api } from '../lib/api';
 import { useProfile } from '../context/ProfileContext';
 import { subjects } from '../lib/subjects';
@@ -194,6 +194,21 @@ export default function QuizPage() {
     submitAnswer(level);
   }
 
+  const [nextSuggestion, setNextSuggestion] = useState(null);
+
+  async function completeQuizSession() {
+    try {
+      const pid = currentProfile._id || currentProfile.id;
+      const data = await api('/quiz/complete', {
+        method: 'POST',
+        body: { profileId: pid, subject, topic: activeTopic, score, total: TOTAL_QUESTIONS, sessionXP, difficulty },
+      });
+      if (data.nextSuggestion) setNextSuggestion(data.nextSuggestion);
+    } catch {
+      // Non-critical
+    }
+  }
+
   function nextQuestion() {
     // Submit without confidence if not already submitted
     if (pendingAnswerRef.current) {
@@ -201,6 +216,7 @@ export default function QuizPage() {
     }
     if (questionNum >= TOTAL_QUESTIONS) {
       setShowSummary(true);
+      completeQuizSession();
       return;
     }
     setQuestionNum((n) => n + 1);
@@ -294,25 +310,42 @@ export default function QuizPage() {
               </div>
             )}
 
-            <div className="flex gap-3">
+            {nextSuggestion && (
+              <div className="bg-green-50 rounded-2xl p-4 mb-4">
+                <p className="text-sm text-green-800 font-semibold">{nextSuggestion}</p>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-2">
               <motion.button
-                onClick={restartQuiz}
-                className="flex-1 bg-white border-2 border-gray-200 font-bold py-3 rounded-2xl flex items-center justify-center gap-2 text-gray-700"
+                onClick={() => navigate(`/subject/${subject}`)}
+                className="w-full gradient-bg text-white font-bold py-3 rounded-2xl flex items-center justify-center gap-2 shadow-lg"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <RotateCcw size={18} />
-                Try Again
+                <ArrowRight size={18} />
+                Next Topic
               </motion.button>
-              <motion.button
-                onClick={() => navigate('/home')}
-                className="flex-1 gradient-bg text-white font-bold py-3 rounded-2xl flex items-center justify-center gap-2 shadow-lg"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Home size={18} />
-                Home
-              </motion.button>
+              <div className="flex gap-2">
+                <motion.button
+                  onClick={restartQuiz}
+                  className="flex-1 bg-white border-2 border-gray-200 font-bold py-3 rounded-2xl flex items-center justify-center gap-2 text-gray-700"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <RotateCcw size={18} />
+                  Try Again
+                </motion.button>
+                <motion.button
+                  onClick={() => navigate(`/learn/${subject}`, { state: { topic: activeTopic } })}
+                  className="flex-1 bg-white border-2 border-gray-200 font-bold py-3 rounded-2xl flex items-center justify-center gap-2 text-gray-700"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Lightbulb size={18} />
+                  Learn More
+                </motion.button>
+              </div>
             </div>
           </motion.div>
         </motion.div>

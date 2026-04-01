@@ -476,14 +476,43 @@ export default function HomeworkPage() {
             <div ref={messagesEndRef} />
           </div>
 
-          {questionComplete && !verifyResult && (
+          {questionComplete && !verifyResult && (() => {
+            const doneCount = questions.filter(q => q.done).length + 1; // +1 for current
+            const isVerifyCheckpoint = doneCount % 4 === 0 || doneCount === questions.length; // every 4th or last question
+
+            if (!isVerifyCheckpoint) {
+              // Auto-advance without verification
+              return (
+                <div className="px-4 pb-2">
+                  <motion.div
+                    className="bg-green-50 border border-green-200 rounded-2xl p-4 text-center"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    <p className="font-bold text-green-800 mb-2">Nice work! Let's keep going!</p>
+                    <motion.button
+                      onClick={() => {
+                        setQuestions(prev => prev.map((q, i) => i === currentQ ? { ...q, done: true, correct: true } : q));
+                        nextQuestion();
+                      }}
+                      className="w-full py-2.5 rounded-xl gradient-bg text-white font-bold text-sm flex items-center justify-center gap-2 shadow-md"
+                      whileTap={{ scale: 0.97 }}
+                    >
+                      Next Question!
+                    </motion.button>
+                  </motion.div>
+                </div>
+              );
+            }
+
+            return (
             <div className="px-4 pb-2">
               <motion.div
                 className="bg-green-50 border border-green-200 rounded-2xl p-4 text-center"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
               >
-                <p className="font-bold text-green-800 mb-2">Now write your answer on paper and show me!</p>
+                <p className="font-bold text-green-800 mb-2">Great progress! Now write your last {Math.min(4, doneCount)} answers on paper and show me!</p>
                 <div className="flex gap-2">
                   <motion.button
                     onClick={() => setPhase('verify')}
@@ -494,7 +523,6 @@ export default function HomeworkPage() {
                   </motion.button>
                   <motion.button
                     onClick={() => {
-                      // Skip verification, mark as done
                       setQuestions(prev => prev.map((q, i) => i === currentQ ? { ...q, done: true, correct: true } : q));
                       nextQuestion();
                     }}
@@ -506,7 +534,8 @@ export default function HomeworkPage() {
                 </div>
               </motion.div>
             </div>
-          )}
+            );
+          })()}
 
           {verifyResult && (
             <div className="px-4 pb-2">

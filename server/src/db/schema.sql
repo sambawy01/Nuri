@@ -196,3 +196,20 @@ CREATE TABLE IF NOT EXISTS daily_challenge_attempts (
 );
 
 CREATE INDEX IF NOT EXISTS idx_daily_attempts_profile ON daily_challenge_attempts(profile_id);
+
+CREATE TABLE IF NOT EXISTS question_bank (
+  id SERIAL PRIMARY KEY,
+  subject VARCHAR(50) NOT NULL,
+  topic VARCHAR(100) NOT NULL,
+  year_group INT NOT NULL,
+  difficulty VARCHAR(20) NOT NULL DEFAULT 'medium',
+  question_text TEXT NOT NULL,
+  options JSONB NOT NULL,
+  correct_answer VARCHAR(1) NOT NULL,
+  explanation TEXT,
+  times_served INT DEFAULT 0,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_qbank_lookup ON question_bank(subject, topic, year_group, difficulty);
+CREATE INDEX IF NOT EXISTS idx_qbank_served ON question_bank(subject, topic, year_group, difficulty, times_served);

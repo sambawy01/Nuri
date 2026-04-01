@@ -42,13 +42,36 @@ router.post('/question', async (req, res, next) => {
       });
     }
 
-    // Generate the question via Claude
-    const question = await generateQuizQuestion(
-      subject,
-      topic,
-      profile.year_group,
-      questionDifficulty
+    // Try question bank first (instant), fall back to live AI
+    let question;
+    const bankResult = await pool.query(
+      `SELECT * FROM question_bank
+       WHERE subject = $1 AND year_group = $2 AND difficulty = $3
+         AND (topic = $4 OR $4 IS NULL)
+       ORDER BY times_served ASC, RANDOM()
+       LIMIT 1`,
+      [subject, profile.year_group, questionDifficulty, topic]
     );
+
+    if (bankResult.rows.length > 0) {
+      const q = bankResult.rows[0];
+      question = {
+        question: q.question_text,
+        options: q.options,
+        correctAnswer: q.correct_answer,
+        explanation: q.explanation,
+      };
+      // Increment times_served
+      await pool.query('UPDATE question_bank SET times_served = times_served + 1 WHERE id = $1', [q.id]);
+    } else {
+      // Fall back to live AI generation
+      question = await generateQuizQuestion(
+        subject,
+        topic,
+        profile.year_group,
+        questionDifficulty
+      );
+    }
 
     // Store the question in quiz_history
     const historyResult = await pool.query(
@@ -64,6 +87,7 @@ router.post('/question', async (req, res, next) => {
         questionId: historyResult.rows[0].id,
         question: question.question,
         options: question.options,
+        explanation: question.explanation,
         difficulty: questionDifficulty,
       },
     });

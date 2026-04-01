@@ -52,39 +52,54 @@ export default function HomeworkPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // For PDFs, read directly
+    // For PDFs, use typed input fallback (Claude Vision doesn't support PDF in image block)
     if (file.type === 'application/pdf') {
-      const reader = new FileReader();
-      reader.onload = async () => {
-        const base64 = reader.result.split(',')[1];
-        await analyzeInput(base64, 'application/pdf', 'upload_pdf');
-      };
-      reader.readAsDataURL(file);
+      setAnalyzeError("PDF upload coming soon! For now, please take a photo of the page or type the questions.");
       return;
     }
 
     // For images, compress to max 1MB to stay within Vercel limits
-    const compressed = await compressImage(file, 1200, 0.7);
-    await analyzeInput(compressed, 'image/jpeg', 'upload_image');
+    try {
+      const compressed = await compressImage(file, 1200, 0.7);
+      await analyzeInput(compressed, 'image/jpeg', 'upload_image');
+    } catch (err) {
+      setAnalyzeError("Couldn't process this image. Try a different photo or use the Type tab.");
+      setPhase('input');
+    }
   }
 
   function compressImage(file, maxWidth, quality) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const img = new Image();
+      const url = URL.createObjectURL(file);
       img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let { width, height } = img;
-        if (width > maxWidth) {
-          height = Math.round((height * maxWidth) / width);
-          width = maxWidth;
+        try {
+          const canvas = document.createElement('canvas');
+          let { width, height } = img;
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+          canvas.width = width;
+          canvas.height = height;
+          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL('image/jpeg', quality);
+          URL.revokeObjectURL(url);
+          resolve(dataUrl.split(',')[1]);
+        } catch (err) {
+          URL.revokeObjectURL(url);
+          reject(err);
         }
-        canvas.width = width;
-        canvas.height = height;
-        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-        const dataUrl = canvas.toDataURL('image/jpeg', quality);
-        resolve(dataUrl.split(',')[1]);
       };
-      img.src = URL.createObjectURL(file);
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        // Fallback: read file directly without compression
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = () => reject(new Error('Could not read image'));
+        reader.readAsDataURL(file);
+      };
+      img.src = url;
     });
   }
 

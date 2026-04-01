@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { User, Trophy, Zap, Target, Award, BookOpen, RotateCcw, Mail, Star, Camera } from 'lucide-react';
+import { User, Trophy, Zap, Target, Award, BookOpen, RotateCcw, Mail, Star, Camera, Swords } from 'lucide-react';
 import { useProfile } from '../context/ProfileContext';
 import { subjectKeys } from '../lib/subjects';
 import { api } from '../lib/api';
@@ -205,6 +205,23 @@ export default function HomePage() {
               <p className="font-bold">Homework Helper</p>
               <p className="text-sm opacity-80 font-semibold">Snap, upload, or type — Nuri helps you solve it!</p>
             </div>
+          </motion.button>
+
+          <motion.button
+            onClick={() => navigate('/duels')}
+            className="w-full bg-gradient-to-r from-orange-500 to-pink-500 rounded-2xl p-4 shadow-lg text-left flex items-center gap-4 cursor-pointer text-white"
+            whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(0,0,0,0.15)' }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          >
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-white/20 shrink-0">
+              <Swords size={24} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold">Study Duels</p>
+              <p className="text-sm opacity-80 font-semibold">Challenge a friend to a quiz battle!</p>
+            </div>
+            <span className="bg-white/20 text-xs font-bold px-2.5 py-1 rounded-full">+50 XP</span>
           </motion.button>
 
           <motion.button

@@ -77,6 +77,7 @@ app.use('/api/parent', parentRouter);
 app.use("/api/test-plan", testPlanRouter);
 app.use("/api/duels", duelsRouter);
 app.use('/api/treehouse', treehouseRouter);
+app.use('/api/story', storyRouter);
 
 // 404 handler
 app.use((req, res) => {

@@ -4,6 +4,7 @@ const router = express.Router();
 const pool = require('../db/connection');
 const { analyzeHomework, verifyWrittenAnswer, buildHomeworkPrompt, getTestPredictions, trackHomeworkTopic } = require('../services/homework');
 const { chat } = require('../services/ai-provider');
+const { getTopics, getCurriculumType } = require('../services/curriculum');
 const { awardXP } = require('../services/xp');
 const { evaluateBadges } = require('../services/badges');
 
@@ -116,7 +117,21 @@ router.post('/chat', async (req, res, next) => {
     const existingMessages = question.messages || [];
     existingMessages.push({ role: 'user', content: message });
 
-    const systemPrompt = buildHomeworkPrompt(profile, subject, question.question_text, learningStyle, question.correct_answer);
+    // Build curriculum context so the AI knows what methods the child has been taught
+    let curriculumContext = '';
+    try {
+      const topics = getTopics(subject, profile.year_group);
+      if (topics) {
+        const currType = getCurriculumType(subject);
+        curriculumContext = `${currType} — Year ${profile.year_group}:\n` +
+          topics.map(t => {
+            const objs = (t.objectives || []).slice(0, 5).join('; ');
+            return `- ${t.name}: ${objs}`;
+          }).join('\n');
+      }
+    } catch {}
+
+    const systemPrompt = buildHomeworkPrompt(profile, subject, question.question_text, learningStyle, question.correct_answer, curriculumContext);
     const responseText = await chat(existingMessages, systemPrompt);
 
     // Parse response

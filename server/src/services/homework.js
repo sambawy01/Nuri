@@ -149,7 +149,7 @@ Be lenient with handwriting. If the answer is mathematically/factually equivalen
 /**
  * Build Socratic prompt for homework question guidance
  */
-function buildHomeworkPrompt(profile, subject, questionText, learningStyle, correctAnswer) {
+function buildHomeworkPrompt(profile, subject, questionText, learningStyle, correctAnswer, curriculumContext) {
   const age = { 1: '5-6', 2: '6-7', 3: '7-8', 4: '8-9', 5: '9-10', 6: '10-11' }[profile.year_group] || '7-8';
 
   let styleNote = '';
@@ -169,6 +169,8 @@ function buildHomeworkPrompt(profile, subject, questionText, learningStyle, corr
 THE HOMEWORK QUESTION: "${questionText}"
 THE CORRECT ANSWER IS: "${correctAnswer || 'unknown'}"
 SUBJECT: ${subject}
+YEAR GROUP: ${profile.year_group} (Age ${age})
+${curriculumContext ? `\nCURRICULUM CONTEXT — what this child has been taught:\n${curriculumContext}\n\nONLY use methods and concepts from the curriculum above. Do NOT use methods from higher year groups.` : ''}
 ${styleNote}
 
 CRITICAL: The correct answer above is VERIFIED. You MUST use it as ground truth.

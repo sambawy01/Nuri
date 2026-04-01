@@ -15,6 +15,8 @@ import StickerBookPage from './pages/StickerBookPage';
 import HomeworkPage from './pages/HomeworkPage';
 import ParentDashboardPage from './pages/ParentDashboardPage';
 import TreehousePage from './pages/TreehousePage';
+import StoryMapPage from './pages/StoryMapPage';
+import StoryChapterPage from './pages/StoryChapterPage';
 import DuelsPage from './pages/DuelsPage';
 import DuelPlayPage from './pages/DuelPlayPage';
 import DuelResultsPage from './pages/DuelResultsPage';
@@ -42,6 +44,8 @@ function App() {
           <Route path="/duels" element={<DuelsPage />} />
           <Route path="/duel/:id" element={<DuelPlayPage />} />
           <Route path="/duel/:id/results" element={<DuelResultsPage />} />
+          <Route path="/story" element={<StoryMapPage />} />
+          <Route path="/story/:chapter/:stage" element={<StoryChapterPage />} />
         </Routes>
       </div>
     </ProfileProvider>

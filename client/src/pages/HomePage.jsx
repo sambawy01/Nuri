@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { User, Trophy, Zap, Target, Award, BookOpen, RotateCcw, Mail, Star, Camera, Swords } from 'lucide-react';
+import { User, Trophy, Zap, Target, Award, BookOpen, RotateCcw, Mail, Star, Camera, Swords, Map } from 'lucide-react';
 import { useProfile } from '../context/ProfileContext';
 import { subjectKeys } from '../lib/subjects';
 import { api } from '../lib/api';
@@ -191,6 +191,23 @@ export default function HomePage() {
           Tools
         </h2>
         <div className="space-y-3">
+          <motion.button
+            onClick={() => navigate('/story')}
+            className="w-full bg-gradient-to-r from-orange-500 to-purple-600 rounded-2xl p-4 shadow-lg text-left flex items-center gap-4 cursor-pointer text-white"
+            whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(0,0,0,0.15)' }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          >
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-white/20 shrink-0">
+              <Map size={24} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold">Story Adventure</p>
+              <p className="text-sm opacity-80 font-semibold">Find the 7 Lost Books of Knowledge!</p>
+            </div>
+            <span className="bg-white/20 text-xs font-bold px-2.5 py-1 rounded-full">NEW</span>
+          </motion.button>
+
           <motion.button
             onClick={() => navigate('/homework')}
             className="w-full bg-gradient-to-r from-blue-500 to-teal-400 rounded-2xl p-4 shadow-lg text-left flex items-center gap-4 cursor-pointer text-white"

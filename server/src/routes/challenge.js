@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db/connection');
-const { generateQuizQuestion } = require('../services/ai-provider');
+const { generateSmartQuestions } = require('../services/smart-questions');
 const { awardXP } = require('../services/xp');
 const { evaluateBadges } = require('../services/badges');
 const { getTopics } = require('../services/curriculum');
@@ -53,7 +53,10 @@ router.get('/today', async (req, res, next) => {
       const yearGroup = profile.rows[0]?.year_group || 3;
       const { subject, topic } = getDailySubjectTopic(today, yearGroup);
 
-      const questionData = await generateQuizQuestion(subject, topic, yearGroup, 'medium');
+      const questions = await generateSmartQuestions({
+        profileId, subject, yearGroup, difficulty: 'medium', count: 1, topics: [topic],
+      });
+      const questionData = questions[0] || { question: `What do you know about ${topic}?`, options: ['A) A lot', 'B) A little', 'C) Nothing yet', 'D) Everything!'], correctAnswer: 'A', explanation: 'Keep learning!' };
 
       await pool.query(
         'INSERT INTO daily_challenges (challenge_date, subject, topic, question_data) VALUES ($1, $2, $3, $4) ON CONFLICT (challenge_date) DO NOTHING',

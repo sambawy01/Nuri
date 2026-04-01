@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db/connection');
-const { generateQuizQuestion } = require('../services/ai-provider');
-const { getTopics } = require('../services/curriculum');
+const { generateSmartQuestions } = require('../services/smart-questions');
 
 function randomCode() {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -22,32 +21,17 @@ router.post('/create', async (req, res, next) => {
     }
     const profile = profileResult.rows[0];
 
-    const topics = getTopics(subject, profile.year_group || 3);
-    if (!topics || topics.length === 0) {
-      return res.status(400).json({ success: false, error: `No topics found for subject "${subject}"` });
-    }
+    // Generate 5 smart questions — no repeats, mastery-aware, age-appropriate
+    const questions = await generateSmartQuestions({
+      profileId,
+      subject,
+      yearGroup: profile.year_group || 3,
+      difficulty: 'medium',
+      count: 5,
+    });
 
-    // Pick 5 random topics (with repetition allowed if fewer than 5 exist)
-    const selectedTopics = Array.from({ length: 5 }, () =>
-      topics[Math.floor(Math.random() * topics.length)]
-    );
-
-    // Generate 5 questions
-    const questions = [];
-    for (const topic of selectedTopics) {
-      try {
-        const q = await generateQuizQuestion(subject, topic.name, profile.year_group || 3, 'medium');
-        questions.push({ ...q, topic: topic.name });
-      } catch (err) {
-        // Fallback question
-        questions.push({
-          question: `What is an important concept in ${topic.name}?`,
-          options: ['Option A', 'Option B', 'Option C', 'Option D'],
-          correctAnswer: 'A',
-          explanation: 'Keep studying this topic!',
-          topic: topic.name,
-        });
-      }
+    if (questions.length === 0) {
+      return res.status(500).json({ success: false, error: 'Could not generate questions. Try again.' });
     }
 
     const code = randomCode();

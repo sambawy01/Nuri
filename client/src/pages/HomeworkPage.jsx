@@ -148,9 +148,22 @@ export default function HomeworkPage() {
         body: { profileId: pid, image: base64, mediaType, sourceType },
       });
       setSessionId(data.sessionId);
-      setQuestions(data.questions);
+      setQuestions(data.questions || []);
       setSubject(data.subject);
-      setPhase('questions');
+      // Auto-start first question immediately
+      if (data.questions?.length > 0) {
+        setCurrentQ(0);
+        setMessages([{
+          text: `I found ${data.questions.length} question${data.questions.length > 1 ? 's' : ''} in your homework! Let's tackle them one by one.\n\nQuestion 1: "${data.questions[0].text}"\n\nWhat do you think the first step is?`,
+          isNuri: true,
+        }]);
+        setQuestionComplete(false);
+        setCorrectAnswer(null);
+        setVerifyResult(null);
+        setPhase('chat');
+      } else {
+        setPhase('questions');
+      }
     } catch (err) {
       setAnalyzeError(err.message || "Nuri couldn't read that. Try a clearer photo or type the question instead.");
       setPhase('input');
@@ -161,8 +174,10 @@ export default function HomeworkPage() {
 
   function startQuestion(idx) {
     setCurrentQ(idx);
+    const total = questions.length;
+    const doneCount = questions.filter(q => q.done).length;
     setMessages([{
-      text: `Let's work on question ${idx + 1}: "${questions[idx].text}"\n\nWhat do you think the first step is?`,
+      text: `${doneCount > 0 ? `Great job! ${doneCount}/${total} done so far! ` : ''}Question ${idx + 1} of ${total}: "${questions[idx].text}"\n\nWhat do you think the first step is?`,
       isNuri: true,
     }]);
     setQuestionComplete(false);
@@ -220,6 +235,11 @@ export default function HomeworkPage() {
   }
 
   function nextQuestion() {
+    // Mark current as done if not already
+    setQuestions(prev => prev.map((q, i) =>
+      i === currentQ && !q.done ? { ...q, done: true } : q
+    ));
+
     const nextIdx = questions.findIndex((q, i) => i > currentQ && !q.done);
     if (nextIdx >= 0) {
       startQuestion(nextIdx);
@@ -259,11 +279,33 @@ export default function HomeworkPage() {
           <ArrowLeft size={22} />
         </button>
         <NuriOwl size="sm" state={isLoading ? 'thinking' : 'idle'} level={currentProfile?.level || 1} />
-        <div>
+        <div className="flex-1">
           <p className="font-bold text-gray-800 text-sm">Homework Helper</p>
-          <p className="text-xs text-gray-500 font-semibold">Nuri helps you solve it</p>
+          <p className="text-xs text-gray-500 font-semibold">
+            {phase === 'chat' || phase === 'verify'
+              ? `Question ${currentQ + 1} of ${questions.length}`
+              : 'Nuri helps you solve it'}
+          </p>
         </div>
+        {(phase === 'chat' || phase === 'verify') && questions.length > 1 && (
+          <span className="text-xs font-bold text-purple-600 bg-purple-50 px-2 py-1 rounded-full">
+            {questions.filter(q => q.done).length}/{questions.length}
+          </span>
+        )}
       </motion.div>
+
+      {/* Progress bar for multi-question sessions */}
+      {(phase === 'chat' || phase === 'verify') && questions.length > 1 && (
+        <div className="px-4 pt-2">
+          <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+            <motion.div
+              className="h-full rounded-full gradient-bg"
+              animate={{ width: `${((questions.filter(q => q.done).length) / questions.length) * 100}%` }}
+              transition={{ duration: 0.4 }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* ── INPUT PHASE ── */}
       {phase === 'input' && (

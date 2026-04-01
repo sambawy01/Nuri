@@ -6,9 +6,10 @@ const { checkUnlocks, seedItems, isUnlocked, getProfileStats, TREEHOUSE_ITEMS } 
 
 // Ensure treehouse tables exist (idempotent)
 async function ensureTables() {
+  // Tables already created via Supabase migration — just ensure they exist
   await pool.query(`
     CREATE TABLE IF NOT EXISTS treehouse_items (
-      id           SERIAL PRIMARY KEY,
+      id           TEXT PRIMARY KEY,
       name         TEXT NOT NULL,
       category     TEXT NOT NULL,
       icon         TEXT NOT NULL,
@@ -21,7 +22,7 @@ async function ensureTables() {
     CREATE TABLE IF NOT EXISTS owned_items (
       id          SERIAL PRIMARY KEY,
       profile_id  INT REFERENCES profiles(id) ON DELETE CASCADE,
-      item_id     INT REFERENCES treehouse_items(id) ON DELETE CASCADE,
+      item_id     TEXT REFERENCES treehouse_items(id) ON DELETE CASCADE,
       equipped    BOOLEAN NOT NULL DEFAULT FALSE,
       earned_at   TIMESTAMPTZ DEFAULT NOW(),
       UNIQUE (profile_id, item_id)

@@ -3,6 +3,7 @@ const router = express.Router();
 const pool = require('../db/connection');
 const { buildSystemPrompt, chat, chatStream, supportsStreaming } = require('../services/ai-provider');
 const { updateStreak, awardXP } = require('../services/xp');
+const { getChildProfile } = require('../services/child-profile');
 
 // POST /api/chat — send message to Nuri
 router.post('/', async (req, res, next) => {
@@ -79,7 +80,11 @@ router.post('/', async (req, res, next) => {
       learningStyle = styleResult.rows[0];
     }
 
-    const systemPrompt = buildSystemPrompt(profile, subject, mode, learningStyle);
+    // Build system prompt with child intelligence profile
+    const childContext = await getChildProfile(profileId);
+    let systemPrompt = buildSystemPrompt(profile, subject, mode, learningStyle);
+    if (childContext) systemPrompt += '\n\n' + childContext;
+
     const wantsStream = req.query.stream === 'true' && supportsStreaming() && chatStream;
 
     if (wantsStream) {

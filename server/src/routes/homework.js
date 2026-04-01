@@ -5,6 +5,7 @@ const pool = require('../db/connection');
 const { analyzeHomework, verifyWrittenAnswer, buildHomeworkPrompt, getTestPredictions, trackHomeworkTopic } = require('../services/homework');
 const { chat } = require('../services/ai-provider');
 const { getTopics, getCurriculumType } = require('../services/curriculum');
+const { getChildProfile } = require('../services/child-profile');
 const { awardXP } = require('../services/xp');
 const { evaluateBadges } = require('../services/badges');
 
@@ -131,7 +132,9 @@ router.post('/chat', async (req, res, next) => {
       }
     } catch {}
 
-    const systemPrompt = buildHomeworkPrompt(profile, subject, question.question_text, learningStyle, question.correct_answer, curriculumContext);
+    const childContext = await getChildProfile(profileId);
+    let systemPrompt = buildHomeworkPrompt(profile, subject, question.question_text, learningStyle, question.correct_answer, curriculumContext);
+    if (childContext) systemPrompt += '\n\n' + childContext;
     const responseText = await chat(existingMessages, systemPrompt);
 
     // Parse response

@@ -16,6 +16,7 @@
 const pool = require('../db/connection');
 const { getObjectiveSummary } = require('./objective-mastery');
 const { checkPrerequisites } = require('./prerequisites');
+const { getMemoryContext } = require('./session-memory');
 
 // Cache profiles for 5 minutes to avoid hammering the DB on every message
 const cache = new Map();
@@ -42,6 +43,7 @@ async function buildProfile(profileId) {
     mistakePatterns,
     subjectActivity,
     practicedSubjects,
+    parentNotes,
   ] = await Promise.all([
     // Last 5 session reports
     pool.query(
@@ -107,6 +109,12 @@ async function buildProfile(profileId) {
       `SELECT DISTINCT subject FROM objective_mastery WHERE profile_id = $1 ORDER BY subject`,
       [profileId]
     ).then(r => r.rows.map(row => row.subject)).catch(() => []),
+
+    // Parent notes
+    pool.query(
+      'SELECT note, priority FROM parent_notes WHERE profile_id = $1 AND active = TRUE ORDER BY priority DESC LIMIT 5',
+      [profileId]
+    ).then(r => r.rows).catch(() => []),
   ]);
 
   // Build the context string
@@ -194,6 +202,16 @@ async function buildProfile(profileId) {
     }
   }
 
+  // Parent/teacher notes — override everything else
+  if (parentNotes && parentNotes.length > 0) {
+    context += '\n\nPARENT/TEACHER INSTRUCTIONS — these OVERRIDE everything else:';
+    for (const note of parentNotes) {
+      const priority = note.priority === 'urgent' ? '🚨 URGENT' : note.priority === 'high' ? '⚠️ HIGH' : '';
+      context += `\n- ${priority} ${note.note}`;
+    }
+    context += '\nFollow these instructions from the parent/teacher. They know this child best.';
+  }
+
   // Objective-level mastery
   if (practicedSubjects && practicedSubjects.length > 0) {
     for (const subj of practicedSubjects.slice(0, 3)) {
@@ -203,6 +221,12 @@ async function buildProfile(profileId) {
       }
     }
   }
+
+  // Session memory (what happened last time)
+  try {
+    const memoryContext = await getMemoryContext(profileId, null);
+    if (memoryContext) context += memoryContext;
+  } catch {}
 
   return context || '';
 }

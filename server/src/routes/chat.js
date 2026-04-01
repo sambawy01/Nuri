@@ -109,6 +109,34 @@ router.post('/', async (req, res, next) => {
         [JSON.stringify(messages), session.id]
       );
 
+      // Auto-save session memory every 10 messages
+      const msgCount = messages.filter(m => m.role === 'user').length;
+      if (mode === 'learn' && msgCount > 0 && msgCount % 5 === 0) {
+        const { saveSessionMemory } = require('../services/session-memory');
+        const lastUserMsg = messages.filter(m => m.role === 'user').pop()?.content || '';
+        const lastAssistantMsg = messages.filter(m => m.role === 'assistant').pop()?.content || '';
+
+        // Use AI to summarize the session state (fire and forget)
+        try {
+          const summaryResponse = await chat(
+            [{ role: 'user', content: `Summarize this tutoring session in JSON. Last messages:\nStudent: "${lastUserMsg}"\nTutor: "${lastAssistantMsg}"\n\nRespond ONLY with: {"leftOffAt": "topic/concept they were on", "struggledWith": "what was hard or null", "breakthroughs": "what clicked or null", "emotionalNote": "happy/frustrated/confused/bored/confident or null"}` }],
+            'You summarize tutoring sessions. Respond with ONLY valid JSON.'
+          );
+          const match = summaryResponse.match(/\{[\s\S]*\}/);
+          if (match) {
+            const summary = JSON.parse(match[0]);
+            await saveSessionMemory({
+              profileId, subject, topic: null,
+              lastObjective: null,
+              leftOffAt: summary.leftOffAt,
+              struggledWith: summary.struggledWith,
+              breakthroughs: summary.breakthroughs,
+              emotionalNote: summary.emotionalNote,
+            });
+          }
+        } catch {}
+      }
+
       // Award XP
       const userMessageCount = messages.filter((m) => m.role === 'user').length;
       let xpResult = null;
@@ -127,6 +155,34 @@ router.post('/', async (req, res, next) => {
         'UPDATE chat_sessions SET messages = $1 WHERE id = $2',
         [JSON.stringify(messages), session.id]
       );
+
+      // Auto-save session memory every 10 messages
+      const msgCount = messages.filter(m => m.role === 'user').length;
+      if (mode === 'learn' && msgCount > 0 && msgCount % 5 === 0) {
+        const { saveSessionMemory } = require('../services/session-memory');
+        const lastUserMsg = messages.filter(m => m.role === 'user').pop()?.content || '';
+        const lastAssistantMsg = messages.filter(m => m.role === 'assistant').pop()?.content || '';
+
+        // Use AI to summarize the session state (fire and forget)
+        try {
+          const summaryResponse = await chat(
+            [{ role: 'user', content: `Summarize this tutoring session in JSON. Last messages:\nStudent: "${lastUserMsg}"\nTutor: "${lastAssistantMsg}"\n\nRespond ONLY with: {"leftOffAt": "topic/concept they were on", "struggledWith": "what was hard or null", "breakthroughs": "what clicked or null", "emotionalNote": "happy/frustrated/confused/bored/confident or null"}` }],
+            'You summarize tutoring sessions. Respond with ONLY valid JSON.'
+          );
+          const match = summaryResponse.match(/\{[\s\S]*\}/);
+          if (match) {
+            const summary = JSON.parse(match[0]);
+            await saveSessionMemory({
+              profileId, subject, topic: null,
+              lastObjective: null,
+              leftOffAt: summary.leftOffAt,
+              struggledWith: summary.struggledWith,
+              breakthroughs: summary.breakthroughs,
+              emotionalNote: summary.emotionalNote,
+            });
+          }
+        } catch {}
+      }
 
       const userMessageCount = messages.filter((m) => m.role === 'user').length;
       let xpResult = null;

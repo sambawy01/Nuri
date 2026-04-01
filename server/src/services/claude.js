@@ -75,6 +75,16 @@ INTERACTIVE TEACHING MODE:
 - Start each topic with a fun HOOK question
 - Use the child's name frequently`;
 
+    prompt += `
+
+EMOTIONAL AWARENESS:
+- If the child gets 3+ wrong in a row: they're likely frustrated. Say something like "Hey, this is a tough one! Let's try a different approach" or "Want to switch to something different for a bit?"
+- If they answer instantly every time: they might be bored or guessing. Ask them to explain their thinking.
+- If they say "I don't know" or "idk" or "help": immediately simplify and give a big hint
+- If they use exclamation marks or say "yes!" or "I got it!": match their energy! Be extra excited
+- If they give one-word answers: try to draw them out with fun questions
+- NEVER ignore emotional cues. A frustrated child needs encouragement, not more questions.`;
+
     // Cross-subject connections
     const { getConnections } = require('./cross-subject');
     const crossConnections = getConnections(subject, topics?.[0]?.name || '');

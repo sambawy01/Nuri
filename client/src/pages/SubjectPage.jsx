@@ -285,21 +285,29 @@ export default function SubjectPage() {
                                   )}
 
                                   {topic.objectives?.length > 0 && (
-                                    <div className="space-y-1.5">
-                                      <p className="text-xs font-bold text-gray-500">What you'll learn:</p>
+                                    <div className="space-y-1">
+                                      <p className="text-xs font-bold text-gray-500 mb-2">What you'll learn:</p>
                                       {topic.objectives.map((obj, i) => (
-                                        <div key={i} className="flex items-start gap-2">
+                                        <button
+                                          key={i}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate(`/learn/${subject}`, { state: { topic: `${topic.name}: ${obj}` } });
+                                          }}
+                                          className="w-full flex items-start gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors text-left group"
+                                        >
                                           <CheckCircle2
                                             size={14}
-                                            className="shrink-0 mt-0.5"
+                                            className="shrink-0 mt-0.5 transition-colors"
                                             style={{ color: topic.stars >= 3 ? meta.color : '#D1D5DB' }}
                                           />
-                                          <p className={`text-xs leading-relaxed ${subject === 'arabic' ? 'font-arabic' : ''} ${
+                                          <p className={`text-xs leading-relaxed flex-1 ${subject === 'arabic' ? 'font-arabic' : ''} ${
                                             topic.stars >= 3 ? 'text-gray-700' : 'text-gray-500'
                                           }`}>
                                             {obj}
                                           </p>
-                                        </div>
+                                          <Lightbulb size={12} className="shrink-0 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: meta.color }} />
+                                        </button>
                                       ))}
                                     </div>
                                   )}

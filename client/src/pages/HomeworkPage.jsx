@@ -176,7 +176,7 @@ export default function HomeworkPage() {
       if (data.questions?.length > 0) {
         setCurrentQ(0);
         setMessages([{
-          text: `I found ${data.questions.length} question${data.questions.length > 1 ? 's' : ''} in your homework! Let's tackle them one by one.\n\nQuestion 1: "${data.questions[0].text}"\n\nWhat do you think the first step is?`,
+          text: `I found ${data.questions.length} question${data.questions.length > 1 ? 's' : ''} in your homework! Let's crack them together! 💪\n\nHere's question 1: "${data.questions[0].text}"\n\nTell me what you think — even if you're not sure, that's totally fine!`,
           isNuri: true,
         }]);
         setQuestionComplete(false);
@@ -199,7 +199,7 @@ export default function HomeworkPage() {
     const total = questions.length;
     const doneCount = questions.filter(q => q.done).length;
     setMessages([{
-      text: `${doneCount > 0 ? `Great job! ${doneCount}/${total} done so far! ` : ''}Question ${idx + 1} of ${total}: "${questions[idx].text}"\n\nWhat do you think the first step is?`,
+      text: `${doneCount > 0 ? `🎉 ${doneCount}/${total} done — you're smashing it! ` : ''}Here's question ${idx + 1} of ${total}: "${questions[idx].text}"\n\nWhat do you think? Give it a go!`,
       isNuri: true,
     }]);
     setQuestionComplete(false);

@@ -149,7 +149,7 @@ Be lenient with handwriting. If the answer is mathematically/factually equivalen
 /**
  * Build Socratic prompt for homework question guidance
  */
-function buildHomeworkPrompt(profile, subject, questionText, learningStyle) {
+function buildHomeworkPrompt(profile, subject, questionText, learningStyle, correctAnswer) {
   const age = { 1: '5-6', 2: '6-7', 3: '7-8', 4: '8-9', 5: '9-10', 6: '10-11' }[profile.year_group] || '7-8';
 
   let styleNote = '';
@@ -167,8 +167,15 @@ function buildHomeworkPrompt(profile, subject, questionText, learningStyle) {
   return `You are Nuri, ${profile.name}'s fun, witty owl best friend who's helping with homework. ${profile.name} is ${age} years old (Year ${profile.year_group}).
 
 THE HOMEWORK QUESTION: "${questionText}"
+THE CORRECT ANSWER IS: "${correctAnswer || 'unknown'}"
 SUBJECT: ${subject}
 ${styleNote}
+
+CRITICAL: The correct answer above is VERIFIED. You MUST use it as ground truth.
+- If the child says "${correctAnswer}", they are CORRECT — celebrate!
+- If the child says anything else, they are WRONG — guide them toward "${correctAnswer}"
+- NEVER confirm a wrong answer. NEVER say a wrong answer is correct.
+- For maths: if the child gives a number that is NOT "${correctAnswer}", it is WRONG regardless of their reasoning.
 
 YOUR TEACHING APPROACH — adapt based on the question type:
 

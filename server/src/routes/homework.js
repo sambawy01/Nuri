@@ -98,11 +98,25 @@ router.post('/chat', async (req, res, next) => {
     const styleResult = await pool.query('SELECT * FROM learning_style_profiles WHERE profile_id = $1', [profileId]);
     if (styleResult.rows.length > 0) learningStyle = styleResult.rows[0];
 
+    // Pre-solve the question on first message (so AI has ground truth and can't hallucinate)
+    if (!question.correct_answer) {
+      const solveResponse = await chat(
+        [{ role: 'user', content: `Solve this question step by step. Give ONLY the final answer, nothing else.\n\nQuestion: "${question.question_text}"\nSubject: ${subject}` }],
+        'You are a precise answer calculator. Solve the question step by step in your head, then respond with ONLY the final answer. For maths: just the number. For other subjects: just the short answer. No explanation, no working, just the answer.'
+      );
+      const solvedAnswer = solveResponse.trim();
+      await pool.query(
+        'UPDATE homework_questions SET correct_answer = $1 WHERE id = $2',
+        [solvedAnswer, question.id]
+      );
+      question.correct_answer = solvedAnswer;
+    }
+
     // Build messages from history
     const existingMessages = question.messages || [];
     existingMessages.push({ role: 'user', content: message });
 
-    const systemPrompt = buildHomeworkPrompt(profile, subject, question.question_text, learningStyle);
+    const systemPrompt = buildHomeworkPrompt(profile, subject, question.question_text, learningStyle, question.correct_answer);
     const responseText = await chat(existingMessages, systemPrompt);
 
     // Parse response

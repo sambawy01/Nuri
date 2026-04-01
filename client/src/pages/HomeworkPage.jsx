@@ -52,14 +52,40 @@ export default function HomeworkPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const base64 = reader.result.split(',')[1];
-      const mediaType = file.type || 'image/jpeg';
-      const sourceType = file.type === 'application/pdf' ? 'upload_pdf' : 'upload_image';
-      await analyzeInput(base64, mediaType, sourceType);
-    };
-    reader.readAsDataURL(file);
+    // For PDFs, read directly
+    if (file.type === 'application/pdf') {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64 = reader.result.split(',')[1];
+        await analyzeInput(base64, 'application/pdf', 'upload_pdf');
+      };
+      reader.readAsDataURL(file);
+      return;
+    }
+
+    // For images, compress to max 1MB to stay within Vercel limits
+    const compressed = await compressImage(file, 1200, 0.7);
+    await analyzeInput(compressed, 'image/jpeg', 'upload_image');
+  }
+
+  function compressImage(file, maxWidth, quality) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let { width, height } = img;
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        resolve(dataUrl.split(',')[1]);
+      };
+      img.src = URL.createObjectURL(file);
+    });
   }
 
   async function handleTypedSubmit() {
@@ -80,8 +106,11 @@ export default function HomeworkPage() {
     }
   }
 
+  const [analyzeError, setAnalyzeError] = useState(null);
+
   async function analyzeInput(base64, mediaType, sourceType) {
     setPhase('analyzing');
+    setAnalyzeError(null);
     try {
       const pid = currentProfile._id || currentProfile.id;
       const data = await api('/homework/analyze', {
@@ -92,7 +121,8 @@ export default function HomeworkPage() {
       setQuestions(data.questions);
       setSubject(data.subject);
       setPhase('questions');
-    } catch {
+    } catch (err) {
+      setAnalyzeError(err.message || "Nuri couldn't read that. Try a clearer photo or type the question instead.");
       setPhase('input');
     }
   }
@@ -208,6 +238,15 @@ export default function HomeworkPage() {
       {/* ── INPUT PHASE ── */}
       {phase === 'input' && (
         <div className="flex-1 p-4">
+          {analyzeError && (
+            <motion.div
+              className="bg-red-50 border border-red-200 rounded-2xl p-3 mb-4"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <p className="text-sm text-red-600 font-semibold">{analyzeError}</p>
+            </motion.div>
+          )}
           <div className="flex gap-2 mb-6">
             {[
               { key: 'camera', icon: Camera, label: 'Camera' },

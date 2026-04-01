@@ -324,7 +324,7 @@ export default function QuizPage() {
                 whileTap={{ scale: 0.98 }}
               >
                 <ArrowRight size={18} />
-                Next Topic
+                Next Mission!
               </motion.button>
               <div className="flex gap-2">
                 <motion.button
@@ -334,7 +334,7 @@ export default function QuizPage() {
                   whileTap={{ scale: 0.98 }}
                 >
                   <RotateCcw size={18} />
-                  Try Again
+                  One More Round!
                 </motion.button>
                 <motion.button
                   onClick={() => navigate(`/learn/${subject}`, { state: { topic: activeTopic } })}
@@ -343,7 +343,7 @@ export default function QuizPage() {
                   whileTap={{ scale: 0.98 }}
                 >
                   <Lightbulb size={18} />
-                  Learn More
+                  Explore More!
                 </motion.button>
               </div>
             </div>

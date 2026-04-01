@@ -52,9 +52,19 @@ export default function HomeworkPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // For PDFs, use typed input fallback (Claude Vision doesn't support PDF in image block)
+    // For PDFs, read directly and send as PDF
     if (file.type === 'application/pdf') {
-      setAnalyzeError("PDF upload coming soon! For now, please take a photo of the page or type the questions.");
+      setPhase('analyzing');
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64 = reader.result.split(',')[1];
+        await analyzeInput(base64, 'application/pdf', 'upload_pdf');
+      };
+      reader.onerror = () => {
+        setAnalyzeError("Couldn't read this PDF. Try taking a photo instead.");
+        setPhase('input');
+      };
+      reader.readAsDataURL(file);
       return;
     }
 

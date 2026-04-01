@@ -13,27 +13,41 @@ function getClient() {
 /**
  * Analyze an image/PDF and extract homework questions using Claude Vision
  */
-async function analyzeHomework(base64Image, mediaType) {
+async function analyzeHomework(base64Data, mediaType) {
   const client = getClient();
+
+  const isPDF = mediaType === 'application/pdf';
+
+  // Build the content block — PDF uses document type, images use image type
+  const fileBlock = isPDF
+    ? {
+        type: 'document',
+        source: {
+          type: 'base64',
+          media_type: 'application/pdf',
+          data: base64Data,
+        },
+      }
+    : {
+        type: 'image',
+        source: {
+          type: 'base64',
+          media_type: mediaType || 'image/jpeg',
+          data: base64Data,
+        },
+      };
 
   const response = await client.messages.create({
     model: 'claude-haiku-4-5-20251001',
-    max_tokens: 2048,
+    max_tokens: 4096,
     messages: [
       {
         role: 'user',
         content: [
-          {
-            type: 'image',
-            source: {
-              type: 'base64',
-              media_type: mediaType || 'image/jpeg',
-              data: base64Image,
-            },
-          },
+          fileBlock,
           {
             type: 'text',
-            text: `Analyze this homework image. Extract each individual question.
+            text: `Analyze this homework ${isPDF ? 'document' : 'image'}. Extract each individual question.
 
 Respond with ONLY valid JSON:
 {
@@ -50,7 +64,8 @@ Rules:
 - For maths: include all numbers, operators, and units exactly as shown
 - For English: include the full sentence or passage reference
 - If you can't read something clearly, note it as [illegible]
-- Detect subject automatically from content`,
+- Detect subject automatically from content
+- Number questions sequentially even if the original doesn't number them`,
           },
         ],
       },

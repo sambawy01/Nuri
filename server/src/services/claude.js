@@ -160,9 +160,79 @@ async function generateQuizQuestion(subject, topic, yearGroup, difficulty) {
   // Pick a random position for the correct answer
   const correctPosition = ['A', 'B', 'C', 'D'][Math.floor(Math.random() * 4)];
 
-  const systemPrompt = `You generate quiz questions for children age ${ageRange} (Year ${effectiveYear}, ${subject}).
+  // Pick a random question FORMAT to force variety
+  const questionFormats = {
+    maths: [
+      'a word problem with a real-life scenario (shopping, sharing sweets, measuring things)',
+      'a "which is bigger/smaller/more/less" comparison question',
+      'a "fill in the missing number" pattern question (e.g., 2, 4, ?, 8)',
+      'a "true or false" style question with 4 statements to pick from',
+      'a question about shapes, pictures, or visual patterns',
+      'a backwards/reverse question (e.g., "what number do you subtract from 20 to get 13?")',
+      'a question using a table or chart description',
+      'an estimation or rounding question',
+    ],
+    science: [
+      'a "what would happen if..." prediction question',
+      'a "which one is the odd one out?" classification question',
+      'a "put these in order" sequencing question',
+      'a "true or false" question about common misconceptions',
+      'a "why does..." explanation question',
+      'a question connecting science to everyday life',
+    ],
+    english: [
+      'a "fix the mistake in this sentence" question',
+      'a "which word means the same as..." synonym question',
+      'a "choose the correct punctuation" question',
+      'a "which sentence is written correctly?" question',
+      'a "what type of word is..." grammar question',
+      'a short reading passage with a comprehension question',
+    ],
+    history: [
+      'a "when did this happen — before or after..." timeline question',
+      'a "who did this..." people and events question',
+      'a "why did this happen..." cause and effect question',
+      'a "what changed because of..." consequence question',
+    ],
+    arabic: [
+      'a vocabulary matching question',
+      'a "complete the sentence" fill-in question',
+      'a letter/sound recognition question',
+      'a grammar rule application question',
+    ],
+    religion: [
+      'a "who said/did this..." Bible stories question',
+      'a values and morals question',
+      'a church traditions question',
+      'a "what does this teach us..." lesson question',
+    ],
+  };
 
-TASK: One multiple-choice question about "${topic}". ${difficultyNote}
+  const formats = questionFormats[subject.toLowerCase()] || questionFormats.maths;
+  const randomFormat = formats[Math.floor(Math.random() * formats.length)];
+
+  // Get the topic's objectives to cycle through them
+  const allTopics = getTopics(subject, effectiveYear) || [];
+  const topicData = allTopics.find(t => t.name === topic || topic?.includes(t.name));
+  const objectives = topicData?.objectives || [];
+  const randomObjective = objectives.length > 0
+    ? objectives[Math.floor(Math.random() * objectives.length)]
+    : '';
+
+  const systemPrompt = `You are a master quiz designer with 30 years of experience teaching children aged ${ageRange}. You know exactly how to test understanding — not just recall. You create questions that make children THINK, not just remember.
+
+TASK: One multiple-choice question about "${topic}" for Year ${effectiveYear} ${subject}. ${difficultyNote}
+${randomObjective ? `\nSPECIFIC OBJECTIVE TO TEST: "${randomObjective}"` : ''}
+
+QUESTION FORMAT: Generate ${randomFormat}.
+
+VARIETY IS CRITICAL:
+- NEVER use the pattern "What is the value of X in Y?" — this is boring and repetitive
+- NEVER use the pattern "What is X + Y?" — too simple
+- Every question must feel DIFFERENT from the last
+- Use real-life contexts: shopping, cooking, sports, animals, school, games
+- Make the child APPLY knowledge, not just recall facts
+- Think like a creative teacher who makes tests that kids actually enjoy
 
 ABSOLUTE RULES FOR OPTIONS — READ CAREFULLY:
 

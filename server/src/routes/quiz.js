@@ -43,20 +43,29 @@ router.post('/question', async (req, res, next) => {
       });
     }
 
-    // Try question bank first (instant), fall back to live AI
+    // Get recently asked questions for this child (last 50) to avoid repeats
+    const recentResult = await pool.query(
+      `SELECT question_text FROM quiz_history
+       WHERE profile_id = $1 AND subject = $2
+       ORDER BY created_at DESC LIMIT 50`,
+      [profileId, subject]
+    );
+    const recentQuestions = recentResult.rows.map(r => r.question_text);
+
+    // Try question bank first (instant), excluding recent questions
     let question;
     const bankResult = await pool.query(
       `SELECT * FROM question_bank
        WHERE subject = $1 AND year_group = $2 AND difficulty = $3
          AND (topic = $4 OR $4 IS NULL)
+         AND question_text NOT IN (SELECT unnest($5::text[]))
        ORDER BY times_served ASC, RANDOM()
        LIMIT 1`,
-      [subject, profile.year_group, questionDifficulty, topic]
+      [subject, profile.year_group, questionDifficulty, topic, recentQuestions.length > 0 ? recentQuestions : ['']]
     );
 
     if (bankResult.rows.length > 0) {
       const q = bankResult.rows[0];
-      // Options in bank are stored without A)/B) prefixes — add them
       const labels = ['A', 'B', 'C', 'D'];
       const opts = typeof q.options === 'string' ? JSON.parse(q.options) : q.options;
       question = {
@@ -65,13 +74,15 @@ router.post('/question', async (req, res, next) => {
         correctAnswer: q.correct_answer,
         explanation: q.explanation,
       };
-      // Increment times_served
       await pool.query('UPDATE question_bank SET times_served = times_served + 1 WHERE id = $1', [q.id]);
     } else {
-      // Fall back to live AI generation
+      // Fall back to live AI — include recent questions so AI avoids them
+      const avoidHint = recentQuestions.length > 0
+        ? `\nDo NOT generate any of these questions (already asked): ${recentQuestions.slice(0, 5).join(' | ')}`
+        : '';
       question = await generateQuizQuestion(
         subject,
-        topic,
+        topic + avoidHint,
         profile.year_group,
         questionDifficulty
       );

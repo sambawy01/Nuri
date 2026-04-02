@@ -234,6 +234,14 @@ VARIETY IS CRITICAL:
 - Make the child APPLY knowledge, not just recall facts
 - Think like a creative teacher who makes tests that kids actually enjoy
 
+QUESTION CLARITY:
+- The question must be SIMPLE to read. A child should understand what's being asked in 5 seconds.
+- BAD: "A number has 5 in the tens place, 3 in the ones place, and 7 in the hundreds place" — confusing
+- GOOD: "Start at 753" — clear and direct
+- Don't hide simple concepts behind complex wording
+- Max 2 sentences for the question. If it needs more, simplify it.
+- Don't combine two concepts in one question (e.g., place value AND counting backwards)
+
 ABSOLUTE RULES FOR OPTIONS — READ CAREFULLY:
 
 1. ALL 4 OPTIONS MUST BE THE SAME LENGTH (within 3 words of each other).

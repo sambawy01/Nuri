@@ -1,7 +1,11 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 
 function isArabicText(text) {
-  return /[\u0600-\u06FF]/.test(text);
+  // Check if MAJORITY of the text is Arabic (not just a few Arabic words mixed in English)
+  const arabicChars = (text.match(/[\u0600-\u06FF]/g) || []).length;
+  const latinChars = (text.match(/[a-zA-Z]/g) || []).length;
+  // Only use Arabic voice if Arabic characters are the majority
+  return arabicChars > latinChars;
 }
 
 export function useVoice() {
@@ -33,11 +37,15 @@ export function useVoice() {
       window.speechSynthesis.cancel();
     }
 
-    // Strip markdown for cleaner speech but keep normal punctuation
+    // Clean text for natural speech
     const cleanText = text
       .replace(/[#*_~`]/g, '')
       .replace(/\[.*?\]\(.*?\)/g, '')
       .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{27BF}\u{1F900}-\u{1F9FF}]/gu, '')
+      .replace(/_{2,}/g, ' blank ')           // Fill-in-the-blank gaps → "blank"
+      .replace(/\.{3,}/g, ' blank ')           // ... gaps → "blank"
+      .replace(/—/g, ', ')                     // Em dash → pause
+      .replace(/\s+/g, ' ')                    // Collapse whitespace
       .substring(0, 1000);
 
     if (!cleanText.trim()) return;

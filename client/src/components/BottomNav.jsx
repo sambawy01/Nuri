@@ -18,16 +18,14 @@ export default function BottomNav() {
   const location = useLocation();
   const currentPath = location.pathname;
 
-  // Hide on welcome/create pages and during fullscreen experiences
+  // Hide ONLY on welcome/create and active fullscreen chat sessions
   if (HIDDEN_ON.includes(currentPath)) return null;
 
-  // Hide during fullscreen experiences
-  if (currentPath.startsWith('/learn/') || currentPath.startsWith('/quiz/') ||
-      currentPath.startsWith('/explain/') || currentPath.startsWith('/duel/') ||
-      currentPath.startsWith('/homework') || currentPath.startsWith('/story/')) {
-    // Only hide on deep paths, not list pages
-    if (currentPath !== '/story' && currentPath !== '/duels') return null;
-  }
+  // Hide only during active chat/play sessions (not browsing pages)
+  const fullscreenPaths = ['/learn/', '/explain/', '/duel/'];
+  if (fullscreenPaths.some(p => currentPath.startsWith(p))) return null;
+  // Story chapter stages (not the map)
+  if (currentPath.startsWith('/story/') && currentPath.split('/').length > 3) return null;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-gray-100 shadow-lg safe-area-bottom">

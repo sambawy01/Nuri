@@ -17,6 +17,7 @@ const pool = require('../db/connection');
 const { getObjectiveSummary } = require('./objective-mastery');
 const { checkPrerequisites } = require('./prerequisites');
 const { getMemoryContext } = require('./session-memory');
+const { getLearningNeeds, buildAdaptationPrompt } = require('./learning-needs');
 
 // Cache profiles for 5 minutes to avoid hammering the DB on every message
 const cache = new Map();
@@ -226,6 +227,15 @@ async function buildProfile(profileId) {
   try {
     const memoryContext = await getMemoryContext(profileId, null);
     if (memoryContext) context += memoryContext;
+  } catch {}
+
+  // Learning needs adaptations (dyslexia, ADHD, autism, dyscalculia)
+  try {
+    const learningNeeds = await getLearningNeeds(profileId);
+    if (learningNeeds) {
+      const adaptations = buildAdaptationPrompt(learningNeeds);
+      if (adaptations) context += adaptations;
+    }
   } catch {}
 
   return context || '';

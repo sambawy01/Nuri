@@ -101,4 +101,69 @@ router.delete('/notes/:noteId', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// GET /api/parent/learning-needs/:profileId
+router.get('/learning-needs/:profileId', async (req, res, next) => {
+  try {
+    const { getLearningNeeds } = require('../services/learning-needs');
+    const needs = await getLearningNeeds(req.params.profileId);
+    res.json({ success: true, data: needs || { dyslexia: false, adhd: false, autism: false, dyscalculia: false } });
+  } catch (err) { next(err); }
+});
+
+// POST /api/parent/learning-needs
+router.post('/learning-needs', async (req, res, next) => {
+  try {
+    const { setLearningNeeds } = require('../services/learning-needs');
+    const { profileId, ...needs } = req.body;
+    if (!profileId) return res.status(400).json({ success: false, error: 'profileId required' });
+    await setLearningNeeds(profileId, needs);
+    res.json({ success: true });
+  } catch (err) { next(err); }
+});
+
+// GET /api/parent/behavior-analysis/:profileId
+router.get('/behavior-analysis/:profileId', async (req, res, next) => {
+  try {
+    const { analyzePatterns } = require('../services/learning-needs');
+    const flags = await analyzePatterns(req.params.profileId);
+    res.json({ success: true, data: flags });
+  } catch (err) { next(err); }
+});
+
+// GET /api/parent/specialist-report/:profileId
+router.get('/specialist-report/:profileId', async (req, res, next) => {
+  try {
+    const { profileId } = req.params;
+
+    const [profile, observations, sessions, mistakes, learningNeeds] = await Promise.all([
+      pool.query('SELECT name, year_group, total_xp, current_level FROM profiles WHERE id = $1', [profileId]).then(r => r.rows[0]),
+      pool.query('SELECT observation_type, details, created_at FROM behavioral_observations WHERE profile_id = $1 ORDER BY created_at DESC LIMIT 100', [profileId]).then(r => r.rows),
+      pool.query(`SELECT session_type, subject, AVG(CASE WHEN questions_attempted > 0 THEN questions_correct::float/questions_attempted*100 ELSE NULL END)::int as avg_accuracy, COUNT(*) as count FROM session_reports WHERE profile_id = $1 GROUP BY session_type, subject`, [profileId]).then(r => r.rows),
+      pool.query('SELECT subject, error_type, COUNT(*) as count FROM mistakes WHERE profile_id = $1 GROUP BY subject, error_type ORDER BY count DESC LIMIT 20', [profileId]).then(r => r.rows),
+      pool.query('SELECT * FROM learning_needs WHERE profile_id = $1', [profileId]).then(r => r.rows[0]),
+    ]);
+
+    const report = {
+      child: profile,
+      learningNeeds,
+      observations: observations.reduce((acc, obs) => {
+        acc[obs.observation_type] = (acc[obs.observation_type] || 0) + 1;
+        return acc;
+      }, {}),
+      observationDetails: observations.slice(0, 20),
+      sessionPerformance: sessions,
+      errorPatterns: mistakes,
+      generatedAt: new Date().toISOString(),
+    };
+
+    // Save report
+    await pool.query(
+      'INSERT INTO specialist_reports (profile_id, report_data) VALUES ($1, $2)',
+      [profileId, JSON.stringify(report)]
+    );
+
+    res.json({ success: true, data: report });
+  } catch (err) { next(err); }
+});
+
 module.exports = router;

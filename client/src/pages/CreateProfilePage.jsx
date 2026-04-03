@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Check, Eye, EyeOff } from 'lucide-react';
 import { api } from '../lib/api';
+import { getDeviceId } from '../lib/device';
 import { useProfile } from '../context/ProfileContext';
 import NuriAvatar from '../components/NuriAvatar';
 
@@ -75,7 +76,7 @@ export default function CreateProfilePage() {
     try {
       const profile = await api('/profiles', {
         method: 'POST',
-        body: { name: name.trim(), yearGroup, avatarColor, pin },
+        body: { name: name.trim(), yearGroup, avatarColor, pin, deviceId: getDeviceId() },
       });
       login(profile);
       navigate('/home');

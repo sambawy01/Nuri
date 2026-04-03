@@ -28,11 +28,12 @@ router.post('/', async (req, res, next) => {
       });
     }
 
+    const { deviceId } = req.body;
     const result = await pool.query(
-      `INSERT INTO profiles (name, year_group, avatar_color, pin)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO profiles (name, year_group, avatar_color, pin, device_id)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
-      [name, yearGroup, avatarColor, pin || null]
+      [name, yearGroup, avatarColor, pin || null, deviceId || null]
     );
 
     res.status(201).json({ success: true, data: result.rows[0] });
@@ -41,12 +42,20 @@ router.post('/', async (req, res, next) => {
   }
 });
 
-// GET /api/profiles — list all profiles
+// GET /api/profiles — list profiles for a device
 router.get('/', async (req, res, next) => {
   try {
-    const result = await pool.query(
-      'SELECT id, name, year_group, avatar_color, total_xp, current_level, streak_days, last_active_date, created_at FROM profiles ORDER BY created_at DESC'
-    );
+    const { deviceId } = req.query;
+    let result;
+    if (deviceId) {
+      result = await pool.query(
+        'SELECT id, name, year_group, avatar_color, total_xp, current_level, streak_days, last_active_date, created_at FROM profiles WHERE device_id = $1 ORDER BY created_at DESC',
+        [deviceId]
+      );
+    } else {
+      // Fallback: return empty for safety (don't expose all profiles)
+      result = { rows: [] };
+    }
 
     res.json({ success: true, data: result.rows });
   } catch (err) {

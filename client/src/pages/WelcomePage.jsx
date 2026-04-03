@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
 import { api } from '../lib/api';
+import { getDeviceId } from '../lib/device';
 import { useProfile } from '../context/ProfileContext';
 import NuriOwl from '../components/NuriOwl';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -26,7 +27,8 @@ export default function WelcomePage() {
 
   async function fetchProfiles() {
     try {
-      const data = await api('/profiles');
+      const deviceId = getDeviceId();
+      const data = await api(`/profiles?deviceId=${deviceId}`);
       setProfiles(data || []);
     } catch (err) {
       setError('Could not load profiles. Is the server running?');

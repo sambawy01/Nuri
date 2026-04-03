@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, Flame, Zap, Trophy, BookOpen, TrendingUp, AlertTriangle,
   Award, BarChart2, ClipboardList, Target, CheckCircle2, XCircle, Lightbulb,
-  MessageSquare, X, Plus,
+  MessageSquare, X, Plus, Heart, Download, ExternalLink, Save,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { subjects } from '../lib/subjects';
@@ -467,6 +467,406 @@ function NotesForNuri({ profileId }) {
   );
 }
 
+// ─── LearningSupport ─────────────────────────────────────────────────────────
+
+const LEARNING_NEEDS = [
+  { key: 'dyslexia',     label: 'Dyslexia',     emoji: '📖', description: 'Reading & phonics support' },
+  { key: 'adhd',         label: 'ADHD',          emoji: '⚡', description: 'Focus & attention strategies' },
+  { key: 'autism',       label: 'Autism',        emoji: '🧩', description: 'Routine & sensory awareness' },
+  { key: 'dyscalculia',  label: 'Dyscalculia',   emoji: '🔢', description: 'Maths number sense support' },
+];
+
+function Toggle({ enabled, onToggle }) {
+  return (
+    <button
+      onClick={onToggle}
+      aria-checked={enabled}
+      role="switch"
+      className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-amber-300 focus:ring-offset-1 ${
+        enabled ? 'bg-amber-400' : 'bg-gray-200'
+      }`}
+    >
+      <span
+        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+          enabled ? 'translate-x-6' : 'translate-x-1'
+        }`}
+      />
+    </button>
+  );
+}
+
+function ObservationCard({ flag, onEnableMode }) {
+  const conditionLabels = {
+    dyslexia:    { emoji: '📖', label: 'Dyslexia-friendly' },
+    adhd:        { emoji: '⚡', label: 'ADHD-friendly' },
+    autism:      { emoji: '🧩', label: 'Autism-friendly' },
+    dyscalculia: { emoji: '🔢', label: 'Dyscalculia-friendly' },
+  };
+  const cfg = conditionLabels[flag.condition] || { emoji: '💡', label: `${flag.condition}-friendly` };
+  const confidencePct = Math.round((flag.confidence || 0) * 100);
+
+  return (
+    <motion.div
+      className="bg-amber-50 border border-amber-200 rounded-2xl p-4 space-y-3"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className="text-xl">{cfg.emoji}</span>
+          <div>
+            <p className="text-sm font-extrabold text-amber-800">
+              We&apos;ve noticed a pattern
+            </p>
+            <p className="text-xs text-amber-600 font-medium">
+              Some children who learn like {flag.childName || 'your child'} benefit from {cfg.label} settings.
+            </p>
+          </div>
+        </div>
+        <span className="shrink-0 text-xs font-bold bg-amber-200 text-amber-800 px-2 py-0.5 rounded-full">
+          {confidencePct}% match
+        </span>
+      </div>
+
+      {flag.evidence && (
+        <p className="text-xs text-amber-700 leading-relaxed bg-amber-100 rounded-xl px-3 py-2">
+          {flag.evidence}
+        </p>
+      )}
+
+      <div className="flex items-center gap-3 flex-wrap">
+        <button
+          onClick={() => onEnableMode(flag.condition)}
+          className="flex items-center gap-1.5 bg-amber-400 hover:bg-amber-500 text-white text-xs font-bold px-4 py-1.5 rounded-full transition-colors"
+        >
+          <CheckCircle2 size={13} />
+          Enable {cfg.label} mode
+        </button>
+        <button className="flex items-center gap-1 text-xs font-semibold text-amber-700 hover:text-amber-900 underline underline-offset-2 transition-colors">
+          <ExternalLink size={12} />
+          You might want to discuss this with a specialist
+        </button>
+      </div>
+    </motion.div>
+  );
+}
+
+function LearningSupport({ profileId }) {
+  const [needs, setNeeds] = useState({
+    dyslexia: false, adhd: false, autism: false, dyscalculia: false,
+  });
+  const [otherNotes, setOtherNotes]       = useState('');
+  const [saving, setSaving]               = useState(false);
+  const [saved, setSaved]                 = useState(false);
+  const [saveError, setSaveError]         = useState('');
+  const [observations, setObservations]   = useState([]);
+  const [obsLoading, setObsLoading]       = useState(true);
+  const [reportData, setReportData]       = useState(null);
+  const [reportLoading, setReportLoading] = useState(false);
+  const [showReport, setShowReport]       = useState(false);
+
+  // Load saved learning needs
+  useEffect(() => {
+    async function loadNeeds() {
+      try {
+        const res = await api(`/parent/learning-needs/${profileId}`);
+        const d = res.data || res;
+        if (d) {
+          setNeeds({
+            dyslexia:    !!d.dyslexia,
+            adhd:        !!d.adhd,
+            autism:      !!d.autism,
+            dyscalculia: !!d.dyscalculia,
+          });
+          setOtherNotes(d.other_notes || '');
+        }
+      } catch {
+        // first time — no saved needs yet, defaults are fine
+      }
+    }
+    loadNeeds();
+  }, [profileId]);
+
+  // Load AI-detected observations
+  useEffect(() => {
+    async function loadObs() {
+      setObsLoading(true);
+      try {
+        const res = await api(`/parent/behavior-analysis/${profileId}`);
+        setObservations(res.flags || res.data || []);
+      } catch {
+        setObservations([]);
+      } finally {
+        setObsLoading(false);
+      }
+    }
+    loadObs();
+  }, [profileId]);
+
+  async function handleSave() {
+    setSaving(true);
+    setSaveError('');
+    setSaved(false);
+    try {
+      await api('/parent/learning-needs', {
+        method: 'POST',
+        body: { profileId, ...needs, other_notes: otherNotes },
+      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } catch {
+      setSaveError('Could not save — please try again.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleEnableMode(condition) {
+    // Optimistically turn on that toggle and save
+    setNeeds(prev => ({ ...prev, [condition]: true }));
+    try {
+      await api('/parent/learning-needs', {
+        method: 'POST',
+        body: { profileId, ...needs, [condition]: true, other_notes: otherNotes },
+      });
+    } catch {
+      // silently fail — user can still save manually
+    }
+  }
+
+  async function handleExportReport() {
+    setReportLoading(true);
+    try {
+      const res = await api(`/parent/specialist-report/${profileId}`);
+      setReportData(res.report || res.data || res);
+      setShowReport(true);
+    } catch {
+      setReportData({ error: 'Could not generate the report. Please try again.' });
+      setShowReport(true);
+    } finally {
+      setReportLoading(false);
+    }
+  }
+
+  function handleDownloadReport() {
+    if (!reportData) return;
+    const text = typeof reportData === 'string'
+      ? reportData
+      : JSON.stringify(reportData, null, 2);
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `nuri-specialist-report-${profileId}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  const hasActiveObservations = observations.length > 0;
+
+  return (
+    <Card delay={0.72}>
+      <SectionTitle icon={Heart} title="Help Nuri Understand Your Child Better" color="text-amber-500" />
+
+      {/* ── Declare Learning Needs ── */}
+      <div className="mb-5">
+        <p className="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wider">
+          Declare Learning Needs
+        </p>
+        <div className="space-y-3">
+          {LEARNING_NEEDS.map(({ key, label, emoji, description }) => (
+            <div key={key} className="flex items-center justify-between gap-3 py-2 border-b border-gray-50 last:border-0">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-lg shrink-0">{emoji}</span>
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-gray-700">{label}</p>
+                  <p className="text-xs text-gray-400 truncate">{description}</p>
+                </div>
+              </div>
+              <Toggle
+                enabled={needs[key]}
+                onToggle={() => setNeeds(prev => ({ ...prev, [key]: !prev[key] }))}
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Other notes */}
+        <div className="mt-4">
+          <label className="block text-xs font-semibold text-gray-500 mb-1.5">
+            Other notes about learning
+          </label>
+          <textarea
+            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent"
+            rows={2}
+            placeholder="e.g. 'She gets anxious with timed tasks' or 'He needs extra time to process instructions'"
+            value={otherNotes}
+            onChange={e => setOtherNotes(e.target.value)}
+          />
+        </div>
+
+        {/* Save button */}
+        <div className="flex items-center gap-3 mt-3">
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex items-center gap-1.5 bg-amber-400 hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold px-5 py-2 rounded-full transition-colors"
+          >
+            <Save size={14} />
+            {saving ? 'Saving…' : 'Save'}
+          </button>
+          <AnimatePresence>
+            {saved && (
+              <motion.span
+                className="text-xs font-bold text-green-600 flex items-center gap-1"
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0 }}
+              >
+                <CheckCircle2 size={13} /> Saved!
+              </motion.span>
+            )}
+            {saveError && (
+              <motion.span
+                className="text-xs font-bold text-red-500"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                {saveError}
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      {/* ── AI Observations ── */}
+      {!obsLoading && hasActiveObservations && (
+        <div className="mb-5">
+          <p className="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wider">
+            Nuri&apos;s Observations
+          </p>
+          <p className="text-xs text-gray-400 mb-3 leading-relaxed">
+            Based on how your child learns, Nuri has spotted some patterns. These are observations only —
+            every child is wonderfully different.
+          </p>
+          <div className="space-y-3">
+            {observations.map((flag, i) => (
+              <ObservationCard
+                key={flag.condition || i}
+                flag={flag}
+                onEnableMode={handleEnableMode}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {obsLoading && (
+        <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-50 rounded-xl px-3 py-2.5 mb-5">
+          <span className="animate-pulse">🔍</span>
+          <span>Nuri is looking at learning patterns…</span>
+        </div>
+      )}
+
+      {/* ── Specialist Report Export ── */}
+      <div>
+        <p className="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wider">
+          Specialist Report
+        </p>
+        <p className="text-xs text-gray-400 mb-3 leading-relaxed">
+          Share a summary of your child&apos;s learning patterns with a specialist, teacher, or therapist.
+          The report includes session data, accuracy trends, and Nuri&apos;s observations.
+        </p>
+        <button
+          onClick={handleExportReport}
+          disabled={reportLoading}
+          className="flex items-center gap-2 bg-white border-2 border-amber-300 hover:border-amber-400 hover:bg-amber-50 disabled:opacity-50 disabled:cursor-not-allowed text-amber-700 text-sm font-bold px-5 py-2.5 rounded-full transition-colors"
+        >
+          <Download size={15} />
+          {reportLoading ? 'Generating…' : 'Export Report for Specialist'}
+        </button>
+      </div>
+
+      {/* ── Report Modal ── */}
+      <AnimatePresence>
+        {showReport && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowReport(false)}
+          >
+            <motion.div
+              className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col"
+              initial={{ opacity: 0, y: 60 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 60 }}
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Modal header */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+                <div>
+                  <h4 className="font-extrabold text-gray-800 text-base">Specialist Report</h4>
+                  <p className="text-xs text-gray-400">You might want to share this with a specialist or teacher.</p>
+                </div>
+                <button
+                  onClick={() => setShowReport(false)}
+                  className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* Modal body */}
+              <div className="flex-1 overflow-y-auto px-5 py-4">
+                {reportData?.error ? (
+                  <p className="text-sm text-red-500 font-medium">{reportData.error}</p>
+                ) : reportData ? (
+                  <div className="space-y-4 text-sm text-gray-700">
+                    {typeof reportData === 'string' ? (
+                      <pre className="whitespace-pre-wrap font-sans text-xs leading-relaxed text-gray-600 bg-gray-50 rounded-xl p-4">
+                        {reportData}
+                      </pre>
+                    ) : (
+                      Object.entries(reportData).map(([section, value]) => (
+                        <div key={section}>
+                          <p className="font-extrabold text-gray-800 capitalize mb-1">
+                            {section.replace(/_/g, ' ')}
+                          </p>
+                          <p className="text-xs text-gray-600 leading-relaxed bg-gray-50 rounded-xl px-3 py-2">
+                            {typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value)}
+                          </p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-400 text-center py-4">Loading…</p>
+                )}
+              </div>
+
+              {/* Modal footer */}
+              {reportData && !reportData.error && (
+                <div className="px-5 py-4 border-t border-gray-100">
+                  <button
+                    onClick={handleDownloadReport}
+                    className="w-full flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-500 text-white font-bold py-3 rounded-2xl transition-colors text-sm"
+                  >
+                    <Download size={15} />
+                    Download as Text File
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </Card>
+  );
+}
+
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
 export default function ParentDashboardPage() {
@@ -680,6 +1080,7 @@ export default function ParentDashboardPage() {
         <TestPredictions predictions={predictions} />
         <MistakePatterns mistakePatterns={mistakePatterns} />
         <NotesForNuri profileId={profileId} />
+        <LearningSupport profileId={profileId} />
         <RecentBadges badges={badges} />
       </div>
     </div>

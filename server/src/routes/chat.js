@@ -4,6 +4,7 @@ const pool = require('../db/connection');
 const { buildSystemPrompt, chat, chatStream, supportsStreaming } = require('../services/ai-provider');
 const { updateStreak, awardXP } = require('../services/xp');
 const { getChildProfile } = require('../services/child-profile');
+const { buildTeachingContext, recordOutcome } = require('../services/teaching-intelligence');
 
 // POST /api/chat — send message to Nuri
 router.post('/', async (req, res, next) => {
@@ -82,8 +83,10 @@ router.post('/', async (req, res, next) => {
 
     // Build system prompt with child intelligence profile
     const childContext = await getChildProfile(profileId);
+    const teachingContext = mode === 'learn' ? await buildTeachingContext(profileId, subject, null, profile.year_group) : '';
     let systemPrompt = buildSystemPrompt(profile, subject, mode, learningStyle);
     if (childContext) systemPrompt += '\n\n' + childContext;
+    if (teachingContext) systemPrompt += '\n\n' + teachingContext;
 
     const wantsStream = req.query.stream === 'true' && supportsStreaming() && chatStream;
 
@@ -133,6 +136,33 @@ router.post('/', async (req, res, next) => {
               breakthroughs: summary.breakthroughs,
               emotionalNote: summary.emotionalNote,
             });
+          }
+        } catch {}
+      }
+
+      // Auto-record teaching outcomes for learning intelligence
+      if (mode === 'learn' && messages.length >= 4) {
+        try {
+          const lastUser = messages.filter(m => m.role === 'user').pop()?.content || '';
+          const lastAssistant = messages.filter(m => m.role === 'assistant').pop()?.content || '';
+          // Detect breakthrough signals
+          const isBroadSuccess = /got it|i see|oh|makes sense|yes|right|correct/i.test(lastUser);
+          const isStruggling = /don.?t know|help|confused|idk|what/i.test(lastUser);
+          // Detect approach used
+          const approach = /pizza|cake|sweet|bag|share|split/i.test(lastAssistant) ? 'analogy'
+            : /imagine|picture|draw/i.test(lastAssistant) ? 'visual'
+            : /step 1|first|then|next/i.test(lastAssistant) ? 'step-by-step'
+            : /story|once upon|imagine you/i.test(lastAssistant) ? 'story'
+            : 'general';
+
+          if (isBroadSuccess || isStruggling) {
+            recordOutcome({
+              profileId, subject, topic: subject,
+              approach,
+              worked: isBroadSuccess,
+              childResponse: lastUser.substring(0, 200),
+              breakthrough: isBroadSuccess && isStruggling === false,
+            }).catch(() => {});
           }
         } catch {}
       }

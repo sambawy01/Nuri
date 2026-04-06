@@ -148,6 +148,64 @@ Critically, what Mr. Helmy learns feeds back into Nuri's core:
 
 A human teacher's knowledge retires when they do. Mr. Helmy's knowledge compounds forever.
 
+### Early Detection — Learning Difficulties & Mental Health
+
+These children are in a remote area with zero access to school psychologists, special education specialists, or learning support teams. Mr. Helmy becomes the early detection system they would otherwise never have.
+
+#### What He Can Detect
+
+**Learning difficulties:**
+- **Dyslexia** — letter/number reversals in handwriting (camera), slow reading, avoids reading aloud
+- **Dyscalculia** — struggles with number sense despite repeated teaching, can't estimate, confuses operations
+- **ADHD patterns** — camera sees fidgeting, looking away. Data shows short focus bursts then dropout. Impulsive answers.
+- **Processing delays** — consistently needs more time than peers. Understands eventually but slowly.
+- **Speech/language issues** — voice recognition detects pronunciation patterns, limited vocabulary for age, avoids speaking
+
+**Mental health / emotional:**
+- **Anxiety** — camera detects tension, avoidance. Performance drops when put on the spot. Confidence meter consistently says "guessed" even when correct.
+- **Withdrawal** — participation declining over days/weeks. Less eye contact. Shorter answers.
+- **Low self-esteem** — "I'm stupid", "I can't do this" in voice/text. Gives up quickly.
+- **Trauma indicators** — sudden behavioral change. Was engaged, now isn't.
+- **Social difficulties** — camera sees isolation during group activities. Doesn't interact with peers.
+- **Fatigue/hunger** — camera detects drowsiness, low energy at consistent times. Could indicate home situation.
+
+#### Signal Sources
+
+| Source | What It Captures |
+|---|---|
+| **Classroom camera** | Engagement, eye contact, expressions, fidgeting, posture, drowsiness, social interaction |
+| **Tablet camera** | Handwriting patterns (reversals, spacing), drawing content |
+| **Voice** | Speech patterns, pronunciation, hesitation, tone, vocabulary range |
+| **Academic data** | Error patterns, response times, topic-specific struggles, regression |
+| **Behavioral data** | Session length tolerance, time-of-day patterns, subject avoidance, confidence levels |
+| **Interaction patterns** | Response to mistakes, handling difficulty, self-talk |
+
+Detection is based on **patterns over time**, not single moments.
+
+#### Response Protocol — Three Levels
+
+**Level 1 — Adapt (Automatic, Invisible):**
+Mr. Helmy quietly adjusts teaching. Kid shows anxiety? Stops putting them on the spot in group lessons. Attention drops after 10 minutes? Builds in breaks. The kid never knows — it just feels like Mr. Helmy "gets them."
+
+**Level 2 — Flag (School Owner Dashboard):**
+When patterns persist over 2+ weeks, Mr. Helmy generates an observation report:
+> "Sara has shown consistent signs of reading difficulty over the past 3 weeks: letter reversals in 60% of handwriting samples, avoids reading aloud, reading speed 40% below expected for age. This may indicate dyslexia. Recommended: professional screening."
+
+No alarm bells. No labels. Data and a gentle recommendation.
+
+**Level 3 — Specialist Report (Exportable):**
+Inherits Nuri's specialist report system but richer — includes:
+- Camera-based behavioral data over months
+- Comparison against peer group (not just age norms)
+- Specific examples with timestamps
+- Clear narrative a professional can act on remotely
+
+Can be shared with a visiting specialist, a doctor in the nearest city, or used for telemedicine consultation.
+
+#### Why This Matters Here
+
+In a city, a teacher notices something and refers to the school counselor. On the Red Sea coast, there's nobody to refer to. Mr. Helmy provides specialist-grade observation data that a remote professional can act on — giving these kids access to early detection they'd otherwise never receive.
+
 ### Repo Strategy
 - Separate branch or fork from Nuri main repo (TBD — likely branch for shared camera layer, fork or directory for Horizon-specific code)
 

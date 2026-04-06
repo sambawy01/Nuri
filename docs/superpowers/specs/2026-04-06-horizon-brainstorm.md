@@ -237,6 +237,74 @@ Questions sent to school owner covering:
 
 ---
 
+## Enhanced Features — All 12
+
+### 1. Virtual Guest Speakers
+Mr. Helmy "invites" experts into the classroom via AI-simulated conversations. A marine biologist explains coral spawning. A hotel GM talks about what makes a great receptionist. Mr. Helmy interviews them, kids ask questions. Can be pre-built from real interviews or AI-generated personas. Eventually — live video calls with actual experts, Mr. Helmy translating/simplifying in real-time.
+
+### 2. Digital Twin of Their Reef
+Using photos kids take on field trips over months, build a living digital map of their local reef. Species spotted, coral health tracked, changes over seasons. Kids become citizen scientists — their data has real value. Mr. Helmy references it: "Remember when you photographed this coral in September? Look at it now — what changed?"
+
+### 3. Tourism Simulation Mode
+Mr. Helmy role-plays as different types of tourists — a German family, a Japanese diver, an American couple who've never snorkeled. Kids practice greeting in different languages, explaining reef rules, handling complaints, recommending activities, basic hospitality English. Real-world job training disguised as a game.
+
+### 4. Peer Teaching
+Older kids teach younger kids, with Mr. Helmy coaching them. An 11-year-old explains coral to a 6-year-old. Mr. Helmy watches via camera, gives the older kid feedback: "You used a great analogy there" or "She looked confused when you said 'photosynthesis' — try simpler words." Builds leadership, communication, and deepens understanding.
+
+### 5. Story Mode — Red Sea Adventures
+Interactive narrative lessons set on the coast. "A baby turtle hatched on the beach last night. She needs to reach the water, but there are dangers..." Kids make choices that teach science, conservation, and problem-solving. Each story generated dynamically based on current learning topics.
+
+### 6. Daily Expedition Log
+Every day starts with Mr. Helmy's "morning briefing" and ends with an expedition log. Kids dictate or write what they learned, what they saw, what they're curious about. Over time, each kid builds a personal journal — part diary, part science notebook, part portfolio. Parents and school owner can see it.
+
+### 7. Weather & Environment Integration
+Mr. Helmy checks actual local weather, tide times, water temperature, wind conditions. Teaches from it:
+- "Wind is 25 knots — too rough for snorkeling. Let's talk about why wind creates waves..."
+- "Spring tide today — reef flat will be exposed. Perfect for a rock pool expedition."
+- "Water is 28°C — close to coral bleaching territory..."
+Real data, real science, real relevance.
+
+### 8. Language Buddy
+Immersive English practice tied to their world:
+- Label everything on the reef in English and Arabic
+- Practice hotel check-in dialogues
+- Describe field trip observations in English
+- Voice recognition scores pronunciation
+- Progress from simple words (fish, coral, beach) to full sentences ("Welcome to our resort, can I help you with your luggage?")
+
+### 9. Parent/Community Dashboard
+Beyond school owner — hotel owner parents can see:
+- What their kid learned today
+- Conservation knowledge relevant to their business
+- Tourism skills their kid is developing
+- Suggestions: "Ahmed learned about reef-safe sunscreen — your hotel could stock it"
+The school becomes a bridge between education and the community's economy.
+
+### 10. Seasonal Curriculum
+Mr. Helmy adapts to what's happening in the environment right now:
+- **Turtle nesting season** → turtle biology, night beach monitoring
+- **Coral spawning** → reproduction, life cycles
+- **Migration season** → whale sharks, dolphins, migratory birds
+- **Tourist high season** → hospitality practice ramps up, English intensifies
+- **Ramadan** → cultural awareness, adjusted schedule
+The curriculum breathes with the coast.
+
+### 11. Achievement Expeditions
+Mastering milestones unlocks real-world reward expeditions:
+- Master 20 fish species → guided snorkeling trip with camera mission
+- Complete hospitality English level 3 → shadow a real hotel receptionist
+- Finish coral health module → join an actual reef monitoring snorkel
+Learning leads to real experiences, not just digital badges.
+
+### 12. Inter-School Connections
+When other schools adopt Horizon (or Nuri schools connect):
+- Video-call students in Cairo, London, Tokyo — practice English, share their reef
+- Compare environments: "We have coral reefs, what do you have?"
+- Collaborative projects: coastal kids study marine pollution, city kids study river pollution — where does it connect?
+Kids go from isolated to globally connected.
+
+---
+
 ## Open Questions (For Us)
 
 - **American curriculum standard:** Need to know which one before building curriculum data files

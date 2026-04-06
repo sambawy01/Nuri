@@ -546,6 +546,65 @@ Fun, non-formal exposure to languages tourists speak: Italian ("Buongiorno!"), G
 
 ---
 
+## Certification — Decided: Option C (Clonlara + Iowa Assessments)
+
+### Accredited Transcripts: Clonlara School
+- **Accreditation:** MSA-CESS (Middle States Association) — recognized worldwide
+- **Program:** Off-Campus Program — use your own curriculum, Clonlara certifies
+- **Cost:** ~$1,460/student/year + $210 registration (first year)
+- **How it works:** Mr. Helmy auto-generates 2 progress reports per year from mastery data, portfolio work, and expedition logs. Clonlara reviews and issues official accredited transcripts showing grade completion.
+- **Students in 80+ countries.** Explicitly designed for families/schools using their own curriculum.
+- **Transcripts can be Apostilled** (Egypt is Hague Convention member) for legal recognition.
+- **Website:** clonlara.org
+
+### Standardized Testing: Iowa Assessments via Seton Testing
+- **Test:** IOWA E Online Complete
+- **Cost:** ~$50/student/year
+- **How it works:** Kids take the test online on their tablets. Facilitator proctors. Results show nationally-normed percentile scores and grade-level equivalency.
+- **Mr. Helmy adds Iowa prep module** 2-3 weeks before test date.
+- **Website:** setontesting.com
+
+### What Mr. Helmy Auto-Generates for Certification
+
+| Certification Task | Mr. Helmy's Role |
+|-------------------|-----------------|
+| Progress reports (2/year) | Auto-generated from mastery data, portfolios, expedition logs |
+| Portfolio documentation | Every lesson, assessment, project, field trip already logged |
+| Standardized test prep | Iowa prep module activated 2-3 weeks before test |
+| Test administration | Kids take Iowa E Online on tablets, facilitator proctors |
+| Transcript data mapping | Maps each child's mastery to American grade-level standards |
+
+### Total Annual Cost for 8 Kids
+- Clonlara: ~$13,000
+- Iowa Assessments: ~$400
+- **Total: ~$13,400/year for full international certification**
+
+### The Path for These Kids
+
+```
+Ages 5-11: Horizon School (Grades K-5)
+├── Daily: Mr. Helmy teaches American curriculum + Conservation + Tourism
+├── Yearly: Clonlara issues accredited transcript per grade
+├── Yearly: Iowa Assessment confirms grade-level performance
+└── Portfolio: Rich evidence (species guides, projects, presentations)
+
+Ages 11-12+: Secondary school options
+├── International school in Egypt (El Gouna, Cairo) — transcripts accepted
+├── International school abroad — Clonlara + Iowa scores accepted globally
+├── Online secondary school (Bridgeway, IVLA, Laurel Springs)
+└── Or: Horizon expands to cover secondary grades
+```
+
+### Long-Term: Direct Cognia Accreditation
+When Horizon grows past 15-20 students or opens more schools, pursue Cognia accreditation directly ($5,000-15,000 setup). "Horizon School" on the transcript instead of Clonlara. Year 2-3 goal, not launch requirement.
+
+### Action Items
+1. Contact Clonlara (clonlara.org) — ask about enrolling 6-10 students from a small school in Egypt, group pricing
+2. Order Iowa E Online from Seton Testing (setontesting.com) for baseline assessment
+3. Contact NWEA about MAP Growth school account (optional — more recognized internationally than Iowa, ~$10-15/student/test)
+
+---
+
 ## Open Questions (For Us)
 
 - **American curriculum standard:** Need to know which one before building curriculum data files

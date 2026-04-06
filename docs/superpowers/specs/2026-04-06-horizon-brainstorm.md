@@ -426,14 +426,78 @@ Mr. Helmy announces the shift: "Summer schedule starts tomorrow — reef at 7:00
 
 ---
 
+## The Facilitator — Horizon's Human Heart
+
+### Who They Are
+Someone already in the community. Not a hired teacher from Cairo. Most likely: a hotel employee, a parent, a semi-retired staff member, or the school owner's appointee. Does NOT need a teaching degree, curriculum experience, or fluent English. DOES need: genuine care for the kids, reliability, patience, physical fitness for field trips, basic first aid, comfort around water.
+
+**Mr. Helmy is the brain. The facilitator is the body and the heart.**
+
+### What They Do — By Block
+
+| Time | Block | Facilitator's Role |
+|------|-------|-------------------|
+| 7:15 | Pre-arrival | Opens classroom, checks Facilitator Dashboard for flags/field trip prep, sets out tablets |
+| 7:30 | Morning Circle | Be present and warm. Watch the room — read human signals the camera misses. Sit next to any distressed child. |
+| 7:45 | Core Block 1 | During group lesson: sit WITH kids, help young ones focus, manage physical disruptions. During individual practice: circulate, help with tablet issues, encourage stuck kids, watch for frustration. |
+| 8:30 | Movement Break | **Lead this. Mr. Helmy is OFF.** Take kids outside. Play WITH them. This is where trust is built. Also: private check-ins with kids who seemed off. |
+| 8:45 | Field Learning (MWF) | **Irreplaceable.** Check safety gear, make weather calls, lead the group physically, manage water safety, count heads, handle the unexpected (injuries, weather changes, curious tourists). Mr. Helmy teaches through tablets; facilitator handles the physical world. |
+| 8:45 | Core Block 2 (TuTh) | Same as Block 1. For science experiments: be the hands (help with equipment, pouring, measuring). |
+| 9:45 | Snack Break | **Second human time.** Eat WITH the kids. Notice who has no food. Learn about their lives. |
+| 10:05 | Local Subjects | Help with physical project work. Play supporting roles in tourism simulations. Manage peer teaching pairings. |
+| 10:45 | Creative Break | Lead creative activities — drawing, building, music. No tablets. Hands and materials. |
+| 11:00 | Core Block 3 | Lightest block. Check dashboard, prep for tomorrow, respond to parent messages. |
+| 11:30 | Closing | Help young kids with expedition logs. Add personal touch: "I'm proud of how you worked together today." High-fives at the door. |
+| 11:45 | After kids leave | Lock tablets, review Mr. Helmy's End of Day Report, flag serious concerns to school owner/parents. |
+
+### The Facilitator Dashboard (Arabic-first)
+
+| Section | What It Shows |
+|---------|--------------|
+| Today's Plan | Schedule, field trip details, equipment needed, weather |
+| Kid Alerts | Flags from yesterday: emotional state, struggles, "check in with Sara" |
+| During Class | Real-time engagement: green/yellow/red dots next to each child's name |
+| Parent Messages | Overnight messages: "Ahmed didn't sleep well", "Layla has dentist at 10" |
+| End of Day | Summary per child, flags, recommended actions for tomorrow |
+
+### Training — 2 Weeks, Not a Degree
+
+**Week 1 — Orientation:**
+- Day 1: What Horizon is, what Mr. Helmy does, what YOU do
+- Day 2: Facilitator Dashboard — how to read it, what to act on
+- Day 3: Tablet basics — power, charging, troubleshooting, waterproof cases
+- Day 4: First aid — reef injuries, heat exhaustion, basic CPR
+- Day 5: Water safety — reef supervision, rip currents, head counts, life vests
+
+**Week 2 — Practice with real kids:**
+- Days 6-7: Shadow the school owner running a Horizon day
+- Days 8-9: Co-lead (take over breaks and field trips)
+- Day 10: Solo lead with school owner observing
+
+**Ongoing:** Dashboard gives daily guidance. Monthly check-in with school owner. Mr. Helmy answers facilitator questions in Arabic.
+
+### Rules
+
+| Never | Why |
+|-------|-----|
+| Teach content or correct Mr. Helmy | AI handles pedagogy. Facilitator handles humanity. |
+| Override difficulty settings | The adaptive engine knows each kid's level better. |
+| Punish disengagement | Mr. Helmy adapts. Facilitator encourages. Neither punishes. |
+| Skip field trips | Field learning is core curriculum, not optional. |
+| Be on their phone during class | They need to see what the camera cannot. |
+| Share learning data beyond parents/owner | Privacy. |
+
+### The One-Line Job Description
+
+> Mr. Helmy can teach a child to multiply fractions. He cannot teach a child that they matter. That's the facilitator's job.
+
+---
+
 ## Open Questions (For Us)
 
 - **American curriculum standard:** Need to know which one before building curriculum data files
-- **Offline capability:** Red Sea coast may have unreliable internet — how much should work offline?
 - **Arabic language support:** Are we teaching English as a foreign language, or is instruction bilingual?
 - **Mr. Helmy's visual design:** What does he look like? Photo-realistic, illustrated, animated?
-- **Assessment/grading:** Does Horizon need formal report cards, or is Nuri-style XP/mastery sufficient?
-- **Parent/guardian dashboard:** Adapt Nuri's parent dashboard for a school supervisor view?
 - **Multi-grade group lessons:** How does Mr. Helmy handle a room with a 5-year-old and an 11-year-old in the same lesson?
 
 ---

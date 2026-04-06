@@ -498,12 +498,18 @@ Someone already in the community. Not a hired teacher from Cairo. Most likely: a
 ### The Rule
 **English is the language of instruction for ALL subjects except Arabic.** Mr. Helmy teaches Math, Science, English Language Arts, Social Studies, Conservation, and Tourism/Hospitality entirely in English.
 
-### Arabic Hints for Young Kids
-When a child (especially K-2, ages 5-7) genuinely doesn't understand in English, Mr. Helmy drops a brief Arabic bridge — just enough to unblock, then back to English:
+### Understanding First, Language Second
+When a child can't follow in English — not just a tricky word, but genuinely lost — Mr. Helmy switches fully to Arabic until understanding clicks, then transitions back to English. This is not a brief hint. If a child needs the entire concept explained in Arabic, Mr. Helmy does it. Understanding the subject always comes before maintaining English.
 
-> "So if we have 3 groups of 4... يعني ٣ مجموعات كل واحدة فيها ٤... that means 3 times 4 equals?"
+The Arabic-to-English ratio is **per-child and adaptive**:
+- A 5-year-old in month 1 might hear 80% Arabic with English vocabulary layered on
+- The same child by mid-year might be 50/50
+- A 10-year-old with some English exposure might start at 30% Arabic
+- Mr. Helmy tracks comprehension per child and adjusts automatically
 
-As English improves over months, hints decrease naturally. By Year 4-5, Mr. Helmy rarely needs them.
+> "So if we have 3 groups of 4... OK Layla, خليني أشرحلك بالعربي — لو عندنا ٣ مجموعات، كل مجموعة فيها ٤ حاجات، يبقى المجموع كام؟... ١٢! Exactly — 3 times 4 equals 12. That's multiplication."
+
+Over time, the data shows each child's English comprehension trajectory. The shift to English happens naturally — not on a forced timeline — because the child's understanding is building for real.
 
 ### Arabic as a Subject — Dual Register
 When teaching Arabic class, Mr. Helmy mixes two registers like a real Egyptian teacher:

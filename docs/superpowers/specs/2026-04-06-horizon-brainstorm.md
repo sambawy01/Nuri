@@ -83,6 +83,71 @@ Nuri (core)
 - **Free exploration** — real-time guided discovery with Mr. Helmy as field guide
 - Reef, beach, desert, hotels, boats — all are classrooms
 
+### Adaptive Intelligence — Mr. Helmy Gets Smarter Over Time
+
+Mr. Helmy isn't static. Every interaction makes him a better teacher for these specific kids in this specific environment.
+
+#### What He Learns About Each Kid
+
+**Academic profile (builds over weeks):**
+- Actual grade level vs age (a 9-year-old might read at grade 2)
+- Subject strengths and weaknesses
+- Specific misconceptions — "Sara always confuses multiplication with addition"
+- Learning speed per topic area
+
+**Behavioral profile (builds over weeks):**
+- Attention span patterns — "Youssef loses focus after 12 minutes"
+- Emotional patterns — "Mona shuts down after two wrong answers in a row"
+- Motivation triggers — competition, collaboration, praise, independence
+- Topic passions — "Ahmed lights up at anything marine life"
+
+**Learning style (inherits Nuri's 5-dimension model):**
+- Visual, analogy, example-first, auditory, try-first
+- Deepened with Horizon-specific data: field vs classroom, group vs individual
+
+#### What He Learns About The Group (New — Nuri Only Teaches Individuals)
+
+- **Group energy patterns** — Mondays are slow, Thursdays they're fired up
+- **Optimal lesson length** — data shows this group's max before engagement drops
+- **Best subject sequencing** — conservation after math works better than before
+- **Group dynamics** — which kids work well paired, who gets distracted by whom
+- **Pacing calibration** — how fast to move through new material for this mix
+
+#### Growth Timeline
+
+| Period | Mr. Helmy's Capability |
+|--------|----------------------|
+| **Week 1** | Follows curriculum plan. Generic pacing, standard approach. Learning names and faces. |
+| **Month 1** | Knows each kid's level. Starts differentiating — harder questions for advanced kids, more support for struggling ones, within the same group lesson. |
+| **Month 3** | Identified each kid's learning style, motivation triggers, attention patterns. Lessons are tailored. Knows "If I tell a reef story first, this group pays attention 40% longer." |
+| **Month 6** | Built a library of tested explanations — knows which ones click and which don't. Starts **predicting** where kids will struggle before they get there. |
+| **Year 1** | Deep profile on every child. Knows growth trajectories. Generates report cards backed by thousands of data points. Can tell the school owner "Youssef grew 2 grade levels in math but needs more English reading support." |
+
+#### Intelligence Infrastructure (Inherited + New)
+
+**Inherited from Nuri's core:**
+- `teaching_outcomes` — tracks which teaching approach worked per topic
+- `golden_explanations` — stores explanations that proved effective
+- `error_fix_patterns` — maps error types to successful fix approaches
+- `learning_style_profiles` — tracks what works per kid
+- `session_memory` — remembers mood, struggles, breakthroughs
+
+**New for Horizon:**
+- **Group intelligence** — learning about the class as a unit, not just individuals
+- **Temporal patterns** — time of day, day of week, seasonal trends
+- **Cross-kid learning** — "The explanation that worked for Sara also works for kids with similar profiles"
+- **Curriculum adaptation** — reshapes lesson sequence based on what actually works for these kids
+- **Environment correlation** — connects field trip observations to classroom performance
+
+#### The Flywheel: Cross-School Learning
+
+Critically, what Mr. Helmy learns feeds back into Nuri's core:
+- Golden explanations discovered in Horizon improve Nuri for all users
+- Teaching approach effectiveness data enriches the shared engine
+- If a second Horizon school opens, it starts with everything the first school taught Mr. Helmy
+
+A human teacher's knowledge retires when they do. Mr. Helmy's knowledge compounds forever.
+
 ### Repo Strategy
 - Separate branch or fork from Nuri main repo (TBD — likely branch for shared camera layer, fork or directory for Horizon-specific code)
 

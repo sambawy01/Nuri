@@ -305,6 +305,69 @@ Kids go from isolated to globally connected.
 
 ---
 
+## Research-Backed Implementation Priorities
+
+Based on comprehensive research across homeschooling, online education, and AI-powered learning (see `horizon-paper-complete.md` for full paper).
+
+### P0 — Must Have Day One
+
+**1. Mastery-Based Adaptive Teaching Engine**
+Per-child knowledge graph tracking every skill. Misconception detection (WHY they're wrong, not just THAT they're wrong). Multiple explanation strategies per concept. No grade levels — skill continuums per subject. A 7-year-old can be "grade 4" reading and "grade 2" math simultaneously. *Evidence: Bloom's 2-Sigma (1984), RAND mastery research (2023) showing 14% better college performance.*
+
+**2. Voice-First Interaction**
+Ages 5-7: Mr. Helmy reads everything aloud, kids answer by speaking or tapping. No typing. Ages 8-11: voice + text hybrid. Speech recognition tuned for children's pronunciation. *Evidence: 0.51 SD increase in comprehension with dialogic approaches (ACM CHI, 2024).*
+
+**3. Active Learning Loop — Never Passive**
+Mr. Helmy NEVER lectures more than 2-3 minutes without requiring a response. Every interaction = answer, predict, explain, draw, speak. Productive failure before instruction. Elaborative interrogation after every answer. No "watch this video" mode. *Evidence: COVID learning loss data — passive = 4.8 months behind. Active = 0.33-0.43 SD improvement.*
+
+### P1 — Build Immediately After Core
+
+**4. Mr. Helmy Character + Social Presence**
+Consistent personality, stories, humor. Remembers everything about each child. Greets by name. Has opinions and preferences. Realistic illustration, not cartoon. Kids know he's AI but feel he's "their teacher." *Evidence: Social presence theory (Xu, 2026), parasocial relationship research (Gola et al., 2013).*
+
+**5. Session Timing + Camera-Triggered Breaks**
+15-20 min group lesson → 15-20 min individual practice → break → repeat. Camera detects attention drop and triggers early breaks. K-1: even shorter (10-15 min). *Evidence: Screen time research consensus for ages 5-11.*
+
+**6. Spaced Repetition + Interleaving Engine**
+Every mastered concept enters spaced repetition queue. Mr. Helmy weaves review into new lessons naturally. Mix topics within practice sessions. Track memory decay per concept per child. *Evidence: Duolingo's algorithm = 30% improvement. Roediger & Karpicke (2006, 2008).*
+
+**7. Offline-First Architecture**
+Local compute node runs compressed teaching engine without internet. Sync when connected, seamless when not. Kids never notice an outage. *Evidence: Remote community infrastructure reality.*
+
+### P2 — Build Once Foundation Works
+
+**8. Camera Integration (Face Recognition + Engagement)**
+Automatic attendance, personalized greetings, engagement tracking, confusion detection, hand-raise detection, participation tracking. Feeds STRUCTURED DATA to Mr. Helmy, not raw video. Transparent to kids and parents. *Evidence: EduSense (Carnegie Mellon, 2019), social presence research.*
+
+**9. Field Learning (Tablet Camera + Species ID)**
+Camera as scientific instrument. Real-time species identification → teaching moment → expedition log → Digital Reef Twin. Cross-curricular by design: reef survey = science + math + English + conservation. *Evidence: Place-based learning research (Sobel, 2004; Gruenewald, 2003).*
+
+**10. Peer Teaching Mode**
+Mr. Helmy pairs older + younger kids for specific topics. Camera watches, coaches the older child on teaching technique. Older child earns XP for teaching. *Evidence: Protégé effect (Chase et al., 2009), multi-age classroom research.*
+
+### P3 — Layer On Top
+
+**11. Meaningful Gamification**
+XP = real mastery demonstrated, never inflated. XP never decreases. Achievement Expeditions unlock real experiences. Progress visualization tied to skill growth. No competitive leaderboards. *Evidence: Gamification meta-analysis effect size 0.822, but only when meaningful (Frontiers, 2023).*
+
+**12. Early Detection System**
+Dyslexia, dyscalculia, ADHD, processing delays via camera + academic data. Anxiety, withdrawal, low self-esteem via behavioral patterns. Three-level response: adapt → flag → specialist report. *Evidence: AI early detection outperforms human observation timing (EdTech Hub, 2025).*
+
+**13. Tourism Simulation + Language Buddy**
+Mr. Helmy role-plays tourists. Immersive English tied to their world. Pronunciation scoring. Hotel check-in dialogues. *Career-relevant but not day-one essential.*
+
+### P4 — Polish and Scale
+
+**14. Digital Reef Twin, Weather Integration, Seasonal Curriculum, Inter-School Connections, Virtual Guest Speakers**
+Powerful features that build on the working foundation. Each adds depth but none are blocking for launch.
+
+### Critical Non-Software Requirement
+
+**15. Human Facilitator — Not Optional**
+A caring adult in the room. Not a trained teacher — a present, supportive person who handles safety, comfort, field trips, conflict, and the moments AI cannot touch. Mr. Helmy does pedagogy. The facilitator does humanity. *Evidence: Attachment theory (Bowlby, 1969), AI over-reliance research (Taylor & Francis, 2025).*
+
+---
+
 ## Open Questions (For Us)
 
 - **American curriculum standard:** Need to know which one before building curriculum data files

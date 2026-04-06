@@ -607,7 +607,7 @@ When Horizon grows past 15-20 students or opens more schools, pursue Cognia accr
 
 ## Open Questions (For Us)
 
-- **American curriculum standard:** Need to know which one before building curriculum data files
+- **Curriculum standard:** School owner said "Macmillan" — need to identify exact program. Awaiting: photo of textbook covers, which subjects covered, which grade levels. Mr. Helmy's skill graph architecture works with any curriculum — just need the specific scope and sequence to build from.
 - **Mr. Helmy's visual design:** What does he look like? Photo-realistic, illustrated, animated?
 - **Multi-grade group lessons:** How does Mr. Helmy handle a room with a 5-year-old and an 11-year-old in the same lesson?
 

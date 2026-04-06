@@ -493,10 +493,56 @@ Someone already in the community. Not a hired teacher from Cairo. Most likely: a
 
 ---
 
+## Language Model — Decided
+
+### The Rule
+**English is the language of instruction for ALL subjects except Arabic.** Mr. Helmy teaches Math, Science, English Language Arts, Social Studies, Conservation, and Tourism/Hospitality entirely in English.
+
+### Arabic Hints for Young Kids
+When a child (especially K-2, ages 5-7) genuinely doesn't understand in English, Mr. Helmy drops a brief Arabic bridge — just enough to unblock, then back to English:
+
+> "So if we have 3 groups of 4... يعني ٣ مجموعات كل واحدة فيها ٤... that means 3 times 4 equals?"
+
+As English improves over months, hints decrease naturally. By Year 4-5, Mr. Helmy rarely needs them.
+
+### Arabic as a Subject — Dual Register
+When teaching Arabic class, Mr. Helmy mixes two registers like a real Egyptian teacher:
+
+- **Egyptian colloquial (عامية)** — for framing, explanations, jokes, making kids comfortable: "طيب يا جماعة النهاردة هنتعلم عن..."
+- **Modern Standard Arabic (فصحى)** — for formal content: reading, writing, grammar, dictation, literature
+
+Mr. Helmy models natural code-switching: amiya to chat, fusha to teach. This is exactly how every Egyptian classroom works.
+
+### Arabic Curriculum (2-3 sessions/week)
+
+| Year | Focus |
+|------|-------|
+| K-Y1 | Alphabet recognition, letter formation, connecting letters, short vowels (tashkeel), basic reading |
+| Y2-Y3 | Reading fluency, simple composition, MSA grammar basics, dictation |
+| Y4-Y5 | Formal grammar (nahw/sarf basics), essay writing, reading literature, comprehension |
+| Y6 | Advanced composition, formal letters, reading news, public speaking in Arabic |
+
+Handwriting practice via tablet camera — Arabic script needs physical practice. Mr. Helmy reads aloud in fusha, discusses in amiya.
+
+### Tourism Language Tasters
+Fun, non-formal exposure to languages tourists speak: Italian ("Buongiorno!"), German ("Guten Morgen!"), French ("Bonjour!"). Not a curriculum — a weekly 5-minute fun segment during Tourism/Hospitality block. Incredibly useful for future hospitality careers.
+
+### Summary
+
+| Context | Language |
+|---------|----------|
+| Math, Science, ELA, Social Studies, Conservation, Tourism | **English** (with brief Arabic hints for young kids when stuck) |
+| Arabic class | **Arabic** — amiya for framing + fusha for content |
+| Facilitator Dashboard | **Arabic-first** |
+| Field trips | **English** narration via tablets, Arabic between kids naturally |
+| Tourism simulation | **English** (that's the whole point) |
+| Parent/Community Dashboard | **Arabic + English** |
+
+---
+
 ## Open Questions (For Us)
 
 - **American curriculum standard:** Need to know which one before building curriculum data files
-- **Arabic language support:** Are we teaching English as a foreign language, or is instruction bilingual?
 - **Mr. Helmy's visual design:** What does he look like? Photo-realistic, illustrated, animated?
 - **Multi-grade group lessons:** How does Mr. Helmy handle a room with a 5-year-old and an 11-year-old in the same lesson?
 

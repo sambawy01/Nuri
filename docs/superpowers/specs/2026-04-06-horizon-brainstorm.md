@@ -368,6 +368,64 @@ A caring adult in the room. Not a trained teacher — a present, supportive pers
 
 ---
 
+## Daily Schedule
+
+### Cool Season (Oct-Apr) — Standard Day: 7:30-11:45 (4 hours 15 min)
+
+| Time | Block | Duration | Mode | Details |
+|------|-------|----------|------|---------|
+| **7:30** | Morning Circle | 15 min | Projector, group | Camera greets kids by name. Mr. Helmy's Morning Briefing: weather, tides, water temp, yesterday review, today's plan. |
+| **7:45** | Core Academic Block 1 | 45 min | Group → Individual | 20 min group lesson on projector (new concept, interactive) → 20 min individual practice on tablets (mastery-level adapted) → 5 min check-out. Camera releases young kids to tablets early if attention drops. |
+| **8:30** | Movement Break | 15 min | Outdoor, facilitator-led | Physical play, running, stretching. Mr. Helmy is OFF. Human time. |
+| **8:45** | Field Learning (MWF) *or* Core Block 2 (TuTh) | 60 min / 45 min | Tablets outdoors *or* group + individual | **MWF:** Mission briefing → field work at reef/beach/hotel with tablets → debrief. **TuTh:** Second core subject (Science or Social Studies). |
+| **9:45** | Snack Break | 20 min | Social, facilitator-led | Food, water, conversation. Mr. Helmy is OFF. |
+| **10:05** | Local Subjects Block | 40 min | Group → Project work | Conservation (MWF) or Tourism/Hospitality (TuTh). Connect field observations to theory. Project work: expedition logs, species profiles, tourism brochures, data analysis. |
+| **10:45** | Creative Break | 15 min | Facilitator-led | Art, drawing, building, music. Can be learning-related or free. |
+| **11:00** | Core Block 3 (Review) | 30 min | Mixed | Spaced repetition review, quiz games, reading/story time. Lighter intensity for end of day. |
+| **11:30** | Expedition Log + Closing | 15 min | Individual → Group | Kids write/dictate daily log. Mr. Helmy celebrates achievements, previews tomorrow. Ends on a high note. |
+| **11:45** | **Day Ends** | | | |
+
+### Weekly Subject Rotation
+
+| Day | Field Trip | Core 1 (7:45) | Core 2 (8:45) | Local Subject (10:05) |
+|-----|-----------|---------------|---------------|----------------------|
+| Monday | Conservation (reef/beach) | Math | — | Conservation |
+| Tuesday | — (indoor) | English | Science | Tourism/Hospitality |
+| Wednesday | Tourism (hotel/town) | Math | — | Conservation |
+| Thursday | — (indoor) | English | Social Studies | Tourism/Hospitality |
+| Friday | Free exploration | English | — | Peer teaching + log review |
+
+### Hot Season Adjustment (May-Sep)
+
+Flip for 40°C+ heat:
+- **7:00-8:30**: Field learning (cool morning)
+- **8:30-11:30**: Indoor academics (AC classroom during hottest hours)
+- **11:30**: Day ends
+
+Mr. Helmy announces the shift: "Summer schedule starts tomorrow — reef at 7:00 while it's cool, then inside for brain work."
+
+### Special Days
+
+- **Monthly Community Day** (last Friday): Kids present work to parents, hotel staff, community. Mr. Helmy hosts but kids lead.
+- **Achievement Expedition Day** (seasonal): Milestone rewards — deep snorkeling mission, hotel shadow day, guided desert hike. Full day, fully experiential.
+- **Ramadan**: Shorter day (7:30-10:30), lighter workload, focus on reading, story mode, creative projects, reflection.
+
+### Why This Schedule Works
+
+| Principle | Implementation |
+|-----------|---------------|
+| 15-25 min sessions | No block exceeds 20 min of same-mode activity |
+| Active, never passive | Every block has interaction, questions, doing |
+| Field = core | 3 field trips/week built into the rhythm |
+| Climate-aware | Outdoor in cool hours, indoor during heat |
+| Mixed-age friendly | Group with differentiation, individual at own level |
+| Spaced repetition | Morning review + Block 3 dedicated review + weekly cycle |
+| Bookended | Morning briefing opens, expedition log closes — daily metacognition |
+| Human time | Two breaks where Mr. Helmy is OFF and facilitator leads |
+| Short day | 4 hours total — research supports shorter, intensive sessions for this age |
+
+---
+
 ## Open Questions (For Us)
 
 - **American curriculum standard:** Need to know which one before building curriculum data files

@@ -609,7 +609,57 @@ When Horizon grows past 15-20 students or opens more schools, pursue Cognia accr
 
 - **Curriculum standard:** DECIDED — Macmillan International Primary. Full scope and sequence documented in `curriculum/macmillan-international-primary.md`. Math (Max Maths, Singapore approach, Grades 1-6), Science (Macmillan Science, Levels 1-6), English (Macmillan English, Levels 1-6). Aligns to Cambridge Primary. Confirm with school owner: which specific edition/series do they have?
 - **Mr. Helmy's visual design:** What does he look like? Photo-realistic, illustrated, animated?
-- **Multi-grade group lessons:** How does Mr. Helmy handle a room with a 5-year-old and an 11-year-old in the same lesson?
+- **Multi-grade group lessons:** DECIDED — see Mixed-Age Teaching Strategy below.
+
+---
+
+## Mixed-Age Teaching Strategy — Decided
+
+### Core Principle: Same Topic, Different Depth
+
+Mr. Helmy teaches the same **topic** at different **depths** simultaneously. The topic is the shared experience. The depth is personalized.
+
+### Three Modes
+
+**Mode 1: Layered Group Lesson (Projector, 15-20 min)**
+Four layers delivered in sequence:
+1. **Hook** (everyone) — story, photo, mystery, question. Accessible to youngest child.
+2. **Basic concept** (young kids absorb, older kids review) — simple explanation.
+3. **Extension** (older kids engage, young kids draw or listen) — deeper questions, data analysis, connections.
+4. **Challenge** (oldest kids, optional) — complex application, real-world calculation.
+
+Camera detects when young kids disengage → Mr. Helmy transitions them to tablets early while continuing with older kids.
+
+**Mode 2: Split Practice (Tablets, 15-20 min)**
+Every child at their own mastery level. Same topic, completely different activities:
+- 5-year-old: counting fish in pictures, drag-and-drop
+- 8-year-old: multiplication word problems about coral colonies
+- 11-year-old: data analysis, persuasive writing using survey evidence
+
+No child knows they're at a "different level" — they just have their own mission.
+
+**Mode 3: Peer Teaching (Structured Pairing, 10-15 min)**
+Mr. Helmy pairs older + younger kids (never more than 3 years apart). Older child teaches, younger child learns. Mr. Helmy coaches the older child via earbud: "She looked confused when you said 'colony' — try saying 'a family of coral'." Both earn XP. Pairs rotate across the year.
+
+### Subject-Specific Strategies
+
+| Subject | Mixed-Age Approach |
+|---------|-------------------|
+| **Math** | 5-min group hook only, then tablets FAST. Widest skill gap — individual practice is essential. |
+| **English** | Works well in groups. Same story read aloud, different comprehension/writing tasks per level. Tourism role-play adjusts complexity per child. |
+| **Science** | Field trips are the great equalizer — every child observes, but what Mr. Helmy asks them to do with observations differs by level. |
+| **Conservation** | Spiral curriculum (same strands Y2-Y6 at increasing depth) naturally supports mixed ages in one room. |
+
+### Mr. Helmy's Advantage Over a Human Teacher
+
+A human teacher juggles "where is each child, what do they need next?" and gets exhausted. Mr. Helmy has a real-time model of every child's exact position on every skill graph. When he asks a group question, he already knows which children can answer it, which it will stretch, which it will confuse, who hasn't spoken in 5 minutes, and who needs the Arabic bridge. No cognitive overload. That's why AI in a mixed-age classroom is potentially **better** than a human at differentiation.
+
+### What Breaks It
+
+- Group lessons that drag at one level too long
+- Math taught as group lecture (gap too wide — go to tablets quickly)
+- Unstructured peer teaching (older kid does the work instead of teaching)
+- Facilitator not watching social dynamics (age power imbalances)
 
 ---
 

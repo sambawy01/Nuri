@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Send, Sparkles, Lightbulb, Puzzle } from 'lucide-react';
+import { ArrowLeft, Send, Sparkles, Lightbulb, Puzzle, Volume2, VolumeX } from 'lucide-react';
 import { api } from '../lib/api';
 import { useProfile } from '../context/ProfileContext';
 import { subjects } from '../lib/subjects';
@@ -44,6 +44,9 @@ export default function LearnPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [owlState, setOwlState] = useState('idle');
+  const [audioMuted, setAudioMuted] = useState(() => {
+    return localStorage.getItem('nuri_audio_muted') === 'true';
+  });
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const sessionIdRef = useRef(restoredLearn?.sessionId || null);
@@ -56,6 +59,17 @@ export default function LearnPage() {
     'Quiz Me 🧩': 'try_first',
   };
   const { speak } = useVoice();
+
+  function toggleAudio() {
+    setAudioMuted(prev => {
+      const newVal = !prev;
+      localStorage.setItem('nuri_audio_muted', String(newVal));
+      if (newVal) {
+        window.speechSynthesis?.cancel();
+      }
+      return newVal;
+    });
+  }
 
   // Persist learn session for back-button recovery
   useEffect(() => {
@@ -111,7 +125,7 @@ export default function LearnPage() {
           setMessages(prev => [...prev, { text, isNuri: true }]);
         }
         // Speak the full response
-        if (text) speak(text, { lang: subject === 'arabic' ? 'ar-SA' : 'en-US' });
+        if (text && !audioMuted) speak(text, { lang: subject === 'arabic' ? 'ar-SA' : 'en-US' });
         return;
       }
 
@@ -158,7 +172,7 @@ export default function LearnPage() {
               const match = unspoken.match(/^(.*?[.!?،؟])\s/);
               if (match) {
                 const sentence = match[1].trim();
-                if (sentence.length > 2) {
+                if (sentence.length > 2 && !audioMuted) {
                   speak(sentence, { lang: subject === 'arabic' ? 'ar-SA' : 'en-US', interrupt: false });
                 }
                 spokenUpTo += match[0].length;
@@ -170,7 +184,7 @@ export default function LearnPage() {
 
       // Speak any remaining text after stream ends
       const remaining = fullText.substring(spokenUpTo).trim();
-      if (remaining.length > 2) {
+      if (remaining.length > 2 && !audioMuted) {
         const waitForSpeech = () => {
           if (window.speechSynthesis?.speaking) {
             setTimeout(waitForSpeech, 200);
@@ -297,6 +311,17 @@ export default function LearnPage() {
           className="text-gray-500 hover:text-gray-700"
         >
           <ArrowLeft size={22} />
+        </button>
+        <button
+          onClick={toggleAudio}
+          className="p-2 rounded-full hover:bg-white/20 transition-colors"
+          title={audioMuted ? 'Turn audio on' : 'Turn audio off'}
+        >
+          {audioMuted ? (
+            <VolumeX size={20} className="text-gray-500" />
+          ) : (
+            <Volume2 size={20} className="text-gray-500" />
+          )}
         </button>
         <NuriOwl size="sm" state={owlState} level={currentProfile?.level || 1} />
         <div>

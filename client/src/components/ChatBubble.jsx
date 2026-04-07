@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
 import NuriOwl from './NuriOwl';
 import SpeakerButton from './SpeakerButton';
 
@@ -24,7 +25,13 @@ export default function ChatBubble({ message, isNuri, subjectColor, owlState, ow
           }`}
           style={!isNuri ? { backgroundColor: subjectColor || '#A855F7' } : undefined}
         >
-          <p className="whitespace-pre-wrap">{message}</p>
+          {isNuri ? (
+            <div className="prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-headings:my-1 prose-headings:text-base">
+              <ReactMarkdown>{message}</ReactMarkdown>
+            </div>
+          ) : (
+            <p className="whitespace-pre-wrap">{message}</p>
+          )}
         </div>
         {isNuri && message && (
           <div className="pl-1">

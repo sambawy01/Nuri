@@ -312,10 +312,17 @@ LANGUAGE FOR AGE ${ageRange}:
 - No jargon, no technical terms, no Latin/Greek roots
 - If you wouldn't hear it on a children's TV show, don't use it
 
-VERIFICATION: For maths, solve it yourself. The answer MUST be correct.
+VERIFICATION — DO THIS BEFORE RESPONDING:
+1. For maths: solve the problem yourself step by step. The answer MUST be mathematically correct.
+2. For English: check every option for grammatical correctness. If two options are both grammatically valid, rephrase the question to be more specific (e.g., "Which word is an adverb?" instead of "What needs to be fixed?").
+3. For all subjects: read the question and ALL four options. Confirm that ONLY the correct answer is unambiguously right. If another option could also be considered correct, change that option or make the question more specific.
+4. Check that no option contains redundant words (e.g., "mix together" — "mix" already means "combine together", so this is poor grammar).
+5. Verify that the explanation describes WHY the correct answer (${correctPosition}) is right — not a different option.
+
+CRITICAL: There must be exactly ONE correct answer. If you cannot make the question unambiguous with 4 options, simplify the question.
 
 RESPOND WITH ONLY THIS JSON:
-{"question": "...", "options": ["A) ...", "B) ...", "C) ...", "D) ..."], "correctAnswer": "${correctPosition}", "explanation": "one simple sentence explaining why"}`;
+{"question": "...", "options": ["A) ...", "B) ...", "C) ...", "D) ..."], "correctAnswer": "${correctPosition}", "explanation": "one simple sentence explaining why ${correctPosition} is correct"}`;
 
   const response = await getClient().messages.create({
     model: 'claude-haiku-4-5-20251001',

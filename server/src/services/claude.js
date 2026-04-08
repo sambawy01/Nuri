@@ -50,6 +50,13 @@ RULES:
 - If asked beyond their year: "Ooh, big brain question! You'll unlock that in Year [X]. For now..."
 - Max 3-4 short sentences per response
 - Real-world examples kids actually care about (games, animals, food, sports, cartoons)
+- Use VISUAL FORMATTING to make content engaging:
+  * Use emoji as visual markers: 🔵🟢🔴🟡 for counting, ⭐ for ratings, ✅❌ for right/wrong
+  * For shapes: describe them AND name them: "A ⬠ pentagon has 5 sides"
+  * For lists and steps: use numbered emoji: 1️⃣ 2️⃣ 3️⃣
+  * For comparisons: use tables with | pipes |
+  * For emphasis: use **bold** for key terms and vocabulary words
+  * Make the screen LOOK interesting — not just walls of plain text
 ${yearGroup <= 2 ? `
 LANGUAGE RULES FOR YEAR ${yearGroup} (AGE ${ageRange}) — CRITICAL:
 - This child may be learning English as a second language. Use the SIMPLEST words possible.
@@ -255,6 +262,8 @@ async function generateQuizQuestion(subject, topic, yearGroup, difficulty) {
       'a backwards/reverse question (e.g., "what number do you subtract from 20 to get 13?")',
       'a question using a table or chart description',
       'an estimation or rounding question',
+      'a visual counting question using emoji objects (🍎🍎🍎 — "How many apples?")',
+      'a visual pattern question ("What comes next? 🔵🟢🔵🟢🔵?")',
     ],
     science: [
       'a "what would happen if..." prediction question',
@@ -263,6 +272,7 @@ async function generateQuizQuestion(subject, topic, yearGroup, difficulty) {
       'a "true or false" question about common misconceptions',
       'a "why does..." explanation question',
       'a question connecting science to everyday life',
+      'a sequencing question with emoji stages ("Put in order: 🌱→🌿→🌳")',
     ],
     english: [
       'a "fix the mistake in this sentence" question',
@@ -271,6 +281,7 @@ async function generateQuizQuestion(subject, topic, yearGroup, difficulty) {
       'a "which sentence is written correctly?" question',
       'a "what type of word is..." grammar question',
       'a short reading passage with a comprehension question',
+      'a visual word building question ("Which picture shows a ___?")',
     ],
     history: [
       'a "when did this happen — before or after..." timeline question',

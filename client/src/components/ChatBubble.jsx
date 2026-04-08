@@ -27,7 +27,20 @@ export default function ChatBubble({ message, isNuri, subjectColor, owlState, ow
         >
           {isNuri ? (
             <div className="prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-headings:my-1 prose-headings:text-base">
-              <ReactMarkdown>{message}</ReactMarkdown>
+              <ReactMarkdown
+                components={{
+                  img: ({ src, alt }) => (
+                    <img
+                      src={src}
+                      alt={alt || ''}
+                      className="rounded-xl max-w-full my-2 mx-auto block"
+                      style={{ maxHeight: '200px' }}
+                    />
+                  ),
+                  h1: ({ children }) => <h3 className="text-base font-bold my-1">{children}</h3>,
+                  h2: ({ children }) => <h3 className="text-base font-bold my-1">{children}</h3>,
+                }}
+              >{message}</ReactMarkdown>
             </div>
           ) : (
             <p className="whitespace-pre-wrap">{message}</p>

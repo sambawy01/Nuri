@@ -103,8 +103,8 @@ function getObjectives(subject, yearGroup, topicId, religionType) {
 /**
  * Get unique strands for a subject/year
  */
-function getStrands(subject, yearGroup) {
-  const topics = getTopics(subject, yearGroup);
+function getStrands(subject, yearGroup, religionType) {
+  const topics = getTopics(subject, yearGroup, religionType);
   if (!topics) return null;
   return [...new Set(topics.map(t => t.strand).filter(Boolean))];
 }
@@ -115,6 +115,7 @@ module.exports = {
   getTopicNames,
   getAgeRange,
   getCurriculumType,
+  getReligionTopics,
   getObjectives,
   getStrands,
 };

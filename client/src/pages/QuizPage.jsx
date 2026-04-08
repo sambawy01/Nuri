@@ -7,6 +7,8 @@ import { useProfile } from '../context/ProfileContext';
 import { subjects } from '../lib/subjects';
 import QuestionCard from '../components/QuestionCard';
 import CelebrationEffect from '../components/CelebrationEffect';
+import CelebrationBurst from '../components/CelebrationBurst';
+import XPPopup from '../components/XPPopup';
 import LoadingSpinner from '../components/LoadingSpinner';
 import NuriOwl from '../components/NuriOwl';
 import DifficultySelector from '../components/DifficultySelector';
@@ -47,6 +49,9 @@ export default function QuizPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [celebrate, setCelebrate] = useState(0);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [xpPopupTrigger, setXpPopupTrigger] = useState(0);
+  const [xpPopupAmount, setXpPopupAmount] = useState(0);
   const [showSummary, setShowSummary] = useState(false);
   const [xpFloat, setXpFloat] = useState(false);
   const [showConfidence, setShowConfidence] = useState(false);
@@ -154,6 +159,9 @@ export default function QuizPage() {
       setSessionXP((xp) => xp + xpGain);
       setQuizStreak((s) => s + 1);
       setCelebrate((c) => c + 1);
+      setShowCelebration(true);
+      setXpPopupAmount(xpGain);
+      setXpPopupTrigger((t) => t + 1);
       setXpFloat(true);
       updateXP(xpGain);
       setTimeout(() => setXpFloat(false), 1500);
@@ -485,6 +493,8 @@ export default function QuizPage() {
         </motion.button>
       )}
 
+      <CelebrationBurst show={showCelebration} onComplete={() => setShowCelebration(false)} />
+      <XPPopup amount={xpPopupAmount} trigger={xpPopupTrigger} />
       <LevelUpModal level={levelUpData?.level} visible={!!levelUpData} onClose={clearLevelUp} />
     </div>
   );

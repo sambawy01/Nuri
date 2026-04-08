@@ -6,6 +6,7 @@ import { useProfile } from '../context/ProfileContext';
 import { subjects, subjectKeys } from '../lib/subjects';
 import { api } from '../lib/api';
 import { getStageImage } from '../components/NuriOwl';
+import StreakFlame from '../components/StreakFlame';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function ProfilePage() {
@@ -60,6 +61,21 @@ export default function ProfilePage() {
   const questionsAnswered = stats?.questionsAnswered ?? 0;
   const masteries = stats?.subjectMastery || {};
 
+  // Level progress calculation using actual thresholds
+  const LEVEL_THRESHOLDS = [
+    { level: 1, xp: 0 }, { level: 2, xp: 100 }, { level: 3, xp: 250 },
+    { level: 4, xp: 500 }, { level: 5, xp: 800 }, { level: 6, xp: 1200 },
+    { level: 7, xp: 1700 }, { level: 8, xp: 2300 }, { level: 9, xp: 3000 },
+    { level: 10, xp: 4000 }, { level: 15, xp: 8000 }, { level: 20, xp: 15000 },
+    { level: 25, xp: 25000 }, { level: 30, xp: 40000 },
+  ];
+  const currentThreshold = LEVEL_THRESHOLDS.find(t => t.level === level);
+  const nextThreshold = LEVEL_THRESHOLDS.find(t => t.level > level);
+  const xpForCurrent = currentThreshold?.xp || 0;
+  const xpForNext = nextThreshold?.xp || xpForCurrent + 1000;
+  const levelProgress = Math.min(100, Math.max(0, ((xp - xpForCurrent) / (xpForNext - xpForCurrent)) * 100));
+  const xpToNext = Math.max(0, xpForNext - xp);
+
   return (
     <div className="min-h-screen px-4 py-6 max-w-lg mx-auto pb-24">
       {/* Back */}
@@ -98,6 +114,28 @@ export default function ProfilePage() {
           <Zap size={14} />
           Level {level}
         </div>
+
+        {/* Level progress bar */}
+        <div className="max-w-xs mx-auto mt-3">
+          <div className="w-full bg-gray-200 rounded-full h-2.5">
+            <motion.div
+              className="h-2.5 rounded-full bg-gradient-to-r from-orange-400 to-purple-500"
+              initial={{ width: 0 }}
+              animate={{ width: `${levelProgress}%` }}
+              transition={{ duration: 0.8, ease: 'easeOut' }}
+            />
+          </div>
+          <p className="text-xs text-gray-400 font-semibold mt-1">
+            {xpToNext} XP to Level {nextThreshold ? nextThreshold.level : level}
+          </p>
+        </div>
+
+        {/* Streak flame */}
+        {streak > 0 && (
+          <div className="flex justify-center mt-3">
+            <StreakFlame days={streak} />
+          </div>
+        )}
       </motion.div>
 
       {/* Stats Grid */}

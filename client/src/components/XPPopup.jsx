@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function XPPopup({ amount, trigger }) {
@@ -7,34 +7,31 @@ export default function XPPopup({ amount, trigger }) {
   useEffect(() => {
     if (trigger && amount) {
       const id = Date.now() + Math.random();
-      const offsetX = (Math.random() - 0.5) * 40;
-      setPopups((prev) => [...prev, { id, amount, offsetX }]);
+      setPopups((prev) => [...prev, { id, amount }]);
 
       const timer = setTimeout(() => {
         setPopups((prev) => prev.filter((p) => p.id !== id));
-      }, 1600);
+      }, 2000);
 
       return () => clearTimeout(timer);
     }
   }, [trigger, amount]);
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center">
+    <div className="fixed top-16 right-0 left-0 pointer-events-none z-50 flex justify-center">
       <AnimatePresence>
         {popups.map((popup) => (
           <motion.div
             key={popup.id}
-            className="absolute font-extrabold text-2xl drop-shadow-lg"
-            style={{
-              color: '#F59E0B',
-              textShadow: '0 2px 8px rgba(245, 158, 11, 0.4)',
-            }}
-            initial={{ opacity: 1, y: 0, x: popup.offsetX, scale: 0.5 }}
-            animate={{ opacity: 0, y: -50, scale: 1.2 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1.5, ease: 'easeOut' }}
+            className="absolute"
+            initial={{ opacity: 0, y: 20, scale: 0.5 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -30, scale: 0.8 }}
+            transition={{ type: 'spring', bounce: 0.4 }}
           >
-            +{popup.amount} XP
+            <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-extrabold text-xl px-5 py-2 rounded-full shadow-lg">
+              +{popup.amount} XP {'\u26A1'}
+            </div>
           </motion.div>
         ))}
       </AnimatePresence>

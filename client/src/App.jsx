@@ -16,6 +16,8 @@ import ExplainBackPage from './pages/ExplainBackPage';
 import StickerBookPage from './pages/StickerBookPage';
 import HomeworkPage from './pages/HomeworkPage';
 import ParentDashboardPage from './pages/ParentDashboardPage';
+import TeacherSetupPage from './pages/TeacherSetupPage';
+import TeacherDashboardPage from './pages/TeacherDashboardPage';
 import TreehousePage from './pages/TreehousePage';
 import StoryMapPage from './pages/StoryMapPage';
 import StoryChapterPage from './pages/StoryChapterPage';
@@ -45,6 +47,8 @@ function App() {
             <Route path="/stickers" element={<StickerBookPage />} />
             <Route path="/homework" element={<HomeworkPage />} />
             <Route path="/parent/:profileId" element={<ParentDashboardPage />} />
+            <Route path="/teacher" element={<TeacherSetupPage />} />
+            <Route path="/teacher/:classId" element={<TeacherDashboardPage />} />
             <Route path="/treehouse" element={<TreehousePage />} />
             <Route path="/duels" element={<DuelsPage />} />
             <Route path="/duel/:id" element={<DuelPlayPage />} />

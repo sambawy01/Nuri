@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, LogOut, Users, Trophy, Zap, Flame, HelpCircle, Star, Award, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, LogOut, Users, Trophy, Zap, Flame, HelpCircle, Star, Award, ShieldCheck, GraduationCap } from 'lucide-react';
 import { useProfile } from '../context/ProfileContext';
 import { subjects, subjectKeys } from '../lib/subjects';
 import { api } from '../lib/api';
@@ -220,6 +220,15 @@ export default function ProfilePage() {
         >
           <ShieldCheck size={18} />
           Parent Dashboard
+        </motion.button>
+        <motion.button
+          onClick={() => navigate('/teacher')}
+          className="w-full bg-gradient-to-r from-blue-500 to-teal-400 text-white font-bold py-3 rounded-2xl flex items-center justify-center gap-2 shadow-md"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <GraduationCap size={18} />
+          Teacher Dashboard
         </motion.button>
         <motion.button
           onClick={() => navigate('/stickers')}

@@ -19,6 +19,7 @@ const slideVariants = {
 const STEP_TITLES = [
   "What's your name?",
   'What year are you in?',
+  'Religion Class',
   'Pick your favourite colour!',
   'Create a secret PIN!',
 ];
@@ -26,6 +27,7 @@ const STEP_TITLES = [
 const NURI_MESSAGES = [
   "I'm Nuri! Let's get to know each other! 🦉",
   "Great name! Now tell me about your school year.",
+  "Which religion class does your child attend?",
   "Ooh, colours! Pick the one that makes you smile! 🎨",
   "Nearly done! This PIN keeps your profile safe. 🔒",
 ];
@@ -37,6 +39,7 @@ export default function CreateProfilePage() {
   const [direction, setDirection] = useState(1);
   const [name, setName] = useState('');
   const [yearGroup, setYearGroup] = useState(null);
+  const [religion, setReligion] = useState('');
   const [avatarColor, setAvatarColor] = useState(null);
   const [pin, setPin] = useState('');
   const [showPin, setShowPin] = useState(false);
@@ -46,14 +49,15 @@ export default function CreateProfilePage() {
   function canProceed() {
     if (step === 0) return name.trim().length >= 2;
     if (step === 1) return yearGroup !== null;
-    if (step === 2) return avatarColor !== null;
-    if (step === 3) return pin.length === 4;
+    if (step === 2) return religion !== '';
+    if (step === 3) return avatarColor !== null;
+    if (step === 4) return pin.length === 4;
     return false;
   }
 
   function nextStep() {
     if (!canProceed()) return;
-    if (step < 3) {
+    if (step < 4) {
       setDirection(1);
       setStep(step + 1);
     } else {
@@ -76,7 +80,7 @@ export default function CreateProfilePage() {
     try {
       const profile = await api('/profiles', {
         method: 'POST',
-        body: { name: name.trim(), yearGroup, avatarColor, pin, deviceId: getDeviceId() },
+        body: { name: name.trim(), yearGroup, religion, avatarColor, pin, deviceId: getDeviceId() },
       });
       login(profile);
       navigate('/home');
@@ -91,7 +95,7 @@ export default function CreateProfilePage() {
       <div className="w-full max-w-md">
         {/* Progress bar */}
         <div className="flex gap-2 mb-8">
-          {[0, 1, 2, 3].map((i) => (
+          {[0, 1, 2, 3, 4].map((i) => (
             <div key={i} className="flex-1 h-2 rounded-full overflow-hidden bg-gray-200">
               <motion.div
                 className="h-full gradient-bg"
@@ -163,6 +167,36 @@ export default function CreateProfilePage() {
             )}
 
             {step === 2 && (
+              <motion.div key="step2" className="text-center">
+                <p className="text-gray-500 mb-6">Which religion class does {name} attend?</p>
+                <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto">
+                  {[
+                    { value: 'christian', label: 'Christian', icon: '✝️' },
+                    { value: 'islamic', label: 'Islamic', icon: '☪️' },
+                  ].map(opt => (
+                    <motion.button
+                      key={opt.value}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => {
+                        setReligion(opt.value);
+                        setStep(3);
+                      }}
+                      className={`p-6 rounded-2xl border-2 transition-all ${
+                        religion === opt.value
+                          ? 'border-orange-400 bg-orange-50 shadow-lg'
+                          : 'border-gray-200 bg-white hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="text-4xl mb-2">{opt.icon}</div>
+                      <div className="font-bold text-gray-800">{opt.label}</div>
+                    </motion.button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {step === 3 && (
               <div className="grid grid-cols-3 gap-4 max-w-xs mx-auto">
                 {COLORS.map((color) => (
                   <motion.button
@@ -190,7 +224,7 @@ export default function CreateProfilePage() {
               </div>
             )}
 
-            {step === 3 && (
+            {step === 4 && (
               <div className="relative max-w-xs mx-auto">
                 <input
                   type={showPin ? 'text' : 'password'}
@@ -245,7 +279,7 @@ export default function CreateProfilePage() {
           >
             {creating ? (
               'Creating...'
-            ) : step === 3 ? (
+            ) : step === 4 ? (
               <>
                 <Check size={18} />
                 Create Profile!

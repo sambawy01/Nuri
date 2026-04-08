@@ -28,12 +28,12 @@ router.post('/', async (req, res, next) => {
       });
     }
 
-    const { deviceId } = req.body;
+    const { deviceId, religion } = req.body;
     const result = await pool.query(
-      `INSERT INTO profiles (name, year_group, avatar_color, pin, device_id)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO profiles (name, year_group, avatar_color, pin, device_id, religion)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *`,
-      [name, yearGroup, avatarColor, pin || null, deviceId || null]
+      [name, yearGroup, avatarColor, pin || null, deviceId || null, religion || 'christian']
     );
 
     res.status(201).json({ success: true, data: result.rows[0] });
@@ -111,7 +111,7 @@ router.get('/:id', async (req, res, next) => {
 router.put('/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { name, yearGroup, avatarColor, pin } = req.body;
+    const { name, yearGroup, avatarColor, pin, religion } = req.body;
 
     const fields = [];
     const values = [];
@@ -120,6 +120,10 @@ router.put('/:id', async (req, res, next) => {
     if (name !== undefined) {
       fields.push(`name = $${paramIndex++}`);
       values.push(name);
+    }
+    if (religion !== undefined) {
+      fields.push(`religion = $${paramIndex++}`);
+      values.push(religion);
     }
     if (yearGroup !== undefined) {
       if (yearGroup < 1 || yearGroup > 6) {

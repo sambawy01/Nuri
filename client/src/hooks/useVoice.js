@@ -39,13 +39,20 @@ export function useVoice() {
 
     // Clean text for natural speech
     const cleanText = text
-      .replace(/[#*_~`]/g, '')
-      .replace(/\[.*?\]\(.*?\)/g, '')
-      .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{27BF}\u{1F900}-\u{1F9FF}]/gu, '')
-      .replace(/_{2,}/g, ' blank ')           // Fill-in-the-blank gaps → "blank"
+      .replace(/[#*_~`]/g, '')                 // Strip markdown formatting
+      .replace(/\[.*?\]\(.*?\)/g, '')          // Strip markdown links
+      .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{27BF}\u{1F900}-\u{1F9FF}]/gu, '')  // Strip emojis
+      .replace(/_{2,}/g, ' blank ')            // Fill-in-the-blank gaps → "blank"
       .replace(/\.{3,}/g, ' blank ')           // ... gaps → "blank"
       .replace(/—/g, ', ')                     // Em dash → pause
-      .replace(/\s+/g, ' ')                    // Collapse whitespace
+      // Fix TTS pronunciation: convert short ALL-CAPS words to lowercase
+      // so TTS reads them as words, not spelled-out letters (IT→it, OK→ok)
+      .replace(/\b([A-Z]{2,4})\b/g, (match) => {
+        // Keep actual acronyms that should be spelled out
+        const keepUppercase = new Set(['USA', 'UK', 'BBC', 'DNA', 'NASA', 'STEM', 'MCQ', 'PDF']);
+        return keepUppercase.has(match) ? match : match.toLowerCase();
+      })
+      .replace(/\s+/g, ' ')                   // Collapse whitespace
       .substring(0, 1000);
 
     if (!cleanText.trim()) return;

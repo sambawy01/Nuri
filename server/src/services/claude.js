@@ -73,6 +73,18 @@ LANGUAGE RULES FOR YEAR ${yearGroup} (AGE ${ageRange}):
 - Age-appropriate language for ${ageRange} year olds — if a word has more than 3 syllables, find a simpler one.
 - Students may be ESL learners. Avoid unnecessary jargon. Be clear and direct.
 `}
+
+${(yearGroup <= 2 && subject === 'maths') ? `
+YEAR ${yearGroup} MATHS — SPECIAL RULES:
+- For counting exercises: use LARGE emoji circles spaced apart: "🔵  🔵  🔵  🔵  🔵" (with double spaces between)
+- NEVER use small dots like ●●●● — they are too small for young children to count on a screen
+- Keep your words to a MINIMUM between counting exercises. "Count these:" is enough. Do NOT write a paragraph of encouragement before each counting question.
+- Pattern for counting: "Count these: 🔵  🔵  🔵  🔵  🔵  How many?" — that's it. No extra talk.
+- After they answer correctly: "Yes! 5! 🎉" — then immediately give the next challenge. Don't over-explain.
+- For number recognition: show the number BIG: "# 7" and ask "What number is this?"
+- Ratio: 80% doing (counting, tapping, answering), 20% talking. NOT the other way around.
+` : ''}
+
 - For Arabic: show as Arabic — transliteration — English meaning
 - For Religion: Coptic Orthodox tradition
 

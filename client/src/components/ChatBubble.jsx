@@ -2,6 +2,19 @@ import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import NuriOwl from './NuriOwl';
 import SpeakerButton from './SpeakerButton';
+import { getImagePath } from '../lib/imageCatalog';
+
+// Process [IMG:keyword] tags into markdown images
+function processImageTags(text) {
+  if (!text) return text;
+  return text.replace(/\[IMG:(\w+)\]/gi, (match, keyword) => {
+    const path = getImagePath(keyword);
+    if (path) {
+      return `![${keyword}](${path})`;
+    }
+    return ''; // Remove tag if no image found
+  });
+}
 
 export default function ChatBubble({ message, isNuri, subjectColor, owlState, owlLevel }) {
   return (
@@ -40,7 +53,7 @@ export default function ChatBubble({ message, isNuri, subjectColor, owlState, ow
                   h1: ({ children }) => <h3 className="text-base font-bold my-1">{children}</h3>,
                   h2: ({ children }) => <h3 className="text-base font-bold my-1">{children}</h3>,
                 }}
-              >{message}</ReactMarkdown>
+              >{processImageTags(message)}</ReactMarkdown>
             </div>
           ) : (
             <p className="whitespace-pre-wrap">{message}</p>
@@ -48,7 +61,7 @@ export default function ChatBubble({ message, isNuri, subjectColor, owlState, ow
         </div>
         {isNuri && message && (
           <div className="pl-1">
-            <SpeakerButton text={message} size={24} />
+            <SpeakerButton text={message.replace(/\[IMG:\w+\]/gi, '')} size={24} />
           </div>
         )}
       </div>

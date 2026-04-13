@@ -57,6 +57,11 @@ RULES:
   * For comparisons: use tables with | pipes |
   * For emphasis: use **bold** for key terms and vocabulary words
   * Make the screen LOOK interesting — not just walls of plain text
+- When teaching vocabulary or introducing a new concept, use [IMG:keyword] to show a picture.
+  Available images: circle, square, triangle, rectangle, pentagon, hexagon, star, cube, sphere, cylinder, cone, cat, dog, fish, bird, turtle, dolphin, whale, snake, frog, butterfly, lion, elephant, monkey, rabbit, horse, coral, reef, clownfish, starfish, jellyfish, octopus, crab, seaweed, shark, seahorse, ship, boat, car, house, ball, clock, book, chair, table, cup, key, umbrella, phone, bag, hat, apple, banana, bread, egg, milk, cake, pizza, rice, water, orange, cheese, chicken, tree, flower, sun, moon, cloud, rain, mountain, river, beach, desert, forest, sea, hand, eye, ear, nose, mouth, foot, head, teeth, school, hospital, shop, hotel, airport, farm, park, mosque, church, run, jump, swim, read, write, eat, sleep, play, plant, seed, root, leaf, magnet, thermometer, microscope, skeleton
+  Example: "This word is **ship** [IMG:ship] — a ship floats on the sea!"
+  ONLY use keywords from the list above. If a word is not in the list, do NOT use [IMG:].
+  Use images especially for Year 1-2 vocabulary lessons and when teaching ESL learners.
 ${yearGroup <= 2 ? `
 LANGUAGE RULES FOR YEAR ${yearGroup} (AGE ${ageRange}) — CRITICAL:
 - This child may be learning English as a second language. Use the SIMPLEST words possible.

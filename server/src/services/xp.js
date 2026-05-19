@@ -131,12 +131,53 @@ async function awardQuizXP(profileId, eventType, difficulty, subject, topic) {
   }
 }
 
+// Streak integrity: if presence is enabled for this profile and today's most
+// recent ended presence session scored below the threshold, silently skip the
+// streak write. XP is unaffected — the child's experience is identical.
+async function shouldCountTodayForStreak(client, profileId) {
+  const profile = await client.query(
+    'SELECT presence_tier FROM profiles WHERE id = $1',
+    [profileId]
+  );
+  if (profile.rows.length === 0) return true;
+  const tier = profile.rows[0].presence_tier;
+  if (!tier || tier === 'off') return true;
+
+  // Look for an ended presence session today.
+  const today = new Date().toISOString().split('T')[0];
+  const session = await client.query(
+    `SELECT counted_toward_streak
+       FROM presence_sessions
+      WHERE profile_id = $1
+        AND ended_at IS NOT NULL
+        AND started_at::date = $2::date
+      ORDER BY ended_at DESC
+      LIMIT 1`,
+    [profileId, today]
+  );
+  if (session.rows.length === 0) return true; // no presence data → don't penalize
+  return session.rows[0].counted_toward_streak === true;
+}
+
 async function updateStreak(profileId) {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
 
     const today = new Date().toISOString().split('T')[0];
+
+    if (!(await shouldCountTodayForStreak(client, profileId))) {
+      await client.query('COMMIT');
+      const cur = await pool.query(
+        'SELECT streak_days FROM profiles WHERE id = $1',
+        [profileId]
+      );
+      return {
+        streakDays: cur.rows[0]?.streak_days ?? 0,
+        isNewDay: false,
+        voidedByPresence: true,
+      };
+    }
 
     // Try to insert today's streak record
     const insertResult = await client.query(

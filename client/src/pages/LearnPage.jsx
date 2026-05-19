@@ -11,6 +11,10 @@ import NuriOwl from '../components/NuriOwl';
 import { useVoice } from '../hooks/useVoice';
 import MicButton from '../components/MicButton';
 import SpeakerButton from '../components/SpeakerButton';
+import PresenceIndicator from '../components/PresenceIndicator';
+import PresencePausedModal from '../components/PresencePausedModal';
+import { usePresence } from '../hooks/usePresence';
+import { usePresenceConfig } from '../context/PresenceContext';
 
 export default function LearnPage() {
   const { subject } = useParams();
@@ -52,6 +56,16 @@ export default function LearnPage() {
   const sessionIdRef = useRef(restoredLearn?.sessionId || null);
   const autoSpokeRef = useRef(!!restoredLearn);
   const lastExplainTypeRef = useRef(null);
+
+  const { tier: presenceTier, updateTier: updatePresenceTier } = usePresenceConfig();
+  const profileId = currentProfile?._id || currentProfile?.id;
+  const presence = usePresence({
+    enabled: !!profileId && presenceTier && presenceTier !== 'off',
+    tier: presenceTier,
+    profileId,
+    context: 'learn',
+    contextRef: subject,
+  });
 
   const EXPLAIN_TYPE_MAP = {
     'Explain Simpler ✨': 'visual',
@@ -254,6 +268,7 @@ export default function LearnPage() {
 
   async function sendMessage(text) {
     if (!text.trim() || isLoading) return;
+    presence.signalLiveness();
     setMessages(prev => [...prev, { text: text.trim(), isNuri: false }]);
     setInput('');
     setIsLoading(true);
@@ -300,6 +315,16 @@ export default function LearnPage() {
 
   return (
     <div className="h-screen flex flex-col max-w-lg mx-auto">
+      <PresenceIndicator
+        status={presence.status}
+        tier={presence.tier}
+        onTurnOff={() => updatePresenceTier('off')}
+      />
+      <PresencePausedModal
+        open={presence.status === 'paused'}
+        onResume={presence.resume}
+        onExit={() => navigate(`/subject/${subject}`)}
+      />
       {/* Header */}
       <motion.div
         className="px-4 py-3 flex items-center gap-3 bg-white/80 backdrop-blur-md border-b border-gray-100 shrink-0"

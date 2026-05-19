@@ -14,6 +14,10 @@ import NuriOwl from '../components/NuriOwl';
 import DifficultySelector from '../components/DifficultySelector';
 import ConfidenceMeter from '../components/ConfidenceMeter';
 import LevelUpModal from '../components/LevelUpModal';
+import PresenceIndicator from '../components/PresenceIndicator';
+import PresencePausedModal from '../components/PresencePausedModal';
+import { usePresence } from '../hooks/usePresence';
+import { usePresenceConfig } from '../context/PresenceContext';
 
 const TOTAL_QUESTIONS = 10;
 const DIFFICULTY_XP = { easy: 5, medium: 10, hard: 15, challenge: 20 };
@@ -57,6 +61,17 @@ export default function QuizPage() {
   const [showConfidence, setShowConfidence] = useState(false);
   const [confidenceGiven, setConfidenceGiven] = useState(false);
   const pendingAnswerRef = useRef(null);
+
+  // Presence: opt-in engagement tracking. T1/T2/T3 all respected.
+  const { tier: presenceTier, updateTier: updatePresenceTier } = usePresenceConfig();
+  const profileId = currentProfile?._id || currentProfile?.id;
+  const presence = usePresence({
+    enabled: !!profileId && presenceTier && presenceTier !== 'off' && !showSummary,
+    tier: presenceTier,
+    profileId,
+    context: 'quiz',
+    contextRef: subject,
+  });
 
   // Persist quiz session progress
   useEffect(() => {
@@ -142,6 +157,7 @@ export default function QuizPage() {
 
   async function handleAnswer(index) {
     if (answered) return;
+    presence.signalLiveness();
     setAnswered(true);
     setSelectedAnswer(index);
 
@@ -250,6 +266,10 @@ export default function QuizPage() {
   if (!meta) {
     navigate('/home');
     return null;
+  }
+
+  if (!currentProfile) {
+    return <LoadingSpinner text="Loading..." />;
   }
 
   const owlState = answered
@@ -369,6 +389,16 @@ export default function QuizPage() {
 
   return (
     <div className="min-h-screen px-4 py-6 max-w-lg mx-auto">
+      <PresenceIndicator
+        status={presence.status}
+        tier={presence.tier}
+        onTurnOff={() => updatePresenceTier('off')}
+      />
+      <PresencePausedModal
+        open={presence.status === 'paused'}
+        onResume={presence.resume}
+        onExit={() => navigate(`/subject/${subject}`)}
+      />
       <CelebrationEffect trigger={celebrate} />
 
       {/* XP Float */}

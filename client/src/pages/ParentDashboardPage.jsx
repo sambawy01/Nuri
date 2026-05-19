@@ -10,6 +10,8 @@ import { api } from '../lib/api';
 import { subjects } from '../lib/subjects';
 import ParentPinModal from '../components/ParentPinModal';
 import LoadingSpinner from '../components/LoadingSpinner';
+import PresenceSettings from '../components/PresenceSettings';
+import PresenceCard from '../components/PresenceCard';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -1000,7 +1002,7 @@ export default function ParentDashboardPage() {
 
   if (!data) return null;
 
-  const { profile, reports, summary, predictions, badges, weeklyXP, weeklyTime, mistakePatterns, topicMastery } = data;
+  const { profile, reports, summary, predictions, badges, weeklyXP, weeklyTime, mistakePatterns, topicMastery, presence } = data;
   const totalXP = (weeklyXP || []).reduce((s, r) => s + (parseInt(r.xp, 10) || 0), 0);
 
   return (
@@ -1074,6 +1076,7 @@ export default function ParentDashboardPage() {
           </motion.div>
         )}
 
+        <PresenceCard presence={presence} tier={profile?.presence_tier} />
         <WeeklyXPChart weeklyXP={weeklyXP} />
         <SubjectAccuracy topicMastery={topicMastery} />
         <SessionReports reports={reports} />
@@ -1082,6 +1085,7 @@ export default function ParentDashboardPage() {
         <NotesForNuri profileId={profileId} />
         <LearningSupport profileId={profileId} />
         <RecentBadges badges={badges} />
+        <PresenceSettings />
       </div>
     </div>
   );

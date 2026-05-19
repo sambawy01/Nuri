@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import { ProfileProvider } from './context/ProfileContext';
+import { PresenceProvider } from './context/PresenceContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import ConnectionStatus from './components/ConnectionStatus';
 import WelcomePage from './pages/WelcomePage';
@@ -30,6 +31,7 @@ function App() {
   return (
     <ErrorBoundary>
       <ProfileProvider>
+        <PresenceProvider>
         <ConnectionStatus />
         <div className="min-h-screen pb-20">
           <Routes>
@@ -58,6 +60,7 @@ function App() {
           </Routes>
           <BottomNav />
         </div>
+        </PresenceProvider>
       </ProfileProvider>
     </ErrorBoundary>
   );

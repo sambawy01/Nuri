@@ -277,3 +277,29 @@ CREATE TABLE IF NOT EXISTS session_reports (
 );
 CREATE INDEX IF NOT EXISTS idx_session_reports_profile ON session_reports(profile_id);
 CREATE INDEX IF NOT EXISTS idx_session_reports_recent ON session_reports(profile_id, created_at DESC);
+
+-- v10: AI Presence Layer (also in migrations/v10-presence.sql)
+ALTER TABLE profiles
+  ADD COLUMN IF NOT EXISTS presence_tier VARCHAR(10) NOT NULL DEFAULT 'off'
+    CHECK (presence_tier IN ('off', 't1', 't2', 't3')),
+  ADD COLUMN IF NOT EXISTS presence_consent_at TIMESTAMP;
+
+CREATE TABLE IF NOT EXISTS presence_sessions (
+  id SERIAL PRIMARY KEY,
+  profile_id INT REFERENCES profiles(id) ON DELETE CASCADE,
+  context VARCHAR(30) NOT NULL,
+  context_ref VARCHAR(100),
+  tier VARCHAR(10) NOT NULL,
+  started_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  ended_at TIMESTAMP,
+  duration_seconds INT,
+  samples_total INT DEFAULT 0,
+  samples_present INT DEFAULT 0,
+  presence_score NUMERIC(4,3),
+  liveness_events INT DEFAULT 0,
+  paused_count INT DEFAULT 0,
+  auto_ended BOOLEAN DEFAULT FALSE,
+  counted_toward_streak BOOLEAN DEFAULT TRUE
+);
+CREATE INDEX IF NOT EXISTS idx_presence_sessions_profile ON presence_sessions(profile_id, started_at DESC);
+CREATE INDEX IF NOT EXISTS idx_presence_sessions_context ON presence_sessions(profile_id, context);

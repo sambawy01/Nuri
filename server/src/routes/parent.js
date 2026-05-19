@@ -4,6 +4,7 @@ const pool = require('../db/connection');
 const { getRecentReports, getPerformanceSummary } = require('../services/session-reports');
 const { getTestPredictions } = require('../services/homework');
 const { getEarnedBadges } = require('../services/badges');
+const presence = require('../services/presence');
 
 // POST /api/parent/set-pin
 router.post('/set-pin', async (req, res, next) => {
@@ -38,8 +39,8 @@ router.get('/dashboard/:profileId', async (req, res, next) => {
   try {
     const { profileId } = req.params;
 
-    const [profile, reports, summary, predictions, badges, weeklyXP, weeklyTime, mistakePatterns, topicMastery] = await Promise.all([
-      pool.query('SELECT name, year_group, total_xp, current_level, streak_days FROM profiles WHERE id = $1', [profileId]).then(r => r.rows[0]),
+    const [profile, reports, summary, predictions, badges, weeklyXP, weeklyTime, mistakePatterns, topicMastery, presenceSummary] = await Promise.all([
+      pool.query('SELECT name, year_group, total_xp, current_level, streak_days, presence_tier FROM profiles WHERE id = $1', [profileId]).then(r => r.rows[0]),
       getRecentReports(profileId, 10),
       getPerformanceSummary(profileId),
       getTestPredictions(profileId).catch(() => []),
@@ -48,6 +49,7 @@ router.get('/dashboard/:profileId', async (req, res, next) => {
       pool.query(`SELECT COUNT(DISTINCT DATE(created_at)) as active_days, COUNT(*) as total_sessions FROM chat_sessions WHERE profile_id = $1 AND created_at >= NOW() - INTERVAL '7 days'`, [profileId]).then(r => r.rows[0]),
       pool.query(`SELECT subject, error_type, COUNT(*) as count FROM mistakes WHERE profile_id = $1 AND resolved = FALSE GROUP BY subject, error_type ORDER BY count DESC LIMIT 10`, [profileId]).then(r => r.rows),
       pool.query(`SELECT subject, AVG(CASE WHEN attempts > 0 THEN correct_count::float / attempts * 100 ELSE 0 END)::int as avg_accuracy, COUNT(*) as topics FROM topic_mastery WHERE profile_id = $1 GROUP BY subject`, [profileId]).then(r => r.rows),
+      presence.summarize(profileId, 7).catch(() => null),
     ]);
 
     res.json({
@@ -62,6 +64,7 @@ router.get('/dashboard/:profileId', async (req, res, next) => {
         weeklyTime,
         mistakePatterns,
         topicMastery,
+        presence: presenceSummary,
       },
     });
   } catch (err) { next(err); }

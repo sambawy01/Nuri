@@ -53,6 +53,47 @@ function Card({ children, className = '', delay = 0 }) {
   );
 }
 
+function ClassPresence({ presence }) {
+  if (!Array.isArray(presence) || presence.length === 0) return null;
+  const withData = presence.filter((p) => (p.sessions ?? 0) > 0);
+  if (withData.length === 0) return null;
+
+  return (
+    <Card>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Clock size={18} className="text-purple-500" />
+          <h3 className="font-extrabold text-base text-gray-700">Class engagement</h3>
+        </div>
+        <span className="text-xs text-gray-400 font-semibold">last 7 days</span>
+      </div>
+      <p className="text-xs text-gray-500 mb-3">
+        Percentage of session time each student was actually present at the screen. Lower = more distracted.
+      </p>
+      <div className="space-y-2">
+        {withData.map((row) => {
+          const pct = Math.round((row.avgPresence || 0) * 100);
+          const color = pct >= 75 ? 'bg-green-500' : pct >= 50 ? 'bg-amber-400' : 'bg-rose-400';
+          return (
+            <div key={row.profileId} className="flex items-center gap-3">
+              <span className="text-sm font-bold text-gray-700 w-28 truncate">{row.name}</span>
+              <div className="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
+                <div className={`${color} h-2 rounded-full`} style={{ width: `${pct}%` }} />
+              </div>
+              <span className="text-xs font-bold text-gray-600 w-10 text-right">{pct}%</span>
+              {row.voidedCount > 0 && (
+                <span className="text-[10px] font-bold text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded">
+                  {row.voidedCount} void
+                </span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </Card>
+  );
+}
+
 function SectionTitle({ icon: Icon, title, color = 'text-gray-700' }) {
   return (
     <div className="flex items-center gap-2 mb-4">
@@ -582,8 +623,11 @@ export default function TeacherDashboardPage() {
     setLoading(true);
     setError('');
     try {
-      const d = await api(`/teacher/dashboard/${classId}`);
-      setData(d);
+      const [d, presence] = await Promise.all([
+        api(`/teacher/dashboard/${classId}`),
+        api(`/presence/class/${classId}`).catch(() => []),
+      ]);
+      setData({ ...d, presence });
     } catch (e) {
       setError(e.message || 'Could not load dashboard');
     } finally {
@@ -634,7 +678,7 @@ export default function TeacherDashboardPage() {
 
   if (!data) return null;
 
-  const { className: clsName, students, classAnalysis, suggestedNextSteps, weeklyObjectives } = data;
+  const { className: clsName, students, classAnalysis, suggestedNextSteps, weeklyObjectives, presence } = data;
 
   return (
     <div className="min-h-screen bg-gray-50 pb-16">
@@ -706,6 +750,7 @@ export default function TeacherDashboardPage() {
       {/* Cards — negative margin to overlap header */}
       <div className="px-4 -mt-10 space-y-4 max-w-2xl mx-auto">
         <StudentOverview students={students} navigate={navigate} />
+        <ClassPresence presence={presence} />
         <WeeklyObjectives objectives={weeklyObjectives} classId={classId} onRefresh={fetchDashboard} />
         <ClassPerformance averageAccuracy={classAnalysis?.averageAccuracy} />
         <ClassAnalysis classAnalysis={classAnalysis} />

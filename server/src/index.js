@@ -25,6 +25,7 @@ const duelsRouter = require('./routes/duels');
 const treehouseRouter = require('./routes/treehouse');
 const storyRouter = require('./routes/story');
 const teacherRouter = require('./routes/teacher');
+const presenceRouter = require('./routes/presence');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -80,6 +81,7 @@ app.use("/api/duels", duelsRouter);
 app.use('/api/treehouse', treehouseRouter);
 app.use('/api/story', storyRouter);
 app.use('/api/teacher', teacherRouter);
+app.use('/api/presence', presenceRouter);
 
 // 404 handler
 app.use((req, res) => {

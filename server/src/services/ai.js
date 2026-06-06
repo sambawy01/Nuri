@@ -15,6 +15,7 @@
 'use strict';
 
 const { getTopics, getAgeRange, getCurriculumType } = require('./curriculum');
+const { getPersona } = require('./persona');
 
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
 
@@ -119,6 +120,13 @@ YEAR ${yearGroup} MATHS — SPECIAL RULES:
 
 - For Arabic subject: TEACH IN ARABIC. Egyptian colloquial for conversation, Modern Standard for content. Add transliteration for parents. Keep Nuri's playful personality in Arabic.
 - For Religion: Coptic Orthodox tradition
+
+${(() => {
+  try {
+    const personaText = getPersona(subject, yearGroup);
+    return personaText ? `\nSUBJECT PERSONA — ${subject.toUpperCase()}:\n${personaText}\n` : '';
+  } catch (_) { return ''; }
+})()}
 
 NEVER STOP THE FUN:
 - NEVER say "that's enough", "take a break", "well done for today"

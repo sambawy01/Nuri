@@ -489,3 +489,182 @@ CREATE TABLE IF NOT EXISTS voice_identification_logs (
 );
 CREATE INDEX IF NOT EXISTS idx_voice_id_logs_profile ON voice_identification_logs(identified_profile_id);
 CREATE INDEX IF NOT EXISTS idx_voice_id_logs_time ON voice_identification_logs(created_at DESC);
+
+-- v6: Pre-Test Predictor (see migrations/v6 in migrate-v6.js)
+CREATE TABLE IF NOT EXISTS test_plans (
+  id SERIAL PRIMARY KEY,
+  profile_id INT REFERENCES profiles(id) ON DELETE CASCADE,
+  subject VARCHAR(50) NOT NULL,
+  topics JSONB NOT NULL DEFAULT '[]',
+  test_date DATE NOT NULL,
+  total_days INT NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_test_plans_profile ON test_plans(profile_id);
+CREATE INDEX IF NOT EXISTS idx_test_plans_date ON test_plans(profile_id, test_date);
+
+CREATE TABLE IF NOT EXISTS test_plan_days (
+  id SERIAL PRIMARY KEY,
+  plan_id INT REFERENCES test_plans(id) ON DELETE CASCADE,
+  day_number INT NOT NULL,
+  day_type VARCHAR(20) NOT NULL CHECK (day_type IN ('review', 'practice', 'mock_test', 'confidence')),
+  topic VARCHAR(200),
+  label TEXT NOT NULL,
+  scheduled_date DATE NOT NULL,
+  completed BOOLEAN DEFAULT FALSE,
+  completed_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_test_plan_days_plan ON test_plan_days(plan_id);
+
+-- v7: Study Duels (see migrate-v7.js)
+CREATE TABLE IF NOT EXISTS duels (
+  id SERIAL PRIMARY KEY,
+  code VARCHAR(6) UNIQUE NOT NULL,
+  subject VARCHAR(50) NOT NULL,
+  creator_profile_id INT REFERENCES profiles(id) ON DELETE CASCADE,
+  opponent_profile_id INT REFERENCES profiles(id) ON DELETE SET NULL,
+  questions JSONB NOT NULL DEFAULT '[]',
+  status VARCHAR(20) NOT NULL DEFAULT 'waiting' CHECK (status IN ('waiting', 'active', 'complete')),
+  winner_profile_id INT REFERENCES profiles(id) ON DELETE SET NULL,
+  creator_score INT DEFAULT 0,
+  opponent_score INT DEFAULT 0,
+  created_at TIMESTAMP DEFAULT NOW(),
+  started_at TIMESTAMP,
+  completed_at TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_duels_code ON duels(code);
+CREATE INDEX IF NOT EXISTS idx_duels_creator ON duels(creator_profile_id);
+CREATE INDEX IF NOT EXISTS idx_duels_opponent ON duels(opponent_profile_id);
+
+CREATE TABLE IF NOT EXISTS duel_answers (
+  id SERIAL PRIMARY KEY,
+  duel_id INT REFERENCES duels(id) ON DELETE CASCADE,
+  profile_id INT REFERENCES profiles(id) ON DELETE CASCADE,
+  question_index INT NOT NULL,
+  answer VARCHAR(10) NOT NULL,
+  is_correct BOOLEAN NOT NULL DEFAULT false,
+  time_ms INT,
+  answered_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE (duel_id, profile_id, question_index)
+);
+CREATE INDEX IF NOT EXISTS idx_duel_answers_duel ON duel_answers(duel_id);
+CREATE INDEX IF NOT EXISTS idx_duel_answers_profile ON duel_answers(profile_id);
+
+-- v9: Teacher Dashboard (see migrations/v9-teacher-dashboard.sql)
+CREATE TABLE IF NOT EXISTS teacher_classes (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL DEFAULT 'My Class',
+  pin VARCHAR(4) NOT NULL,
+  device_id VARCHAR(255),
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS class_roster (
+  id SERIAL PRIMARY KEY,
+  class_id INTEGER REFERENCES teacher_classes(id) ON DELETE CASCADE,
+  profile_id INTEGER REFERENCES profiles(id) ON DELETE CASCADE,
+  added_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(class_id, profile_id)
+);
+CREATE INDEX IF NOT EXISTS idx_class_roster_class ON class_roster(class_id);
+CREATE INDEX IF NOT EXISTS idx_class_roster_profile ON class_roster(profile_id);
+
+CREATE TABLE IF NOT EXISTS weekly_objectives (
+  id SERIAL PRIMARY KEY,
+  class_id INTEGER REFERENCES teacher_classes(id) ON DELETE CASCADE,
+  subject VARCHAR(50) NOT NULL,
+  topic VARCHAR(255) NOT NULL,
+  objective TEXT NOT NULL,
+  week_start DATE NOT NULL DEFAULT CURRENT_DATE,
+  completed_by JSONB DEFAULT '[]',
+  created_at TIMESTAMP DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_weekly_objectives_class ON weekly_objectives(class_id, week_start);
+
+-- v15: Phase 4-5 — Parent Dashboard, Story Mode, Learning Needs (see migrations/v15-phase4-parent-story.sql)
+CREATE TABLE IF NOT EXISTS parent_pins (
+  id SERIAL PRIMARY KEY,
+  profile_id INT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  pin_hash VARCHAR(255) NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(profile_id)
+);
+CREATE INDEX IF NOT EXISTS idx_parent_pins_profile ON parent_pins(profile_id);
+
+CREATE TABLE IF NOT EXISTS parent_notes (
+  id SERIAL PRIMARY KEY,
+  profile_id INT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  note TEXT NOT NULL,
+  priority VARCHAR(20) NOT NULL DEFAULT 'normal',
+  active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_parent_notes_profile ON parent_notes(profile_id);
+
+CREATE TABLE IF NOT EXISTS learning_needs (
+  id SERIAL PRIMARY KEY,
+  profile_id INT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  dyslexia BOOLEAN NOT NULL DEFAULT FALSE,
+  adhd BOOLEAN NOT NULL DEFAULT FALSE,
+  autism BOOLEAN NOT NULL DEFAULT FALSE,
+  dyscalculia BOOLEAN NOT NULL DEFAULT FALSE,
+  other_notes TEXT,
+  source VARCHAR(20) NOT NULL DEFAULT 'parent',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(profile_id)
+);
+CREATE INDEX IF NOT EXISTS idx_learning_needs_profile ON learning_needs(profile_id);
+
+CREATE TABLE IF NOT EXISTS behavioral_observations (
+  id SERIAL PRIMARY KEY,
+  profile_id INT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  observation_type VARCHAR(50) NOT NULL,
+  details JSONB,
+  session_type VARCHAR(30),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_behavioral_obs_profile ON behavioral_observations(profile_id);
+CREATE INDEX IF NOT EXISTS idx_behavioral_obs_type ON behavioral_observations(profile_id, observation_type, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS specialist_reports (
+  id SERIAL PRIMARY KEY,
+  profile_id INT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  report_data JSONB NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_specialist_reports_profile ON specialist_reports(profile_id);
+
+CREATE TABLE IF NOT EXISTS story_progress (
+  id SERIAL PRIMARY KEY,
+  profile_id INT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  chapter INT NOT NULL,
+  stage INT NOT NULL,
+  score INT NOT NULL DEFAULT 0,
+  completed_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(profile_id, chapter, stage)
+);
+CREATE INDEX IF NOT EXISTS idx_story_progress_profile ON story_progress(profile_id);
+
+-- Treehouse / owned items (auto-created by treehouse route)
+CREATE TABLE IF NOT EXISTS treehouse_items (
+  id           TEXT PRIMARY KEY,
+  name         TEXT NOT NULL,
+  category     TEXT NOT NULL,
+  icon         TEXT NOT NULL,
+  unlock_type  TEXT NOT NULL,
+  unlock_value INTEGER NOT NULL,
+  created_at   TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS owned_items (
+  id          SERIAL PRIMARY KEY,
+  profile_id  INT REFERENCES profiles(id) ON DELETE CASCADE,
+  item_id     TEXT REFERENCES treehouse_items(id) ON DELETE CASCADE,
+  equipped    BOOLEAN NOT NULL DEFAULT FALSE,
+  earned_at   TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE (profile_id, item_id)
+);
+CREATE INDEX IF NOT EXISTS idx_owned_items_profile ON owned_items(profile_id);
+CREATE INDEX IF NOT EXISTS idx_owned_items_item ON owned_items(item_id);

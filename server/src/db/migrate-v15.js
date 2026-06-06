@@ -1,21 +1,34 @@
+const { pool } = require('../connection');
 const fs = require('fs');
 const path = require('path');
-const pool = require('./connection');
 
 async function migrateV15() {
-    try {
-        console.log('Running v15 migration (voice biometrics)...');
-        const sql = fs.readFileSync(path.join(__dirname, 'migrations', 'v15-voice-biometrics.sql'), 'utf-8');
-        await pool.query(sql);
-        console.log('v15 migration completed.');
-    } catch (err) {
-        console.error('v15 migration failed:', err.message);
-        process.exit(1);
-    }
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // V15: Parent Dashboard + Story Mode + Learning Needs tables
+    const v15sql = fs.readFileSync(path.join(__dirname, 'v15-phase4-parent-story.sql'), 'utf8');
+    await client.query(v15sql);
+    console.log('✅ V15: parent_pins, parent_notes, learning_needs, behavioral_observations, specialist_reports, story_progress');
+
+    await client.query('COMMIT');
+    console.log('🎉 V15 migration complete');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('❌ V15 migration failed:', err.message);
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
+// Run if called directly
 if (require.main === module) {
-    migrateV15().then(() => process.exit(0)).catch(() => process.exit(1));
+  migrateV15().then(() => process.exit(0)).catch(err => {
+    console.error(err);
+    process.exit(1);
+  });
 }
 
 module.exports = migrateV15;

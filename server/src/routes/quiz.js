@@ -6,6 +6,10 @@ const { awardXP, awardQuizXP } = require('../services/xp');
 const { getTopics } = require('../services/curriculum');
 const { evaluateBadges } = require('../services/badges');
 const { generateSessionReport } = require('../services/session-reports');
+const { getSubjectLevel, maybeAdvance } = require('../services/levels');
+const { recordObjectiveAttempt } = require('../services/objective-mastery');
+const sr = require('../services/spaced-repetition');
+const { logEvent } = require('../services/skill-memory');
 
 // POST /api/quiz/question — generate quiz question
 router.post('/question', async (req, res, next) => {
@@ -34,12 +38,16 @@ router.post('/question', async (req, res, next) => {
 
     const profile = profileResult.rows[0];
 
-    // Validate topic exists in curriculum
-    const topics = getTopics(subject, profile.year_group);
+    // Content level is the per-subject working level (falls back to year_group).
+    // year_group still drives age-appropriate tone elsewhere.
+    const contentLevel = await getSubjectLevel(profileId, subject);
+
+    // Validate topic exists in curriculum at the working level
+    const topics = getTopics(subject, contentLevel);
     if (!topics) {
       return res.status(400).json({
         success: false,
-        error: `Invalid subject "${subject}" for year group ${profile.year_group}`,
+        error: `Invalid subject "${subject}" for level ${contentLevel}`,
       });
     }
 
@@ -61,7 +69,7 @@ router.post('/question', async (req, res, next) => {
          AND question_text NOT IN (SELECT unnest($5::text[]))
        ORDER BY times_served ASC, RANDOM()
        LIMIT 1`,
-      [subject, profile.year_group, questionDifficulty, topic, recentQuestions.length > 0 ? recentQuestions : ['']]
+      [subject, contentLevel, questionDifficulty, topic, recentQuestions.length > 0 ? recentQuestions : ['']]
     );
 
     if (bankResult.rows.length > 0) {
@@ -83,7 +91,7 @@ router.post('/question', async (req, res, next) => {
       question = await generateQuizQuestion(
         subject,
         topic + avoidHint,
-        profile.year_group,
+        contentLevel,
         questionDifficulty
       );
     }
@@ -230,8 +238,72 @@ router.post('/answer', async (req, res, next) => {
       );
     }
 
+    // ── BKT mastery update (Bayesian Knowledge Tracing) ──
+    // Dual-writes to bkt_skills + legacy objective_mastery; graceful if table not migrated.
+    const bktResult = await recordObjectiveAttempt(
+      profileId, masterySubject, masteryTopic,
+      isCorrect ? 'quiz correct' : 'quiz wrong',
+      isCorrect
+    );
+
+    // ── FSRS review card update (spaced repetition) ──
+    // Upsert a review card and schedule its next review based on the answer quality.
+    try {
+      const rating = sr.answerToRating(isCorrect, confidence);
+      const cardResult = await pool.query(
+        `SELECT * FROM review_cards WHERE profile_id = $1 AND subject = $2 AND topic = $3`,
+        [profileId, masterySubject, masteryTopic]
+      );
+      if (cardResult.rows.length > 0) {
+        const card = sr.rowToCard(cardResult.rows[0]);
+        const updated = sr.scheduleReview(card, rating);
+        await pool.query(
+          `UPDATE review_cards SET state=$1, stability=$2, difficulty=$3, elapsed_days=$4,
+           scheduled_days=$5, reps=$6, lapses=$7, last_review=$8, due=$9, last_score=$10, updated_at=NOW()
+           WHERE profile_id = $11 AND subject = $12 AND topic = $13`,
+          [updated.state, updated.stability, updated.difficulty, updated.elapsedDays,
+           updated.scheduledDays, updated.reps, updated.lapses, updated.lastReview,
+           updated.due, updated.lastScore, profileId, masterySubject, masteryTopic]
+        );
+      } else {
+        const card = sr.createCard({ profileId, subject: masterySubject, topic: masteryTopic });
+        const updated = sr.scheduleReview(card, rating);
+        const row = sr.cardToRow(updated);
+        await pool.query(
+          `INSERT INTO review_cards (profile_id, subject, topic, state, stability, difficulty,
+            elapsed_days, scheduled_days, reps, lapses, last_review, due, last_score, first_learn_date)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
+          [row.profile_id, row.subject, row.topic, row.state, row.stability, row.difficulty,
+           row.elapsed_days, row.scheduled_days, row.reps, row.lapses, row.last_review,
+           row.due, row.last_score, row.first_learn_date]
+        );
+      }
+    } catch (err) {
+      if (err.code !== '42P01') console.warn('[Quiz] FSRS card update failed:', err.message);
+      // review_cards table may not exist yet — non-blocking
+    }
+
+    // ── Skill memory event (DeepTutor L1 trace) ──
+    logEvent({
+      profileId, surface: 'quiz', eventType: isCorrect ? 'breakthrough' : 'struggle',
+      subject: masterySubject, topic: masteryTopic,
+      details: { questionId, answer, correct: isCorrect, difficulty: question.difficulty },
+    }).catch(() => {}); // fire-and-forget
+
     // Evaluate badges
     const newBadges = await evaluateBadges(profileId);
+
+    // Level-based progression: if this answer completed mastery of the current
+    // level for the subject, promote to the next level (never demotes, caps at 6).
+    let levelUp = null;
+    if (isCorrect && masterySubject) {
+      try {
+        const adv = await maybeAdvance(profileId, masterySubject);
+        if (adv.advanced) {
+          levelUp = { subject: masterySubject, level: adv.level, previousLevel: adv.previousLevel };
+        }
+      } catch { /* advancement is best-effort, never block the answer */ }
+    }
 
     res.json({
       success: true,
@@ -242,6 +314,8 @@ router.post('/answer', async (req, res, next) => {
         totalXP: xpResult.totalXP,
         level: xpResult.level,
         newBadges,
+        levelUp,
+        bkt: bktResult.bkt ? { enabled: true } : { enabled: false, error: bktResult.bktError },
       },
     });
   } catch (err) {

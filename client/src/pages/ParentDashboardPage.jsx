@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -551,8 +551,10 @@ function ObservationCard({ flag, onEnableMode }) {
     autism:      { emoji: '🧩', label: 'Autism-friendly' },
     dyscalculia: { emoji: '🔢', label: 'Dyscalculia-friendly' },
   };
-  const cfg = conditionLabels[flag.condition] || { emoji: '💡', label: `${flag.condition}-friendly` };
-  const confidencePct = Math.round((flag.confidence || 0) * 100);
+  const cfg = conditionLabels[flag.condition] || { emoji: '💡', label: `${flag.condition || 'unknown'}-friendly` };
+  const confidenceMap = { low: 0.4, moderate: 0.7, high: 0.9 };
+  const confidenceVal = confidenceMap[flag.confidence] || flag.confidence || 0;
+  const confidencePct = Math.round((typeof confidenceVal === 'number' ? confidenceVal : 0) * 100);
 
   return (
     <motion.div
@@ -605,6 +607,7 @@ function LearningSupport({ profileId }) {
     dyslexia: false, adhd: false, autism: false, dyscalculia: false,
   });
   const [otherNotes, setOtherNotes]       = useState('');
+  const savedTimerRef                      = useRef(null);
   const [saving, setSaving]               = useState(false);
   const [saved, setSaved]                 = useState(false);
   const [saveError, setSaveError]         = useState('');
@@ -662,7 +665,8 @@ function LearningSupport({ profileId }) {
         body: { profileId, ...needs, other_notes: otherNotes },
       });
       setSaved(true);
-      setTimeout(() => setSaved(false), 2500);
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+      savedTimerRef.current = setTimeout(() => setSaved(false), 2500);
     } catch {
       setSaveError('Could not save — please try again.');
     } finally {
@@ -671,15 +675,15 @@ function LearningSupport({ profileId }) {
   }
 
   async function handleEnableMode(condition) {
-    // Optimistically turn on that toggle and save
-    setNeeds(prev => ({ ...prev, [condition]: true }));
+    const updatedNeeds = { ...needs, [condition]: true };
+    setNeeds(updatedNeeds);
     try {
       await api('/parent/learning-needs', {
         method: 'POST',
-        body: { profileId, ...needs, [condition]: true, other_notes: otherNotes },
+        body: { profileId, ...updatedNeeds, other_notes: otherNotes },
       });
     } catch {
-      // silently fail — user can still save manually
+      setNeeds(prev => ({ ...prev, [condition]: false }));  // revert toggle on failure
     }
   }
 
@@ -970,6 +974,7 @@ export default function ParentDashboardPage() {
       try {
         await api('/parent/set-pin', { method: 'POST', body: { profileId, pin } });
         try { sessionStorage.setItem(SESSION_KEY(profileId), 'true'); } catch {}
+        setPinError('');
         setPinMode(null);
         setVerified(true);
       } catch {
@@ -981,6 +986,7 @@ export default function ParentDashboardPage() {
         const result = await api('/parent/verify-pin', { method: 'POST', body: { profileId, pin } });
         if (result.verified) {
           try { sessionStorage.setItem(SESSION_KEY(profileId), 'true'); } catch {}
+          setPinError('');
           setPinMode(null);
           setVerified(true);
         } else {

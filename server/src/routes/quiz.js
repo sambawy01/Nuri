@@ -10,6 +10,7 @@ const { getSubjectLevel, maybeAdvance } = require('../services/levels');
 const { recordObjectiveAttempt } = require('../services/objective-mastery');
 const sr = require('../services/spaced-repetition');
 const { logEvent } = require('../services/skill-memory');
+const { recordObservation } = require('../services/learning-needs');
 
 // POST /api/quiz/question — generate quiz question
 router.post('/question', async (req, res, next) => {
@@ -289,6 +290,45 @@ router.post('/answer', async (req, res, next) => {
       subject: masterySubject, topic: masteryTopic,
       details: { questionId, answer, correct: isCorrect, difficulty: question.difficulty },
     }).catch(() => {}); // fire-and-forget
+
+    // Gap 2: Wire behavioral observations (fire-and-forget, non-blocking)
+    // Each observation is independent — overlapping signals are all recorded
+    const answerTime = req.body.answerTimeMs || 0;
+    
+    if (answerTime > 0 && answerTime < 3000 && !isCorrect) {
+      recordObservation(profileId, 'fast_guess', { 
+        topic: masteryTopic, timeMs: answerTime, questionId 
+      }, 'quiz').catch(() => {});
+    }
+    
+    if (confidence === 'knew_it' && !isCorrect) {
+      recordObservation(profileId, 'blind_spot', { 
+        topic: masteryTopic, questionId 
+      }, 'quiz').catch(() => {});
+    }
+    
+    if ((confidence === 'guessed' || confidence === 'unsure') && isCorrect) {
+      recordObservation(profileId, 'lucky_guess', { 
+        topic: masteryTopic, questionId 
+      }, 'quiz').catch(() => {});
+    }
+    
+    // Repeated mistakes: non-blocking check (fire-and-forget)
+    if (!isCorrect && masteryTopic) {
+      pool.query(
+        `SELECT COUNT(*) as cnt FROM quiz_history
+         WHERE profile_id = $1 AND subject = $2 AND topic = $3 AND was_correct = false
+         AND created_at > NOW() - INTERVAL '1 hour'`,
+        [profileId, masterySubject, masteryTopic]
+      ).then(result => {
+        const count = parseInt(result.rows[0]?.cnt || 0);
+        if (count >= 3) {
+          recordObservation(profileId, 'repeated_mistake', { 
+            topic: masteryTopic, count 
+          }, 'quiz').catch(() => {});
+        }
+      }).catch(() => {});
+    }
 
     // Evaluate badges
     const newBadges = await evaluateBadges(profileId);

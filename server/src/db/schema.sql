@@ -628,6 +628,20 @@ CREATE TABLE IF NOT EXISTS behavioral_observations (
 CREATE INDEX IF NOT EXISTS idx_behavioral_obs_profile ON behavioral_observations(profile_id);
 CREATE INDEX IF NOT EXISTS idx_behavioral_obs_type ON behavioral_observations(profile_id, observation_type, created_at DESC);
 
+-- Gap 3: Learning need flags table (stores pattern analysis results for parent dashboard)
+CREATE TABLE IF NOT EXISTS learning_need_flags (
+  id SERIAL PRIMARY KEY,
+  profile_id INT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  condition VARCHAR(50) NOT NULL,
+  confidence VARCHAR(20) NOT NULL,
+  evidence TEXT,
+  suggestion TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(profile_id, condition)
+);
+CREATE INDEX IF NOT EXISTS idx_learning_need_flags_profile ON learning_need_flags(profile_id);
+
+-- Gap 3: Specialist reports table (stores specialist assessment requests)
 CREATE TABLE IF NOT EXISTS specialist_reports (
   id SERIAL PRIMARY KEY,
   profile_id INT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,

@@ -13,6 +13,8 @@ export function useVoice() {
   const utteranceRef = useRef(null);
   const audioRef = useRef(null);
   const audioUrlRef = useRef(null);
+  const abortRef = useRef(null);          // AbortController for in-flight fetch
+  const genRef = useRef(0);               // Generation counter to kill stale calls
 
   const isSupported =
     typeof window !== 'undefined' &&
@@ -98,11 +100,17 @@ export function useVoice() {
       return;
     }
 
-    // Cleanup before starting new utterance
+    // ── Kill any in-flight request + old audio ──────────────────────
+    abortRef.current?.abort();
     cleanupAudio();
     cleanupSpeech();
 
+    const myGen = ++genRef.current;          // Claim this generation
+
     try {
+      const controller = new AbortController();
+      abortRef.current = controller;
+
       const res = await fetch('/api/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -111,43 +119,59 @@ export function useVoice() {
           voiceId: options.voiceId,
           model: options.model,
         }),
+        signal: controller.signal,
       });
 
+      // If a newer speak() has started, die silently
+      if (genRef.current !== myGen) return;
+
       if (!res.ok) {
-        // Non-OK → fall back to native
         console.warn('TTS proxy failed:', res.status, 'falling back to Web Speech');
         speakNative(text, options);
         return;
       }
 
       const blob = await res.blob();
+
+      // Generation check again after async gap
+      if (genRef.current !== myGen) return;
+
       const url = URL.createObjectURL(blob);
       audioUrlRef.current = url;
 
       const audio = new Audio(url);
       audioRef.current = audio;
 
-      audio.onplay = () => setIsSpeaking(true);
+      audio.onplay = () => {
+        if (genRef.current === myGen) setIsSpeaking(true);
+      };
       audio.onended = () => {
-        setIsSpeaking(false);
-        options.onEnd?.();
+        if (genRef.current === myGen) {
+          setIsSpeaking(false);
+          options.onEnd?.();
+        }
       };
       audio.onerror = (e) => {
         console.warn('Audio playback error:', e);
-        setIsSpeaking(false);
-        speakNative(text, options);
+        if (genRef.current === myGen) {
+          setIsSpeaking(false);
+          speakNative(text, options);
+        }
       };
 
       await audio.play();
     } catch (err) {
+      if (err.name === 'AbortError') return; // Silently drop cancelled
       console.warn('TTS fetch error:', err.message);
-      speakNative(text, options);
+      if (genRef.current === myGen) speakNative(text, options);
     }
   }, [cleanupAudio, cleanupSpeech, speakNative]);
 
   const stopSpeaking = useCallback(() => {
+    abortRef.current?.abort();
     cleanupAudio();
     cleanupSpeech();
+    ++genRef.current;           // Kill any queued generation
     setIsSpeaking(false);
   }, [cleanupAudio, cleanupSpeech]);
 

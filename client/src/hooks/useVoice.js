@@ -48,21 +48,7 @@ export function useVoice() {
       window.speechSynthesis.cancel();
     }
 
-    const cleanText = text
-      .replace(/[#*_~`]/g, '')
-      .replace(/\[.*?\]\(.*?\)/g, '')
-      .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{27BF}\u{1F900}-\u{1F9FF}]/gu, '')
-      .replace(/\[IMG:\w+\]/gi, '')
-      .replace(/_{2,}/g, ' blank ')
-      .replace(/\.{3,}/g, ' blank ')
-      .replace(/—/g, ', ')
-      .replace(/\b([A-Z]{2,4})\b/g, (match) => {
-        const keepUppercase = new Set(['USA', 'UK', 'BBC', 'DNA', 'NASA', 'STEM', 'MCQ', 'PDF']);
-        return keepUppercase.has(match) ? match : match.toLowerCase();
-      })
-      .replace(/\s+/g, ' ')
-      .substring(0, 1000);
-
+    const cleanText = cleanTextForSpeech(text);
     if (!cleanText.trim()) return;
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
@@ -92,6 +78,24 @@ export function useVoice() {
     window.speechSynthesis.speak(utterance);
   }, [cleanupAudio]);
 
+  // ── Shared text cleaner for TTS ─────────────────────────────────
+  function cleanTextForSpeech(text) {
+    return text
+      .replace(/[#*_~`]/g, '')
+      .replace(/\[.*?\]\(.*?\)/g, '')
+      .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{27BF}\u{1F900}-\u{1F9FF}]/gu, '')
+      .replace(/\[IMG:\w+\]/gi, '')
+      .replace(/_{2,}/g, ' blank ')
+      .replace(/\.{3,}/g, ' blank ')
+      .replace(/—/g, ', ')
+      .replace(/\b([A-Z]{2,4})\b/g, (match) => {
+        const keepUppercase = new Set(['USA', 'UK', 'BBC', 'DNA', 'NASA', 'STEM', 'MCQ', 'PDF']);
+        return keepUppercase.has(match) ? match : match.toLowerCase();
+      })
+      .replace(/\s+/g, ' ')
+      .substring(0, 1000);
+  }
+
   // ── ElevenLabs via backend proxy ────────────────────────────────
   const speak = useCallback(async (text, options = {}) => {
     // Force native Web Speech when explicitly requested
@@ -111,11 +115,14 @@ export function useVoice() {
       const controller = new AbortController();
       abortRef.current = controller;
 
+      const cleanText = cleanTextForSpeech(text);
+      if (!cleanText.trim()) return;
+
       const res = await fetch('/api/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          text,
+          text: cleanText,
           voiceId: options.voiceId,
           model: options.model,
         }),

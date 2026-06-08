@@ -171,4 +171,26 @@ router.get('/specialist-report/:profileId', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// GET /api/parent/interventions/:profileId
+router.get('/interventions/:profileId', async (req, res, next) => {
+  try {
+    const { getInterventionSummary, getInterventions } = require('../services/intervention');
+    const days = parseInt(req.query.days, 10) || 7;
+    const [summary, recent] = await Promise.all([
+      getInterventionSummary(req.params.profileId, days),
+      getInterventions(req.params.profileId, { days, limit: 20 }),
+    ]);
+    res.json({ success: true, data: { summary, recent } });
+  } catch (err) { next(err); }
+});
+
+// GET /api/parent/devices/:profileId
+router.get('/devices/:profileId', async (req, res, next) => {
+  try {
+    const { getDevices } = require('../services/cross-device');
+    const data = await getDevices(req.params.profileId);
+    res.json({ success: true, data });
+  } catch (err) { next(err); }
+});
+
 module.exports = router;

@@ -1,4 +1,5 @@
 const pool = require('../db/connection');
+const { recordIntervention } = require('./intervention');
 
 const STREAK_THRESHOLD = 0.40;
 
@@ -70,6 +71,27 @@ async function endSession({ sessionId, autoEnded }) {
       RETURNING duration_seconds, profile_id`,
     [sessionId, presenceScore, !!autoEnded, counted]
   );
+
+  // ── Intervention logging ──
+  if (autoEnded) {
+    await recordIntervention({
+      profileId: row.profile_id,
+      sessionId,
+      interventionType: 'auto_pause',
+      context: row.context,
+      details: { presence_score: presenceScore, tier: row.tier, threshold: STREAK_THRESHOLD },
+      triggeredBy: 'presence_auto_end',
+    });
+  } else if (!counted) {
+    await recordIntervention({
+      profileId: row.profile_id,
+      sessionId,
+      interventionType: 'break_suggested',
+      context: row.context,
+      details: { presence_score: presenceScore, threshold: STREAK_THRESHOLD, reason: 'low_engagement' },
+      triggeredBy: 'presence_streak_guard',
+    });
+  }
 
   return {
     profileId: row.profile_id,

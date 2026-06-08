@@ -11,6 +11,7 @@ const { recordObjectiveAttempt } = require('../services/objective-mastery');
 const sr = require('../services/spaced-repetition');
 const { logEvent } = require('../services/skill-memory');
 const { recordObservation } = require('../services/learning-needs');
+const { recordIntervention } = require('../services/intervention');
 
 // POST /api/quiz/question — generate quiz question
 router.post('/question', async (req, res, next) => {
@@ -326,6 +327,26 @@ router.post('/answer', async (req, res, next) => {
           recordObservation(profileId, 'repeated_mistake', { 
             topic: masteryTopic, count 
           }, 'quiz').catch(() => {});
+          // Intervention: difficulty drop after 3 wrong
+          if (count === 3) {
+            recordIntervention({
+              profileId,
+              interventionType: 'difficulty_drop',
+              context: masteryTopic,
+              details: { subject: masterySubject, consecutive_wrong: count, trigger: 'quiz_answer' },
+              triggeredBy: 'quiz_repeated_mistake',
+            }).catch(() => {});
+          }
+          // Intervention: break suggested after 5 wrong
+          if (count >= 5) {
+            recordIntervention({
+              profileId,
+              interventionType: 'break_suggested',
+              context: masteryTopic,
+              details: { subject: masterySubject, consecutive_wrong: count, trigger: 'quiz_answer' },
+              triggeredBy: 'quiz_repeated_mistake',
+            }).catch(() => {});
+          }
         }
       }).catch(() => {});
     }

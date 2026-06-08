@@ -682,3 +682,33 @@ CREATE TABLE IF NOT EXISTS owned_items (
 );
 CREATE INDEX IF NOT EXISTS idx_owned_items_profile ON owned_items(profile_id);
 CREATE INDEX IF NOT EXISTS idx_owned_items_item ON owned_items(item_id);
+
+-- Gap A: Cross-device session tracking (resumes across tablets/phones)
+CREATE TABLE IF NOT EXISTS devices (
+  id SERIAL PRIMARY KEY,
+  profile_id INT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  device_fingerprint VARCHAR(255) NOT NULL,
+  platform VARCHAR(50),
+  name VARCHAR(100),
+  last_seen_at TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(profile_id, device_fingerprint)
+);
+CREATE INDEX IF NOT EXISTS idx_devices_profile ON devices(profile_id);
+CREATE INDEX IF NOT EXISTS idx_devices_fingerprint ON devices(device_fingerprint);
+
+-- Gap D: Intervention log (auto-pause, difficulty adjust, hint escalation, etc.)
+CREATE TABLE IF NOT EXISTS interventions (
+  id SERIAL PRIMARY KEY,
+  profile_id INT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  session_id INT REFERENCES presence_sessions(id) ON DELETE SET NULL,
+  intervention_type VARCHAR(50) NOT NULL,
+    CHECK (intervention_type IN ('auto_pause', 'auto_resume', 'difficulty_drop', 'hint_escalation', 'streak_save', 'break_suggested', 'parent_alert')),
+  context VARCHAR(50),
+  details JSONB,
+  triggered_by VARCHAR(50),
+  resolved BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_interventions_profile ON interventions(profile_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_interventions_type ON interventions(profile_id, intervention_type, created_at DESC);

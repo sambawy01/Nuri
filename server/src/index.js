@@ -29,6 +29,8 @@ const presenceRouter = require('./routes/presence');
 const bedayaRouter = require('./routes/bedaya');
 const diagnosticRouter = require('./routes/diagnostic');
 const voiceAuthRouter = require('./routes/voice-auth');
+const devicesRouter = require('./routes/devices');
+const interventionsRouter = require('./routes/interventions');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -87,6 +89,8 @@ app.use('/api/presence', presenceRouter);
 app.use('/api/bedaya', bedayaRouter);
 app.use('/api/diagnostic', diagnosticRouter);
 app.use('/api/voice', voiceAuthRouter);
+app.use('/api/devices', devicesRouter);
+app.use('/api/interventions', interventionsRouter);
 
 // 404 handler
 app.use((req, res) => {

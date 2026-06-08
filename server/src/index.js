@@ -31,6 +31,7 @@ const diagnosticRouter = require('./routes/diagnostic');
 const voiceAuthRouter = require('./routes/voice-auth');
 const devicesRouter = require('./routes/devices');
 const interventionsRouter = require('./routes/interventions');
+const ttsRouter = require('./routes/tts');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -91,6 +92,7 @@ app.use('/api/diagnostic', diagnosticRouter);
 app.use('/api/voice', voiceAuthRouter);
 app.use('/api/devices', devicesRouter);
 app.use('/api/interventions', interventionsRouter);
+app.use('/api/tts', ttsRouter);
 
 // 404 handler
 app.use((req, res) => {

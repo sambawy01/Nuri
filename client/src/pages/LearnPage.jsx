@@ -199,14 +199,7 @@ export default function LearnPage() {
       // Speak any remaining text after stream ends
       const remaining = fullText.substring(spokenUpTo).trim();
       if (remaining.length > 2 && !audioMuted) {
-        const waitForSpeech = () => {
-          if (window.speechSynthesis?.speaking) {
-            setTimeout(waitForSpeech, 200);
-          } else {
-            speak(remaining, { lang: subject === 'arabic' ? 'ar-SA' : 'en-US', interrupt: false });
-          }
-        };
-        waitForSpeech();
+        speak(remaining, { lang: subject === 'arabic' ? 'ar-SA' : 'en-US', interrupt: false });
       }
       return;
     } catch (err) {

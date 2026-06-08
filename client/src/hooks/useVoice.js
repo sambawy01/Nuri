@@ -21,11 +21,14 @@ export function useVoice() {
     'speechSynthesis' in window &&
     ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
 
+  const queueRef = useRef([]);            // Audio queue for interrupt: false
+
   // ── Cleanup helpers ─────────────────────────────────────────────
   const cleanupAudio = useCallback(() => {
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.src = '';
+      audioRef.current.load(); // force browser to drop buffer
       audioRef.current = null;
     }
     if (audioUrlRef.current) {
@@ -96,6 +99,40 @@ export function useVoice() {
       .substring(0, 1000);
   }
 
+  // ── Audio queue for sequential playback (interrupt: false) ──────
+  function playNextInQueue() {
+    if (queueRef.current.length === 0) return;
+    const next = queueRef.current.shift();
+    // If a newer generation has started, skip queue items
+    if (genRef.current !== next.gen) return;
+
+    audioRef.current = next.audio;
+    audioUrlRef.current = next.url;
+
+    next.audio.onplay = () => {
+      if (genRef.current === next.gen) setIsSpeaking(true);
+    };
+    next.audio.onended = () => {
+      if (genRef.current === next.gen) {
+        setIsSpeaking(false);
+        next.options?.onEnd?.();
+        playNextInQueue();
+      }
+    };
+    next.audio.onerror = (e) => {
+      console.warn('Audio playback error:', e);
+      if (genRef.current === next.gen) {
+        setIsSpeaking(false);
+        speakNative(next.text, next.options);
+      }
+    };
+
+    next.audio.play().catch(() => {
+      // Autoplay blocked or other error — skip and move to next
+      playNextInQueue();
+    });
+  }
+
   // ── ElevenLabs via backend proxy ────────────────────────────────
   const speak = useCallback(async (text, options = {}) => {
     // Force native Web Speech when explicitly requested
@@ -104,12 +141,20 @@ export function useVoice() {
       return;
     }
 
-    // ── Kill any in-flight request + old audio ──────────────────────
-    abortRef.current?.abort();
-    cleanupAudio();
-    cleanupSpeech();
-
     const myGen = ++genRef.current;          // Claim this generation
+
+    // ── Interrupt mode (default) ────────────────────────────────────
+    if (options.interrupt !== false) {
+      abortRef.current?.abort();
+      cleanupAudio();
+      cleanupSpeech();
+      queueRef.current = []; // clear any queued items
+    }
+
+    // ── If already playing and not interrupting, queue this text ────
+    if (options.interrupt === false && (isSpeaking || audioRef.current || queueRef.current.length > 0)) {
+      // We need to fetch the audio but not play it yet — store in queue
+    }
 
     try {
       const controller = new AbortController();
@@ -134,7 +179,13 @@ export function useVoice() {
 
       if (!res.ok) {
         console.warn('TTS proxy failed:', res.status, 'falling back to Web Speech');
-        speakNative(text, options);
+        if (options.interrupt !== false) {
+          speakNative(text, options);
+        } else {
+          // Fallback to native but queue it
+          // We can't queue native speech easily, so just play it native
+          speakNative(text, options);
+        }
         return;
       }
 
@@ -144,40 +195,51 @@ export function useVoice() {
       if (genRef.current !== myGen) return;
 
       const url = URL.createObjectURL(blob);
-      audioUrlRef.current = url;
-
       const audio = new Audio(url);
-      audioRef.current = audio;
 
-      audio.onplay = () => {
-        if (genRef.current === myGen) setIsSpeaking(true);
-      };
-      audio.onended = () => {
-        if (genRef.current === myGen) {
-          setIsSpeaking(false);
-          options.onEnd?.();
-        }
-      };
-      audio.onerror = (e) => {
-        console.warn('Audio playback error:', e);
-        if (genRef.current === myGen) {
-          setIsSpeaking(false);
-          speakNative(text, options);
-        }
-      };
+      if (options.interrupt !== false) {
+        // Immediate playback (overwrite previous)
+        audioRef.current = audio;
+        audioUrlRef.current = url;
 
-      await audio.play();
+        audio.onplay = () => {
+          if (genRef.current === myGen) setIsSpeaking(true);
+        };
+        audio.onended = () => {
+          if (genRef.current === myGen) {
+            setIsSpeaking(false);
+            options.onEnd?.();
+          }
+        };
+        audio.onerror = (e) => {
+          console.warn('Audio playback error:', e);
+          if (genRef.current === myGen) {
+            setIsSpeaking(false);
+            speakNative(text, options);
+          }
+        };
+
+        await audio.play();
+      } else {
+        // Queue for sequential playback
+        queueRef.current.push({ audio, url, text, options, gen: myGen });
+        // If nothing currently playing, start the queue
+        if (!isSpeaking && !audioRef.current) {
+          playNextInQueue();
+        }
+      }
     } catch (err) {
       if (err.name === 'AbortError') return; // Silently drop cancelled
       console.warn('TTS fetch error:', err.message);
       if (genRef.current === myGen) speakNative(text, options);
     }
-  }, [cleanupAudio, cleanupSpeech, speakNative]);
+  }, [cleanupAudio, cleanupSpeech, speakNative, isSpeaking]);
 
   const stopSpeaking = useCallback(() => {
     abortRef.current?.abort();
     cleanupAudio();
     cleanupSpeech();
+    queueRef.current = [];      // clear queued audio
     ++genRef.current;           // Kill any queued generation
     setIsSpeaking(false);
   }, [cleanupAudio, cleanupSpeech]);
